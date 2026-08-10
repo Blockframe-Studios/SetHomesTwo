@@ -12,9 +12,13 @@ commands:
   create-home:
     description: Create a new home where you are currently standing.
     permission: sh2.create-home
+    aliases:
+      - sethome
   delete-home:
     description: Delete a home from your home list.
     permission: sh2.delete-home
+    aliases:
+      - delhome
   add-to-blacklist:
     description: Add dimensions to be blacklisted from setting homes.
     permission: sh2.add-to-blacklist
@@ -40,3 +44,40 @@ commands:
     permission: sh2.list-homes
     aliases:
       - homes
+permissions:
+  sh2.create-home:
+    description: Allow player to create homes.
+    default: true
+  sh2.go-home:
+    description: Allow player to teleport to homes by command.
+    default: true
+  sh2.list-homes:
+    description: Allow player to list and view their homes.
+    default: true
+  sh2.delete-home:
+    description: Allow player to delete their own homes.
+    default: true
+  sh2.teleport:
+    description: Allow player to teleport to created homes.
+    default: true
+  sh2.give-homes-item:
+    description: Allow player to get the homes viewing item.
+    default: true
+  sh2.add-to-blacklist:
+    description: Add dimensions to the blacklist.
+    default: op
+  sh2.remove-from-blacklist:
+    description: Remove dimensions from the blacklist.
+    default: op
+  sh2.get-blacklisted-dimensions:
+    description: List blacklisted dimensions.
+    default: op
+  sh2.get-player-homes:
+    description: View another player's homes.
+    default: op
+  sh2.set-max-homes:
+    description: Set the max number of homes.
+    default: op
+  sh2.import-homes:
+    description: Import homes from other plugins.
+    default: op
