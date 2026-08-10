@@ -138,6 +138,9 @@ public class SetHomesTwo extends JavaPlugin {
         PluginCommand listHomes = Objects.requireNonNull(this.getCommand("list-homes"));
         listHomes.setExecutor(new ListHomes());
 
+        PluginCommand homes = Objects.requireNonNull(this.getCommand("homes"));
+        homes.setExecutor(new OpenHomesGui(this));
+
         PluginCommand goHome = Objects.requireNonNull(this.getCommand("go-home"));
         goHome.setExecutor(new GoHome());
         goHome.setTabCompleter(new HomesTabCompleter());

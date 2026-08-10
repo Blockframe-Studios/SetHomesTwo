@@ -42,8 +42,9 @@ commands:
   list-homes:
     description: Prints a list of the players created homes.
     permission: sh2.list-homes
-    aliases:
-      - homes
+  homes:
+    description: Opens the homes menu.
+    permission: sh2.list-homes
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
