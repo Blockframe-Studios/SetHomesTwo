@@ -1,5 +1,6 @@
 package com.samleighton.sethomestwo.commands;
 
+import com.samleighton.sethomestwo.importers.EssentialsXImporter;
 import com.samleighton.sethomestwo.importers.HomesImporter;
 import com.samleighton.sethomestwo.importers.ImportReport;
 import com.samleighton.sethomestwo.importers.SetHomesV1Importer;
@@ -13,12 +14,14 @@ import java.util.Map;
 
 public class ImportHomes implements CommandExecutor {
 
-    // Task 6 adds the EssentialsX importer here.
     public static final Map<String, HomesImporter> SOURCES = new LinkedHashMap<>();
 
     static {
         HomesImporter setHomesV1 = new SetHomesV1Importer();
         SOURCES.put(setHomesV1.sourceName(), setHomesV1);
+
+        HomesImporter essentialsX = new EssentialsXImporter();
+        SOURCES.put(essentialsX.sourceName(), essentialsX);
     }
 
     @Override
