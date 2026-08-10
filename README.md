@@ -17,18 +17,22 @@ An example setup can also be found right before the screenshots section.
 - [LuckPerms](https://luckperms.net/download)
 
 ### Commands
-- `/create-home [name] [display_material | d | default] [description]` - Will create a home where the player is standing with the given name, material chosen, and description.
-- `/go-home [name]` - Will teleport the player to their home with the given name. Players will also need the sh2.teleport permission to use this command effectively.
+- `/create-home [name] [display_material | d | default] [description]` `(alias: /sethome)` - Will create a home where the player is standing with the given name, material chosen, and description.
+- `/go-home [name]` `(alias: /home)` - Will teleport the player to their home with the given name. Players will also need the sh2.teleport permission to use this command effectively.
 - `/list-homes` - Prints a listing of the players created homes. A home can be teleported to by clicking on the underlined home name (requires player to have sh2.teleport and sh2.go-home permissions).
-- `/delete-home [name]` - Will delete the home with the name provided.
+- `/homes` - Opens the homes menu directly.
+- `/delete-home [name]` `(alias: /delhome)` - Will delete the home with the name provided.
 - `/add-to-blacklist [dimension names]` - This will add the specified dimension to the blacklisted table. If a dimension is present in this table, players will not be able to have save their homes in that dimension.
 - `/remove-from-blacklist [dimension names]` - This will remove the specified dimension from the blacklisted table.
 - `/get-blacklisted-dimensions` - This will return a list of the dimensions that are in the blacklisted table
 - `/set-max-homes [group name] [number]` - This will update the maximum number of homes that players are allowed to set. 
 If the plugin is set up to allow different groupings or tiers for players, you will need to provide a group name in addition to the number of max homes. 
 If the plugin is set up to only have one group or tier, you only need to provide the number of max homes.
+- `/import-homes [sethomes|essentialsx] [confirm]` - Imports homes from Set Homes v1 or EssentialsX. Dry-run unless confirm is given.
 
 ### Permissions
+
+As of 1.1.0, the player permissions below default to granted for all players; the admin permissions default to OP only.
 
 - `sh2.give-homes-item` - Allow player to get homes viewing/teleportation item.
 - `sh2.create-home` - Allow player to create homes.
@@ -41,6 +45,7 @@ If the plugin is set up to only have one group or tier, you only need to provide
 - `sh2.get-blacklisted-dimensions` - Retrieve a list of the blacklisted dimensions.
 - `sh2.get-player-homes` - Retrieve a list of a given player's homes.
 - `sh2.set-max-homes` - Set the max number of homes all players, or individual groups, can have.
+- `sh2.import-homes` - Import homes from another homes plugin (Set Homes v1 or EssentialsX).
 
 ### Extra Features
 - The time it takes to teleport to a saved home can be configured
@@ -82,6 +87,7 @@ teleportSubtitle: "You will be teleported in %d..." # You can use %d here as a p
 teleportSuccess: "Teleported to %s" # You can use %s here as a placeholder for the home name the player was teleported to.
 cancelOnMove: true # true | false
 delay: 3 # (seconds) 0 is no delay.
+teleportSafety: true # Relocate to the nearest safe spot (or cancel) when a home would teleport you into blocks, lava, or a fall.
 
 # -- MESSAGES --
 homeCreated: "%s has been created successfully." # You can use %s here as a placeholder for the players home name.
@@ -97,6 +103,8 @@ noHomes: "You have not created any homes yet. Use /create-home to make your firs
 teleportToBlacklistedDimension: "You cannot teleport to this home because the dimension is blacklisted."
 maxHomesReached: "You have reached the maximum number of homes allowed."
 dimensionBlacklisted: "You cannot set home in this dimension because it is blacklisted."
+unsafeHome: "Teleport cancelled: this home is not safe to stand in and no safe spot was found nearby."
+movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the nearest safe spot."
 
 # -- DEBUGGING --
 debugLevel: "error" # Choices are: error | info
@@ -121,3 +129,9 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 - Fixed issue where players missing sh2.teleport could not break blocks.
 - Fixed issue where a player who has an open homes gui has their inventory overwritten by the next person to open a homes gui.
 - Added go-home and list-homes commands
+- Added `/sethome`, `/delhome`, and `/home` as classic aliases for `/create-home`, `/delete-home`, and `/go-home`.
+- Player permissions (create-home, go-home, list-homes, delete-home, teleport, give-homes-item) now default to granted for all players; admin permissions still default to OP.
+- Fixed stale teleport attempts surviving a server restart, which could block a player's next teleport (finishes #14).
+- Added the `/homes` command, which opens the homes GUI directly; `/list-homes` still prints the chat listing.
+- Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
+- Added `/import-homes` to import homes from Set Homes v1 or EssentialsX (dry-run by default, pass `confirm` to apply).
