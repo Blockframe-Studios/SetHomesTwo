@@ -62,6 +62,15 @@ public class SetHomesTwo extends JavaPlugin {
             if (createdTables && ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
                 Bukkit.getLogger().info("Table initialization was successfully executed.");
 
+            // Any teleport attempt present at startup is stale (crash or offline player
+            // at shutdown) and would permanently block that player's teleports.
+            boolean clearedAttempts = DatabaseUtil.execute(
+                    connectionManager.getConnection("homes"),
+                    "delete from player_teleport_attempts;"
+            );
+            if (!clearedAttempts)
+                Bukkit.getLogger().severe("Could not clear stale teleport attempts on startup.");
+
         } else {
             Bukkit.getLogger().severe("Could not create database connection!");
         }
