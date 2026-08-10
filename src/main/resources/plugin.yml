@@ -2,6 +2,7 @@ name: 'SetHomesTwo'
 version: '${project.version}'
 main: com.samleighton.sethomestwo.SetHomesTwo
 api-version: 1.21
+softdepend: [ LuckPerms ]
 prefix: SH2
 authors: [ Xquiset, GiggityTurtle1 ]
 description: '${project.description}'

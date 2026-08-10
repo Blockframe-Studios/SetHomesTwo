@@ -135,3 +135,4 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 - Added the `/homes` command, which opens the homes GUI directly; `/list-homes` still prints the chat listing.
 - Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
 - Added `/import-homes` to import homes from Set Homes v1 or EssentialsX (dry-run by default, pass `confirm` to apply).
+- Fixed error when maxHomesType is groups and LuckPerms is not installed. The limit is now skipped with a console warning instead.
