@@ -45,6 +45,9 @@ commands:
   homes:
     description: Opens the homes menu.
     permission: sh2.list-homes
+  import-homes:
+    description: Import homes from another homes plugin (dry-run unless confirmed).
+    permission: sh2.import-homes
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
