@@ -14,6 +14,7 @@ public enum UserError {
     DIMENSION_IS_BLACKLISTED("You cannot set a home in this dimension because it has been blacklisted."),
     MOVED_WHILE_TELEPORTING("Your teleport has been cancelled because you have moved."),
     ALREADY_TELEPORTING("You cannot teleport while already teleporting."),
+    UNSAFE_HOME("Teleport cancelled: this home is not safe to stand in and no safe spot was found nearby."),
 
     /** Command Input Errors */
     DIMENSION_IS_NOT_BLACKLISTED("The %s dimension has not been blacklisted yet therefore you cannot remove it."),

@@ -4,9 +4,11 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.TeleportAttemptsDao;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.TeleportSafetyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -223,7 +225,23 @@ public class Home implements Serializable {
             // This logic fires after total seconds have elapsed
             teleportAttemptsDao.delete(player.getUniqueId());
 
-            player.teleport(this.asLocation());
+            // Resolve a safe destination before moving the player
+            Location destination = this.asLocation();
+            if (ConfigUtil.getConfig().getBoolean("teleportSafety", true)) {
+                Location safeDestination = TeleportSafetyUtil.findSafeLocation(destination);
+                if (safeDestination == null) {
+                    ChatUtils.sendError(player, ConfigUtil.getConfig().getString("unsafeHome", UserError.UNSAFE_HOME.getValue()));
+                    player.resetTitle();
+                    player.removePotionEffect(PotionEffectType.NAUSEA);
+                    return;
+                }
+                if (safeDestination != destination) {
+                    ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("movedToSafeSpot", UserInfo.MOVED_TO_SAFE_SPOT.getValue()));
+                }
+                destination = safeDestination;
+            }
+
+            player.teleport(destination);
             player.removePotionEffect(PotionEffectType.NAUSEA);
             player.resetTitle();
             player.playNote(player.getLocation(), Instrument.BELL, Note.sharp(2, Note.Tone.F));
