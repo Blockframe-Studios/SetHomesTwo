@@ -187,8 +187,17 @@ public class Home implements Serializable {
         // Track player teleport attempt
         teleportAttemptsDao.save(new TeleportAttempt(player, player.getLocation()));
 
-        // Send player countdown title.
         Plugin plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        boolean teleportSafetyEnabled = ConfigUtil.getConfig().getBoolean("teleportSafety", true);
+        Location prefetchDestination = this.asLocation();
+
+        // Warm the destination's chunks now so the safety scan below doesn't
+        // block the main thread on chunk I/O once the countdown finishes.
+        if (teleportSafetyEnabled) {
+            TeleportSafetyUtil.prefetchChunks(prefetchDestination, plugin);
+        }
+
+        // Send player countdown title.
         AtomicInteger seconds = new AtomicInteger(ConfigUtil.getConfig().getInt("delay"));
 
         // Schedule repeating task for every second
@@ -200,6 +209,9 @@ public class Home implements Serializable {
             TeleportAttempt currAttempt = teleportAttemptsDao.get(player);
             if (currAttempt != null) {
                 if (!currAttempt.canTeleport()) {
+                    if (teleportSafetyEnabled) {
+                        TeleportSafetyUtil.releaseChunkTickets(prefetchDestination, plugin);
+                    }
                     ChatUtils.sendError(player, ConfigUtil.getConfig().getString("movedWhileTeleporting", UserError.MOVED_WHILE_TELEPORTING.getValue()));
                     player.playSound(player, Sound.ENTITY_PLAYER_BIG_FALL, 5f, 5f);
                     teleportAttemptsDao.delete(player.getUniqueId());
@@ -227,8 +239,9 @@ public class Home implements Serializable {
 
             // Resolve a safe destination before moving the player
             Location destination = this.asLocation();
-            if (ConfigUtil.getConfig().getBoolean("teleportSafety", true)) {
+            if (teleportSafetyEnabled) {
                 Location safeDestination = TeleportSafetyUtil.findSafeLocation(destination);
+                TeleportSafetyUtil.releaseChunkTickets(prefetchDestination, plugin);
                 if (safeDestination == null) {
                     ChatUtils.sendError(player, ConfigUtil.getConfig().getString("unsafeHome", UserError.UNSAFE_HOME.getValue()));
                     player.resetTitle();
