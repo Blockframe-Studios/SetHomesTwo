@@ -146,6 +146,11 @@ public class CreateHome implements CommandExecutor {
                 maxHomesAllowed = ConfigUtil.getConfig().getInt("maxHomes", -1);
                 break;
             case "groups":
+                // LuckPerms is a soft dependency; without it group limits cannot be resolved
+                if (!Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
+                    Bukkit.getLogger().warning("maxHomesType is 'groups' but LuckPerms is not installed. Max homes limit will not be enforced.");
+                    break;
+                }
                 ConfigurationSection maxHomesSection = ConfigUtil.getConfig().getConfigurationSection("maxHomes");
                 Map<String, Integer> maxHomesMap = new HashMap<>();
                 for(String key : Objects.requireNonNull(maxHomesSection).getKeys(false)){

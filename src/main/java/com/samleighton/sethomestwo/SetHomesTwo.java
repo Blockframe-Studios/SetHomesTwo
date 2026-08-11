@@ -62,6 +62,15 @@ public class SetHomesTwo extends JavaPlugin {
             if (createdTables && ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
                 Bukkit.getLogger().info("Table initialization was successfully executed.");
 
+            // Any teleport attempt present at startup is stale (crash or offline player
+            // at shutdown) and would permanently block that player's teleports.
+            boolean clearedAttempts = DatabaseUtil.execute(
+                    connectionManager.getConnection("homes"),
+                    "delete from player_teleport_attempts;"
+            );
+            if (!clearedAttempts)
+                Bukkit.getLogger().severe("Could not clear stale teleport attempts on startup.");
+
         } else {
             Bukkit.getLogger().severe("Could not create database connection!");
         }
@@ -129,6 +138,9 @@ public class SetHomesTwo extends JavaPlugin {
         PluginCommand listHomes = Objects.requireNonNull(this.getCommand("list-homes"));
         listHomes.setExecutor(new ListHomes());
 
+        PluginCommand homes = Objects.requireNonNull(this.getCommand("homes"));
+        homes.setExecutor(new OpenHomesGui(this));
+
         PluginCommand goHome = Objects.requireNonNull(this.getCommand("go-home"));
         goHome.setExecutor(new GoHome());
         goHome.setTabCompleter(new HomesTabCompleter());
@@ -157,6 +169,9 @@ public class SetHomesTwo extends JavaPlugin {
 
         PluginCommand setMaxHomes = Objects.requireNonNull(this.getCommand("set-max-homes"));
         setMaxHomes.setExecutor(new SetMaxHomes(this));
+
+        PluginCommand importHomes = Objects.requireNonNull(this.getCommand("import-homes"));
+        importHomes.setExecutor(new ImportHomes());
     }
 
     /**

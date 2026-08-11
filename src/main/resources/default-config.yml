@@ -39,6 +39,7 @@ teleportSubtitle: "You will be teleported in %d..." # You can use %d here as a p
 teleportSuccess: "Teleported to %s" # You can use %s here as a placeholder for the home name the player was teleported to.
 cancelOnMove: true # true | false
 delay: 3 # (seconds) 0 is no delay.
+teleportSafety: true # Relocate to the nearest safe spot (or cancel) when a home would teleport you into blocks, lava, or a fall.
 
 # -- MESSAGES --
 homeCreated: "%s has been created successfully." # You can use %s here as a placeholder for the players home name.
@@ -54,6 +55,8 @@ noHomes: "You have not created any homes yet. Use /create-home to make your firs
 teleportToBlacklistedDimension: "You cannot teleport to this home because the dimension it is in has been blacklisted."
 maxHomesReached: "You have reached the maximum number of homes allowed."
 dimensionBlacklisted: "You cannot set a home in this dimension because it has been blacklisted."
+unsafeHome: "Teleport cancelled: this home is not safe to stand in and no safe spot was found nearby."
+movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the nearest safe spot."
 
 # -- DEBUGGING --
 debugLevel: "error" # Choices are: error | info
