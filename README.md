@@ -13,6 +13,21 @@ An example setup can also be found right before the screenshots section.
 
 **NOTE**: For `maxHomes` to work you must install the soft dependency below, and setup groups for the respective permissions plugin.
 
+### Migrating from Set Homes v1 or EssentialsX
+Already have homes in Set Homes (v1) or EssentialsX? You can bring them over with one command. The old plugin does not need to be running - the importer reads its data files directly, so this works even if you already removed the old jar.
+
+1. Make sure the old plugin's data folder is still present on your server: `plugins/SetHomes/homes.yml` for Set Homes v1, or `plugins/Essentials/userdata/` for EssentialsX.
+2. Install Set Homes Two and start the server.
+3. As an operator (or anyone with `sh2.import-homes`), run `/import-homes sethomes` or `/import-homes essentialsx` from chat or the console. This is a preview only - it reports how many homes would be imported and warns about any that would be skipped, without changing anything.
+4. Run the same command again with `confirm` (for example `/import-homes sethomes confirm`) to apply.
+
+Good to know:
+- Existing homes are never overwritten. A home whose name is already taken for that player is skipped, which also means re-running the command is always safe.
+- Homes in worlds that no longer exist on the server are skipped with a warning naming the world.
+- Imported homes use your configured `defaultHomeItem` as their icon - players can recreate a home with `/create-home` if they want a custom icon.
+- A v1 "default" home (set with plain `/sethome`) is imported under the name `default`.
+- After migrating, remove the old plugin's jar if you have not already - Set Homes Two provides `/sethome`, `/home`, and `/delhome`, and two plugins registering the same commands will conflict.
+
 ### Soft Dependencies
 - [LuckPerms](https://luckperms.net/download)
 
