@@ -3,10 +3,8 @@ package com.samleighton.sethomestwo.importers;
 import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.models.Home;
-import com.samleighton.sethomestwo.utils.ConfigUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -89,7 +87,7 @@ public class SetHomesV1Importer implements HomesImporter {
             if (!dryRun) {
                 boolean saved = homesDao.save(new Home(
                         playerUUID,
-                        defaultMaterial(),
+                        HomesImporter.defaultMaterial(),
                         location,
                         homeName,
                         home.getString("desc"),
@@ -106,10 +104,5 @@ public class SetHomesV1Importer implements HomesImporter {
             report.failed++;
             report.warnings.add(String.format("Home '%s' for player %s could not be read: %s", homeName, playerUUID, e.getMessage()));
         }
-    }
-
-    static String defaultMaterial() {
-        Material material = Material.matchMaterial(ConfigUtil.getConfig().getString("defaultHomeItem", "white_wool"));
-        return material == null ? Material.WHITE_WOOL.name() : material.name();
     }
 }

@@ -84,7 +84,7 @@ public class EssentialsXImporter implements HomesImporter {
             if (!dryRun) {
                 boolean saved = homesDao.save(new Home(
                         playerUUID,
-                        SetHomesV1Importer.defaultMaterial(),
+                        HomesImporter.defaultMaterial(),
                         location,
                         homeName,
                         null,
