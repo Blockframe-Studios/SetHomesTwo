@@ -49,11 +49,7 @@ public class OpenHomesGui implements CommandExecutor {
             return true;
         }
 
-        // The join listener normally seeds this map; compute a fresh gui if absent
-        // (e.g. plugin reloaded while the player was online).
-        HomesGui homesGui = plugin.getHomesGuiMap().computeIfAbsent(player.getUniqueId(), uuid -> new HomesGui(player));
-        homesGui.setHomes(playersHomes);
-        homesGui.displayInventory(player);
+        HomesGui.openFor(plugin, player, playersHomes);
         return true;
     }
 }

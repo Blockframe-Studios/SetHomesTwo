@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Lightable;
 import org.jetbrains.annotations.Nullable;
 
 public class TeleportSafetyUtil {
@@ -23,16 +24,22 @@ public class TeleportSafetyUtil {
         if (!feet.isPassable() || !head.isPassable()) return false;
         if (feet.isLiquid() || head.isLiquid()) return false;
         if (!below.getType().isSolid()) return false;
-        return !isBurnHazard(feet.getType()) && !isBurnHazard(head.getType()) && !isBurnHazard(below.getType());
+        return !isBurnHazard(feet) && !isBurnHazard(head) && !isBurnHazard(below);
     }
 
-    private static boolean isBurnHazard(Material material) {
-        return material == Material.LAVA
+    private static boolean isBurnHazard(Block block) {
+        Material material = block.getType();
+        if (material == Material.LAVA
                 || material == Material.FIRE
                 || material == Material.SOUL_FIRE
-                || material == Material.MAGMA_BLOCK
-                || material == Material.CAMPFIRE
-                || material == Material.SOUL_CAMPFIRE;
+                || material == Material.MAGMA_BLOCK) {
+            return true;
+        }
+        if (material == Material.CAMPFIRE || material == Material.SOUL_CAMPFIRE) {
+            // Only a lit campfire burns; an extinguished one is safe to stand on.
+            return block.getBlockData() instanceof Lightable && ((Lightable) block.getBlockData()).isLit();
+        }
+        return false;
     }
 
     /**

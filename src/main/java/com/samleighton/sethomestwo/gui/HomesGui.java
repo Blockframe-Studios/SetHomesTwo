@@ -46,6 +46,17 @@ public class HomesGui implements Listener {
         inv = Bukkit.createInventory(player, inventorySize, title);
     }
 
+    /**
+     * Gets or creates the player's GUI (the join listener normally seeds this
+     * map; compute a fresh one if absent, e.g. plugin reloaded while online),
+     * loads the given homes into it, and opens it.
+     */
+    public static void openFor(SetHomesTwo plugin, Player player, List<Home> homes) {
+        HomesGui homesGui = plugin.getHomesGuiMap().computeIfAbsent(player.getUniqueId(), uuid -> new HomesGui(player));
+        homesGui.setHomes(homes);
+        homesGui.displayInventory(player);
+    }
+
     // Ingest players homes into a hash map of home lists for pagination
     public void setHomes(List<Home> homes) {
         // Clear any preexisting homes

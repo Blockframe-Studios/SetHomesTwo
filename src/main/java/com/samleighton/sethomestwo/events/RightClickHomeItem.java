@@ -73,9 +73,7 @@ public class RightClickHomeItem implements Listener {
         Dao<Home> homesDao = new HomesDao();
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
-        HomesGui homesGui = plugin.getHomesGuiMap().get(player.getUniqueId());
-        homesGui.setHomes(playersHomes);
-        homesGui.displayInventory(player);
+        HomesGui.openFor(plugin, player, playersHomes);
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
             Bukkit.getLogger().info(String.format("%s has clicked with home item id %s", player.getDisplayName(), homeItemUUID));
