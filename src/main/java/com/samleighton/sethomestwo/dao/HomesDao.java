@@ -63,6 +63,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                         rs.getString("description"),
                         rs.getString("dimension")
                 );
+                home.setId(rs.getInt("id"));
 
                 String dimension = home.getDimension();
                 List<String> blacklistedDimensions = blacklistEntryDao.getAll();
@@ -122,6 +123,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                         rs.getString("description"),
                         rs.getString("dimension")
                 );
+                home.setId(rs.getInt("id"));
             }
         } catch (SQLException e) {
             Bukkit.getLogger().severe("There was an issue reading a home for player " + playerUUID);
