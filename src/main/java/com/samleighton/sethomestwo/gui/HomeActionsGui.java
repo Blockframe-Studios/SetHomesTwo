@@ -68,7 +68,7 @@ public class HomeActionsGui implements GuiScreen {
     }
 
     private static NamespacedKey actionKey() {
-        return new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), ACTION_KEY_NAME);
+        return new NamespacedKey(SetHomesTwo.instance(), ACTION_KEY_NAME);
     }
 
     /**
@@ -256,7 +256,7 @@ public class HomeActionsGui implements GuiScreen {
      * @param home    The home being renamed, freshly read
      */
     private void openRenamePrompt(Player player, GuiSession session, Home home) {
-        SetHomesTwo plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        SetHomesTwo plugin = SetHomesTwo.instance();
         int maxLength = ConfigUtil.getConfig().getInt("maxHomeNameLength", 32);
 
         new AnvilGUI.Builder()

@@ -36,6 +36,23 @@ public class SetHomesTwo extends JavaPlugin {
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
 
+    /**
+     * The single, canonical way to fetch the running plugin instance.
+     * <p>
+     * {@code JavaPlugin.getPlugin(SetHomesTwo.class)} requires the passed class to
+     * have been loaded by Bukkit's own plugin classloader. MockBukkit enables the
+     * plugin through a generated subclass loaded by its own classloader, so the
+     * literal {@code SetHomesTwo.class} reference (loaded by the ordinary test
+     * classpath) never satisfies that check under test. Looking the plugin up by
+     * name through the plugin manager instead works identically on a real server
+     * and under MockBukkit.
+     *
+     * @return The running SetHomesTwo instance
+     */
+    public static SetHomesTwo instance() {
+        return (SetHomesTwo) Bukkit.getPluginManager().getPlugin("SetHomesTwo");
+    }
+
     @Override
     public void onEnable() {
         // Create the directories for the plugin

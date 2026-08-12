@@ -9,6 +9,6 @@ public abstract class SQLiteDao {
     public final Connection conn;
 
     public SQLiteDao(){
-        this.conn = SetHomesTwo.getPlugin(SetHomesTwo.class).getConnectionManager().getConnection("homes");
+        this.conn = SetHomesTwo.instance().getConnectionManager().getConnection("homes");
     }
 }

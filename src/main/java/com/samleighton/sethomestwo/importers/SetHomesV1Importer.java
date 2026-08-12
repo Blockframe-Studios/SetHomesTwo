@@ -23,7 +23,7 @@ public class SetHomesV1Importer implements HomesImporter {
     public ImportReport run(boolean dryRun) {
         ImportReport report = new ImportReport();
 
-        File pluginsDir = SetHomesTwo.getPlugin(SetHomesTwo.class).getDataFolder().getParentFile();
+        File pluginsDir = SetHomesTwo.instance().getDataFolder().getParentFile();
         File homesFile = new File(pluginsDir, "SetHomes/homes.yml");
         if (!homesFile.exists()) {
             report.warnings.add("plugins/SetHomes/homes.yml not found - nothing to import.");

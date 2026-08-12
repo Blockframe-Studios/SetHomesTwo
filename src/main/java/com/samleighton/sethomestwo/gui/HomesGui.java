@@ -172,7 +172,7 @@ public class HomesGui implements GuiScreen {
         if (!lore.isEmpty()) meta.setLore(lore);
 
         // Persist the home to the item
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
         meta.getPersistentDataContainer().set(homeKey, new PersistentHome(), home);
 
         // Apply item meta
@@ -189,7 +189,7 @@ public class HomesGui implements GuiScreen {
     @Override
     public void onClick(InventoryClickEvent event, GuiSession session) {
         ItemStack clickedItem = event.getCurrentItem();
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
 
         // Guard for user actually clicking item.
         if (clickedItem == null || clickedItem.getType().isAir() || clickedItem.getItemMeta() == null) return;

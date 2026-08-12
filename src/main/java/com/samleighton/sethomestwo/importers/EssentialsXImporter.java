@@ -23,7 +23,7 @@ public class EssentialsXImporter implements HomesImporter {
     public ImportReport run(boolean dryRun) {
         ImportReport report = new ImportReport();
 
-        File pluginsDir = SetHomesTwo.getPlugin(SetHomesTwo.class).getDataFolder().getParentFile();
+        File pluginsDir = SetHomesTwo.instance().getDataFolder().getParentFile();
         File userdataDir = new File(pluginsDir, "Essentials/userdata");
         File[] userFiles = userdataDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".yml"));
         if (userFiles == null || userFiles.length == 0) {

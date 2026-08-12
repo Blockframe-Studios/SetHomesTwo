@@ -47,8 +47,8 @@ public class RightClickHomeItem implements Listener {
 
         // Get item in hand
         ItemStack itemInHand = event.getItem();
-        NamespacedKey playerKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "belongs-to");
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "list-id");
+        NamespacedKey playerKey = new NamespacedKey(SetHomesTwo.instance(), "belongs-to");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "list-id");
         PersistentDataContainer itemDataContainer = itemInHand.getItemMeta().getPersistentDataContainer();
 
         // Guard checking if item is a home item specifically
