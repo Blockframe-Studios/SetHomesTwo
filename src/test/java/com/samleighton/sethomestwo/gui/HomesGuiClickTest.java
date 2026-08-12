@@ -1,7 +1,6 @@
 package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
-import com.samleighton.sethomestwo.dao.TeleportAttemptsDao;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
@@ -83,7 +82,7 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void rightClickOnTheAdminListDoesNotOpenTheSubmenu() {
-        PlayerMock admin = server.addPlayer();
+        PlayerMock admin = addTestPlayer("admin");
 
         // The clicked home must belong to the clicker, or the ownership-scoped
         // getById lookup inside onClick would return null and take the "home no
@@ -115,13 +114,6 @@ class HomesGuiClickTest extends ServerTestBase {
         // the home lookup would have succeeded: isOwnList is what stops it.
         assertInstanceOf(HomesGui.class, session.getActiveScreen());
         assertFalse(session.getActiveScreen() instanceof HomeActionsGui);
-
-        // The teleport this triggered scheduled a repeating task to finish the
-        // countdown and clear this row itself, but nothing in the test ticks the
-        // scheduler. Clear it directly so teardown's onDisable() does not find a
-        // dangling attempt and try to reset the admin's title, which MockBukkit
-        // does not implement.
-        new TeleportAttemptsDao().delete(admin.getUniqueId());
     }
 
     @Test
