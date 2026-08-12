@@ -1,11 +1,17 @@
 package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentString;
+import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.models.Home;
+import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.ServerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -146,6 +152,72 @@ public class HomeActionsGui implements GuiScreen {
             return;
         }
 
+        if (ACTION_MOVE.equals(action)) {
+            Home fresh = reloadHome(player, session);
+            if (fresh == null) return;
+
+            Location destination = player.getLocation();
+            String destinationDimension = Objects.requireNonNull(destination.getWorld()).getEnvironment().toString();
+
+            // Blacklisted dimension guard, sharing the rule create-home applies.
+            if (ServerUtil.isDimensionBlacklisted(destinationDimension)) {
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString("cannotMoveToBlacklistedDimension", UserError.CANNOT_MOVE_TO_BLACKLISTED_DIMENSION.getValue()));
+                return;
+            }
+
+            fresh.setWorld(destination.getWorld().getUID().toString());
+            fresh.setX(destination.getX());
+            fresh.setY(destination.getY());
+            fresh.setZ(destination.getZ());
+            fresh.setPitch(destination.getPitch());
+            fresh.setYaw(destination.getYaw());
+            fresh.setDimension(destinationDimension);
+
+            HomesDao homesDao = new HomesDao();
+            if (!homesDao.update(fresh)) {
+                ChatUtils.pluginError(player);
+                return;
+            }
+
+            String moved = ConfigUtil.getConfig().getString("homeMoved", UserSuccess.HOME_MOVED.getValue());
+            ChatUtils.sendSuccess(player, String.format(moved, fresh.getName()));
+            returnToRefreshedList(player, session);
+            return;
+        }
+
         // Remaining actions are implemented in later tasks.
+    }
+
+    /**
+     * Re-read this menu's home from the database.
+     *
+     * @param player The acting player
+     * @return The current home, or null when it no longer exists (the player has
+     * already been messaged and returned to the list in that case)
+     */
+    private Home reloadHome(Player player, GuiSession session) {
+        HomesDao homesDao = new HomesDao();
+        Home fresh = homesDao.getById(player.getUniqueId(), homeId);
+
+        if (fresh == null) {
+            player.closeInventory();
+            ChatUtils.sendError(player, ConfigUtil.getConfig().getString("homeNoLongerExists", UserError.HOME_NO_LONGER_EXISTS.getValue()));
+            session.openHomeList(player);
+            return null;
+        }
+
+        return fresh;
+    }
+
+    /**
+     * Re-fetch the player's homes and show the refreshed list.
+     *
+     * @param player  The acting player
+     * @param session The owning session
+     */
+    private void returnToRefreshedList(Player player, GuiSession session) {
+        HomesDao homesDao = new HomesDao();
+        session.getHomesGui().setHomes(homesDao.getAll(player.getUniqueId()));
+        session.openHomeList(player);
     }
 }

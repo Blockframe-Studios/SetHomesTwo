@@ -1,5 +1,7 @@
 package com.samleighton.sethomestwo.utils;
 
+import com.samleighton.sethomestwo.dao.BlacklistDao;
+import com.samleighton.sethomestwo.dao.Dao;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -38,6 +40,20 @@ public class ServerUtil {
      */
     public static Map<String, String> getDimensionsMap() {
         return dimensionsMap;
+    }
+
+    /**
+     * Whether homes are barred from a dimension.
+     *
+     * @param dimension The environment name, as produced by
+     *                  world.getEnvironment().toString()
+     * @return true when the dimension is blacklisted
+     */
+    public static boolean isDimensionBlacklisted(String dimension) {
+        Dao<String> blacklistDao = new BlacklistDao();
+        List<String> blacklistedDimensions = blacklistDao.getAll();
+
+        return blacklistedDimensions.contains(getDimensionsMap().get(dimension));
     }
 
     public static String getPlayerUUID(String playerName){
