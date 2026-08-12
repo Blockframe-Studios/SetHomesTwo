@@ -26,7 +26,13 @@ public enum UserError {
     PLAYERS_ONLY("Only players may execute this command."),
     DIMENSION_ALREADY_BLACKLISTED("The %s dimension has already been blacklisted. You cannot add it again."),
     GROUP_DOES_NOT_EXIST("Group does not exist. Use /get-max-homes-groups to see all groups."),
-    HOME_DOES_NOT_EXIST("The home '%s' does not exist.");
+    HOME_DOES_NOT_EXIST("The home '%s' does not exist."),
+    DUPLICATE_HOME_NAME("You already have a home called '%s'."),
+    INVALID_HOME_NAME("That home name is not valid. Names must not be blank."),
+    HOME_NAME_TOO_LONG("That home name is too long. The maximum is %d characters."),
+    HOME_NO_LONGER_EXISTS("That home no longer exists."),
+    EMPTY_HAND_FOR_ICON("Hold the item you want to use as the icon, then click again."),
+    CANNOT_MOVE_TO_BLACKLISTED_DIMENSION("You cannot move a home into this dimension because it has been blacklisted.");
 
 
     private final String value;

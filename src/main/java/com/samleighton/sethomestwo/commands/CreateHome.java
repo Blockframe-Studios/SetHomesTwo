@@ -113,6 +113,14 @@ public class CreateHome implements CommandExecutor {
             description = stringBuilder.toString();
         }
 
+        // Duplicate name guard
+        HomesDao homesLookup = new HomesDao();
+        if (homesLookup.nameExists(player.getUniqueId(), homeName, null)) {
+            String duplicateMessage = ConfigUtil.getConfig().getString("duplicateHomeName", UserError.DUPLICATE_HOME_NAME.getValue());
+            ChatUtils.sendError(player, String.format(duplicateMessage, homeName));
+            return true;
+        }
+
         // Create the home
         boolean created = homesDao.save(new Home(
                 player.getUniqueId().toString(),

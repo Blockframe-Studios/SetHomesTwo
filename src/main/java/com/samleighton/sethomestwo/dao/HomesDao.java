@@ -242,4 +242,39 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
 
         return null;
     }
+
+    /**
+     * Case-insensitive check for whether this player already has a home by this
+     * name.
+     *
+     * @param playerUUID The owning player
+     * @param name       The candidate name
+     * @param excludeId  A home id to ignore, so a home renaming to its own
+     *                   current name does not conflict with itself. Pass null
+     *                   when creating a new home.
+     * @return true when the name is already taken
+     */
+    public boolean nameExists(UUID playerUUID, String name, Integer excludeId) {
+        if (name == null) return false;
+
+        String sql = "select count(*) as total from %s where player_uuid = ? and lower(name) = lower(?)";
+        ResultSet rs;
+
+        if (excludeId == null) {
+            rs = DatabaseUtil.fetch(this.conn, String.format(sql, TABLE_NAME), playerUUID.toString(), name);
+        } else {
+            rs = DatabaseUtil.fetch(this.conn, String.format(sql + " and id != ?", TABLE_NAME), playerUUID.toString(), name, excludeId);
+        }
+
+        if (rs == null) return false;
+
+        try {
+            if (rs.next()) return rs.getInt("total") > 0;
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("There was an issue checking for a duplicate home name.");
+            Bukkit.getLogger().info(e.getMessage());
+        }
+
+        return false;
+    }
 }
