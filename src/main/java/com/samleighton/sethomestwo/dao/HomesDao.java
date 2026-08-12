@@ -158,11 +158,17 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
 
     @Override
     public boolean delete(Object object) {
-        if(!(object instanceof Home)) return false;
+        if (!(object instanceof Home)) return false;
 
         Home homeToRemove = (Home) object;
-        String sql = "delete from %s where player_uuid = ? and name = ?";
-        return DatabaseUtil.execute(this.conn, String.format(sql, TABLE_NAME), homeToRemove.getUUIDBelongingTo(), homeToRemove.getName());
+
+        if (homeToRemove.getId() == null) {
+            Bukkit.getLogger().severe("Refusing to delete a home that has no id.");
+            return false;
+        }
+
+        String sql = "delete from %s where id = ?";
+        return DatabaseUtil.executeUpdate(this.conn, String.format(sql, TABLE_NAME), homeToRemove.getId()) > 0;
     }
 
     @Override
