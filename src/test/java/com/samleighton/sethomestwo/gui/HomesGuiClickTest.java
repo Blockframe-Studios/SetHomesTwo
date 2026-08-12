@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,9 +83,15 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void rightClickOnTheAdminListDoesNotOpenTheSubmenu() {
-        PlayerMock target = server.addPlayer();
         PlayerMock admin = server.addPlayer();
-        HomeFixtures.persist(target, "base");
+
+        // The clicked home must belong to the clicker, or the ownership-scoped
+        // getById lookup inside onClick would return null and take the "home no
+        // longer exists" branch instead - which also never opens the submenu,
+        // rescuing this test for the wrong reason. Give admin a home of their
+        // own so that lookup succeeds, and isOwnList is the only thing left
+        // standing between the click and the management submenu.
+        HomeFixtures.persist(admin, "base");
 
         // Falling through to teleport behaviour actually invokes Home.teleport(),
         // which with teleport safety on would prefetch chunks via a WorldMock API
@@ -92,9 +99,11 @@ class HomesGuiClickTest extends ServerTestBase {
         // about, so it is turned off to let the routing decision run to completion.
         plugin.getConfig().set("teleportSafety", false);
 
-        // The admin view is the two-argument constructor, which sets isOwnList false.
-        HomesGui adminGui = new HomesGui(admin, "Homes of " + target.getName());
-        adminGui.setHomes(new HomesDao(true).getAll(target.getUniqueId()));
+        // The admin view is the two-argument constructor, which sets isOwnList
+        // false, even though it is populated with admin's own home here so the
+        // ownership lookup succeeds and only isOwnList is under test.
+        HomesGui adminGui = new HomesGui(admin, "Homes of " + admin.getName());
+        adminGui.setHomes(new HomesDao(true).getAll(admin.getUniqueId()));
         adminGui.displayInventory(admin);
 
         GuiSession session = new GuiSession(new HomesGui(admin));
@@ -102,8 +111,10 @@ class HomesGuiClickTest extends ServerTestBase {
 
         click(adminGui, session, admin, 0, ClickType.RIGHT);
 
-        // Falls through to teleport behaviour rather than management.
+        // Falls through to teleport behaviour rather than management, even though
+        // the home lookup would have succeeded: isOwnList is what stops it.
         assertInstanceOf(HomesGui.class, session.getActiveScreen());
+        assertFalse(session.getActiveScreen() instanceof HomeActionsGui);
 
         // The teleport this triggered scheduled a repeating task to finish the
         // countdown and clear this row itself, but nothing in the test ticks the
