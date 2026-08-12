@@ -144,6 +144,12 @@ manageHomeTitle: "Manage: %s"
 # Title of the anvil prompt shown when renaming a home.
 renamePromptTitle: "New home name"
 
+# Hint shown on each home in the homes list, below the description.
+# Only shown to players who can actually manage the home (sh2.manage-homes)
+# and never on another player's homes. Supports '&' colour codes.
+# Set to "" to hide it.
+manageHomeHint: "&7Right click to edit home"
+
 # Maximum number of characters allowed in a home name.
 maxHomeNameLength: 32
 

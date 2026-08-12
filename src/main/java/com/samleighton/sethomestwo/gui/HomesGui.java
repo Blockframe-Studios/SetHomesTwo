@@ -32,6 +32,7 @@ public class HomesGui implements GuiScreen {
 
     private final String defaultBackPageMaterial = "red_stained_glass_pane";
     private final String defaultNextPageMaterial = "green_stained_glass_pane";
+    private final String defaultManageHomeHint = "&7Right click to edit home";
 
     // True when this screen is the viewer's own home list; false for the
     // admin view of another player's homes (GetPlayerHomes), where the
@@ -101,9 +102,13 @@ public class HomesGui implements GuiScreen {
             return;
         }
 
+        // The hint is only truthful when right-clicking will actually open the
+        // management submenu, which onClick gates on the same two conditions.
+        boolean showManageHint = isOwnList && player.hasPermission("sh2.manage-homes");
+
         // Draw home items in inventory
         for (Home home : homesForDisplay) {
-            inv.addItem(createGuiItem(Material.matchMaterial(home.getMaterial()), home));
+            inv.addItem(createGuiItem(Material.matchMaterial(home.getMaterial()), home, showManageHint));
         }
 
         // Open inventory without page items
@@ -142,18 +147,29 @@ public class HomesGui implements GuiScreen {
     /**
      * Create a new item to be placed in the inventory.
      *
-     * @param mat,  The material of the item
-     * @param home, The home designated for this item
+     * @param mat,             The material of the item
+     * @param home,            The home designated for this item
+     * @param showManageHint, Whether to append the "right click to edit" lore line
      * @return ItemStack
      */
-    protected ItemStack createGuiItem(final Material mat, @NotNull Home home) {
+    protected ItemStack createGuiItem(final Material mat, @NotNull Home home, boolean showManageHint) {
         ItemStack item = new ItemStack(mat, 1);
         ItemMeta meta = item.getItemMeta();
 
         // Setup item lore and display name
         Objects.requireNonNull(meta).setDisplayName(home.getName());
-        if (home.getDescription() != null)
-            Objects.requireNonNull(meta).setLore(Collections.singletonList(home.getDescription()));
+
+        List<String> lore = new ArrayList<>();
+        if (home.getDescription() != null) lore.add(home.getDescription());
+
+        if (showManageHint) {
+            String hint = ChatColor.translateAlternateColorCodes('&', ConfigUtil.getConfig().getString("manageHomeHint", defaultManageHomeHint));
+
+            // An empty hint in the config is how a server turns the line off.
+            if (!hint.trim().isEmpty()) lore.add(hint);
+        }
+
+        if (!lore.isEmpty()) meta.setLore(lore);
 
         // Persist the home to the item
         NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
