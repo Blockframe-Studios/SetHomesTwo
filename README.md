@@ -200,13 +200,31 @@ Please feel free to donate via the button below, any amount is greatly appreciat
   **A:** You will need to install the permission plugin, [LuckPerms](https://luckperms.net/download) then configure the config.yml to allow for multiple groups (see above for example config).
 
 ### Changelog
-- Fixed issue where players missing sh2.teleport could not break blocks.
-- Fixed issue where a player who has an open homes gui has their inventory overwritten by the next person to open a homes gui.
-- Added go-home and list-homes commands
+
+#### 1.2.0 (2026-08-12)
+
+Behaviour changes to be aware of before updating:
+- Home names are now unique per player without regard to case, so you can no longer create both `base` and `Base`. Homes you already have are untouched, including any existing duplicates.
+- `/delete-home` now deletes a single home. Previously it deleted every home whose name matched, so a player with duplicate names lost all of them at once.
+- The plugin now requires Java 21 to run (previously Java 9). Minecraft 1.21 servers already require Java 21, so most setups need no change.
+
+- Added a home management menu: right-click a home in the homes GUI to rename it, move it to where you are standing, set its icon to the item you are holding, or delete it. Deleting asks for confirmation first, and renaming opens an anvil prompt for the new name.
+- Added a "Right click to edit home" hint to homes in the list, shown only to players who are able to manage them.
+- Added the `sh2.manage-homes` permission, which controls the management menu and defaults to granted.
+- Added config keys for the management menu: `manageHomeTitle`, `renamePromptTitle`, `manageHomeHint`, `maxHomeNameLength`, the button item and name pairs, and the new success and error messages. See the example config above.
+- Fixed home updates and deletes not being scoped to the owning player.
+
+#### 1.1.0 (2026-08-11)
 - Added `/sethome`, `/delhome`, and `/home` as classic aliases for `/create-home`, `/delete-home`, and `/go-home`.
 - Player permissions (create-home, go-home, list-homes, delete-home, teleport, give-homes-item) now default to granted for all players; admin permissions still default to OP.
-- Fixed stale teleport attempts surviving a server restart, which could block a player's next teleport (finishes #14).
 - Added the `/homes` command, which opens the homes GUI directly; `/list-homes` still prints the chat listing.
-- Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
 - Added `/import-homes` to import homes from Set Homes v1 or EssentialsX (dry-run by default, pass `confirm` to apply).
+- Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
+- Teleport destination chunks are now loaded during the countdown, so arriving at a distant home is smoother.
+- Fixed stale teleport attempts surviving a server restart, which could block a player's next teleport (finishes #14).
 - Fixed error when maxHomesType is groups and LuckPerms is not installed. The limit is now skipped with a console warning instead.
+
+#### Earlier releases
+- Added go-home and list-homes commands.
+- Fixed issue where players missing sh2.teleport could not break blocks.
+- Fixed issue where a player who has an open homes gui has their inventory overwritten by the next person to open a homes gui.
