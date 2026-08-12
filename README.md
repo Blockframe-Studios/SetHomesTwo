@@ -45,6 +45,17 @@ If the plugin is set up to allow different groupings or tiers for players, you w
 If the plugin is set up to only have one group or tier, you only need to provide the number of max homes.
 - `/import-homes [sethomes|essentialsx] [confirm]` - Imports homes from Set Homes v1 or EssentialsX. Dry-run unless confirm is given.
 
+### Managing homes from the GUI
+
+Open your homes with `/homes` or by right-clicking the homes item, then:
+
+- **Left-click** a home to teleport to it.
+- **Right-click** a home to open its management menu, where you can rename it, move it to where you are standing, set its icon to the item you are holding, or delete it.
+
+Deleting always asks for confirmation first. Renaming opens an anvil where you type the new name. Home names must be unique per player and are compared without regard to case, so you cannot have both `base` and `Base`.
+
+Management is controlled by the `sh2.manage-homes` permission, which defaults to true.
+
 ### Permissions
 
 As of 1.1.0, the player permissions below default to granted for all players; the admin permissions default to OP only.
@@ -61,6 +72,7 @@ As of 1.1.0, the player permissions below default to granted for all players; th
 - `sh2.get-player-homes` - Retrieve a list of a given player's homes.
 - `sh2.set-max-homes` - Set the max number of homes all players, or individual groups, can have.
 - `sh2.import-homes` - Import homes from another homes plugin (Set Homes v1 or EssentialsX).
+- `sh2.manage-homes` - Allow player to rename, move, re-icon, or delete their homes from the GUI. Defaults to granted for all players.
 
 ### Extra Features
 - The time it takes to teleport to a saved home can be configured
@@ -123,6 +135,46 @@ movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the n
 
 # -- DEBUGGING --
 debugLevel: "error" # Choices are: error | info
+
+# -- HOME MANAGEMENT GUI --
+# Title of the per-home management menu.
+# %s is replaced with the home name.
+manageHomeTitle: "Manage: %s"
+
+# Title of the anvil prompt shown when renaming a home.
+renamePromptTitle: "New home name"
+
+# Maximum number of characters allowed in a home name.
+maxHomeNameLength: 32
+
+# Buttons in the management menu.
+renameButtonItem: "name_tag"
+renameButtonName: "Rename"
+moveHomeButtonItem: "ender_pearl"
+moveHomeButtonName: "Move home here"
+setIconButtonItem: "item_frame"
+setIconButtonName: "Set icon to held item"
+deleteButtonItem: "barrier"
+deleteButtonName: "Delete"
+backButtonItem: "arrow"
+backButtonName: "Back"
+confirmButtonItem: "lime_wool"
+confirmButtonName: "Confirm delete"
+cancelButtonItem: "red_wool"
+cancelButtonName: "Cancel"
+
+# -- HOME MANAGEMENT MESSAGES --
+homeRenamed: "%s has been renamed to %s." # First %s is the old name, second is the new name.
+homeMoved: "%s has been moved to your current location." # %s is the home name.
+homeIconChanged: "The icon for %s is now %s." # First %s is the home name, second is the material.
+
+# -- HOME MANAGEMENT ERROR MESSAGES --
+duplicateHomeName: "You already have a home called '%s'." # %s is the duplicate name.
+invalidHomeName: "That home name is not valid. Names must not be blank."
+homeNameTooLong: "That home name is too long. The maximum is %d characters." # %d is the configured maximum.
+homeNoLongerExists: "That home no longer exists."
+emptyHandForIcon: "Hold the item you want to use as the icon, then click again."
+cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension because it has been blacklisted."
 ~~~
 
 ### Donations
