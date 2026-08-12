@@ -177,7 +177,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         }
 
         String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ? where id = ?";
-        return DatabaseUtil.execute(
+        return DatabaseUtil.executeUpdate(
                 this.conn,
                 String.format(sql, TABLE_NAME),
                 home.getMaterial(),
@@ -191,7 +191,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.getYaw(),
                 home.getDimension(),
                 home.getId()
-        );
+        ) > 0;
     }
 
     /**
