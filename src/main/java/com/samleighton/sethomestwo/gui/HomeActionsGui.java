@@ -8,7 +8,9 @@ import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.HomeNameValidator;
 import com.samleighton.sethomestwo.utils.ServerUtil;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -20,6 +22,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -243,6 +247,74 @@ public class HomeActionsGui implements GuiScreen {
             returnToRefreshedList(player, session);
             return;
         }
+
+        if (ACTION_RENAME.equals(action)) {
+            Home fresh = reloadHome(player, session);
+            if (fresh == null) return;
+
+            openRenamePrompt(player, session, fresh);
+            return;
+        }
+    }
+
+    /**
+     * Open an anvil prompt for the new home name. Validation failures re-prompt
+     * with the reason rather than closing.
+     *
+     * @param player  The acting player
+     * @param session The owning session
+     * @param home    The home being renamed, freshly read
+     */
+    private void openRenamePrompt(Player player, GuiSession session, Home home) {
+        SetHomesTwo plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        int maxLength = ConfigUtil.getConfig().getInt("maxHomeNameLength", 32);
+
+        new AnvilGUI.Builder()
+                .plugin(plugin)
+                .title(ConfigUtil.getConfig().getString("renamePromptTitle", "New home name"))
+                .text(home.getName())
+                .onClick((slot, stateSnapshot) -> {
+                    if (slot != AnvilGUI.Slot.OUTPUT) return Collections.emptyList();
+
+                    String candidate = HomeNameValidator.normalise(stateSnapshot.getText());
+                    HomeNameValidator.Result result = HomeNameValidator.validate(candidate, maxLength);
+
+                    if (result == HomeNameValidator.Result.EMPTY) {
+                        ChatUtils.sendError(player, ConfigUtil.getConfig().getString("invalidHomeName", UserError.INVALID_HOME_NAME.getValue()));
+                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
+                    }
+
+                    if (result == HomeNameValidator.Result.TOO_LONG) {
+                        String tooLong = ConfigUtil.getConfig().getString("homeNameTooLong", UserError.HOME_NAME_TOO_LONG.getValue());
+                        ChatUtils.sendError(player, String.format(tooLong, maxLength));
+                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
+                    }
+
+                    HomesDao homesDao = new HomesDao();
+
+                    if (homesDao.nameExists(player.getUniqueId(), candidate, home.getId())) {
+                        String duplicate = ConfigUtil.getConfig().getString("duplicateHomeName", UserError.DUPLICATE_HOME_NAME.getValue());
+                        ChatUtils.sendError(player, String.format(duplicate, candidate));
+                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
+                    }
+
+                    String previousName = home.getName();
+                    home.setName(candidate);
+
+                    if (!homesDao.update(home)) {
+                        ChatUtils.pluginError(player);
+                        return Collections.singletonList(AnvilGUI.ResponseAction.close());
+                    }
+
+                    String renamed = ConfigUtil.getConfig().getString("homeRenamed", UserSuccess.HOME_RENAMED.getValue());
+                    ChatUtils.sendSuccess(player, String.format(renamed, previousName, candidate));
+
+                    return Arrays.asList(
+                            AnvilGUI.ResponseAction.close(),
+                            AnvilGUI.ResponseAction.run(() -> returnToRefreshedList(player, session))
+                    );
+                })
+                .open(player);
     }
 
     /**
