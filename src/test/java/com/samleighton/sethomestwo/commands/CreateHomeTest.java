@@ -3,10 +3,18 @@ package com.samleighton.sethomestwo.commands;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -102,9 +110,58 @@ class CreateHomeTest extends ServerTestBase {
         HomeFixtures.persist(player, "base");
 
         // LuckPerms is a soft dependency and is not installed here, so the
-        // guard short-circuits and the home is still created.
-        server.execute("create-home", player, "camp").assertSucceeded();
+        // guard should short-circuit - logging a distinctive warning - and
+        // the home should still be created. Asserting only the creation
+        // count would also pass if maxHomeEnabled/maxHomesType were ignored
+        // for an unrelated reason, so assert the warning too, proving the
+        // groups branch was actually reached.
+        List<LogRecord> logged = captureLog(() ->
+                server.execute("create-home", player, "camp").assertSucceeded());
 
         assertEquals(2, new HomesDao().getAll(player.getUniqueId()).size());
+        assertTrue(loggedWarning(logged,
+                        "maxHomesType is 'groups' but LuckPerms is not installed. Max homes limit will not be enforced."),
+                "Expected the groups-limit guard to log a warning when LuckPerms is absent");
+    }
+
+    /**
+     * Attach a temporary handler to the Bukkit logger for the duration of
+     * {@code action}, so a test can assert on what got logged rather than
+     * only on a method's return value. The handler is always removed
+     * afterward so it cannot leak into other tests. Mirrors the helper in
+     * HomesDaoTest; not shared because it is only two call sites in
+     * different classes.
+     */
+    private List<LogRecord> captureLog(Runnable action) {
+        List<LogRecord> captured = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                captured.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        Logger logger = Bukkit.getLogger();
+        logger.addHandler(handler);
+        try {
+            action.run();
+        } finally {
+            logger.removeHandler(handler);
+        }
+
+        return captured;
+    }
+
+    private boolean loggedWarning(List<LogRecord> records, String message) {
+        return records.stream().anyMatch(
+                record -> record.getLevel() == Level.WARNING && message.equals(record.getMessage()));
     }
 }

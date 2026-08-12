@@ -45,8 +45,21 @@ class OpenHomesGuiTest extends ServerTestBase {
         PlayerMock player = server.addPlayer();
         HomeFixtures.persist(player, "base");
 
+        // PlayerJoin unconditionally seeds a session on join, before either
+        // /homes call below. Clearing it here forces the first call to be the
+        // one that actually populates the map via computeIfAbsent - otherwise
+        // a command that short-circuited before touching the session map at
+        // all would still leave both lookups resolving to the join-created
+        // session, and assertSame would pass without proving reuse.
+        plugin.getGuiSessionMap().clear();
+
         server.execute("homes", player).assertSucceeded();
         GuiSession first = plugin.getGuiSessionMap().get(player.getUniqueId());
+        assertNotNull(first);
+        // activeScreen starts null and is only set by openHomeList, so this
+        // proves the command actually ran the open-list path, not just that
+        // some session object happens to exist.
+        assertNotNull(first.getActiveScreen());
 
         server.execute("homes", player).assertSucceeded();
         GuiSession second = plugin.getGuiSessionMap().get(player.getUniqueId());
