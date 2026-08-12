@@ -25,7 +25,12 @@ public class ConnectionManager {
     }
 
     public boolean createConnection(String key, String dbName) {
-        SetHomesTwo plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        // Looked up by name via the plugin manager rather than
+        // JavaPlugin.getPlugin(SetHomesTwo.class): MockBukkit enables the
+        // plugin through a generated subclass loaded by its own classloader,
+        // so the literal SetHomesTwo.class reference never satisfies that
+        // method's same-classloader check under test.
+        SetHomesTwo plugin = (SetHomesTwo) Bukkit.getPluginManager().getPlugin("SetHomesTwo");
         String dbURL = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/database/" + dbName + ".db";
 
         try {

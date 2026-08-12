@@ -11,34 +11,39 @@ import java.util.List;
 import java.util.Map;
 
 public class ServerUtil {
-    private final static List<String> validDimensions = new ArrayList<>() {
-        {
-            Bukkit.getWorlds().forEach(world -> add(world.getName().toLowerCase()));
-        }
-    };
-
-    // Mapping the environment grabbed from player to our valid dimension list
-    private final static Map<String, String> dimensionsMap = new HashMap<>() {{
-        put("NORMAL", validDimensions.get(0));
-        put("NETHER", validDimensions.get(1));
-        put("THE_END", validDimensions.get(2));
-    }};
 
     /**
      * Retrieve a list of the server's valid dimensions.
+     * <p>
+     * Read live rather than cached in a static initialiser: the cached form
+     * bound itself to whichever server loaded the class first, and threw
+     * outright on a server with fewer than three worlds.
      *
      * @return List
      */
     public static List<String> getValidDimensions() {
+        List<String> validDimensions = new ArrayList<>();
+        Bukkit.getWorlds().forEach(world -> validDimensions.add(world.getName().toLowerCase()));
+
         return validDimensions;
     }
 
     /**
      * Retrieve dimensions mapping.
+     * <p>
+     * Worlds are matched by position, so a server that disables the Nether or
+     * the End simply contributes no entry for it rather than failing.
      *
      * @return Map<String, String>
      */
     public static Map<String, String> getDimensionsMap() {
+        List<String> validDimensions = getValidDimensions();
+        Map<String, String> dimensionsMap = new HashMap<>();
+
+        if (validDimensions.size() > 0) dimensionsMap.put("NORMAL", validDimensions.get(0));
+        if (validDimensions.size() > 1) dimensionsMap.put("NETHER", validDimensions.get(1));
+        if (validDimensions.size() > 2) dimensionsMap.put("THE_END", validDimensions.get(2));
+
         return dimensionsMap;
     }
 
