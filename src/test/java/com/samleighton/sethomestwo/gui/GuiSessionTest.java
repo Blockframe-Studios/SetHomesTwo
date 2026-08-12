@@ -4,14 +4,20 @@ import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,6 +53,14 @@ class GuiSessionTest extends ServerTestBase {
     private InventoryClickEvent clickOn(PlayerMock player, Inventory inventory, int slot) {
         InventoryView view = player.openInventory(inventory);
         return new InventoryClickEvent(view, InventoryType.SlotType.CONTAINER, slot, ClickType.LEFT, InventoryAction.PICKUP_ALL);
+    }
+
+    private InventoryDragEvent dragOn(PlayerMock player, Inventory inventory) {
+        InventoryView view = player.openInventory(inventory);
+        Map<Integer, ItemStack> newItems = new HashMap<>();
+        newItems.put(0, new ItemStack(Material.DIAMOND, 1));
+
+        return new InventoryDragEvent(view, null, new ItemStack(Material.DIAMOND, 1), false, newItems);
     }
 
     @Test
@@ -89,6 +103,42 @@ class GuiSessionTest extends ServerTestBase {
 
         assertTrue(event.isCancelled());
         assertEquals(1, screen.clicks);
+    }
+
+    @Test
+    void dragIsIgnoredWhenNoScreenIsActive() {
+        PlayerMock player = server.addPlayer();
+        GuiSession session = new GuiSession(new HomesGui(player));
+
+        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, "other"));
+        session.handleDrag(event);
+
+        assertFalse(event.isCancelled());
+    }
+
+    @Test
+    void dragInAForeignInventoryIsNotCancelled() {
+        PlayerMock player = server.addPlayer();
+        GuiSession session = new GuiSession(new HomesGui(player));
+        session.setActiveScreen(new RecordingScreen(Bukkit.createInventory(player, 9, "active")));
+
+        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, "foreign"));
+        session.handleDrag(event);
+
+        assertFalse(event.isCancelled());
+    }
+
+    @Test
+    void dragInTheActiveScreenIsCancelled() {
+        PlayerMock player = server.addPlayer();
+        Inventory inventory = Bukkit.createInventory(player, 9, "active");
+        GuiSession session = new GuiSession(new HomesGui(player));
+        session.setActiveScreen(new RecordingScreen(inventory));
+
+        InventoryDragEvent event = dragOn(player, inventory);
+        session.handleDrag(event);
+
+        assertTrue(event.isCancelled());
     }
 
     @Test
