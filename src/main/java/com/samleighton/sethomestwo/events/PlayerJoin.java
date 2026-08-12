@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.events;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +19,6 @@ public class PlayerJoin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event){
         // Get the player from the event
         Player player = event.getPlayer();
-        plugin.getHomesGuiMap().put(player.getUniqueId(), new HomesGui(player));
+        plugin.getGuiSessionMap().put(player.getUniqueId(), new GuiSession(new HomesGui(player)));
     }
 }

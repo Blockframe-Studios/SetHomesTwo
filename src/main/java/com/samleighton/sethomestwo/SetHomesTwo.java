@@ -8,6 +8,7 @@ import com.samleighton.sethomestwo.events.PlayerJoin;
 import com.samleighton.sethomestwo.events.PlayerLeave;
 import com.samleighton.sethomestwo.events.PlayerMoveWhileTeleporting;
 import com.samleighton.sethomestwo.events.RightClickHomeItem;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
 import com.samleighton.sethomestwo.tabcompleters.DimensionTabCompleter;
@@ -33,7 +34,7 @@ import java.util.UUID;
 
 public class SetHomesTwo extends JavaPlugin {
     private final ConnectionManager connectionManager = new ConnectionManager();
-    private final Map<UUID, HomesGui> homesGuiMap = new HashMap<>();
+    private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -49,7 +50,7 @@ public class SetHomesTwo extends JavaPlugin {
 
         // Load online players into gui map just in case this was a reload
         for (Player player : Bukkit.getOnlinePlayers()) {
-            homesGuiMap.put(player.getUniqueId(), new HomesGui(player));
+            guiSessionMap.put(player.getUniqueId(), new GuiSession(new HomesGui(player)));
         }
 
         // Init database connections
@@ -212,7 +213,7 @@ public class SetHomesTwo extends JavaPlugin {
         return this.connectionManager;
     }
 
-    public Map<UUID, HomesGui> getHomesGuiMap() {
-        return this.homesGuiMap;
+    public Map<UUID, GuiSession> getGuiSessionMap() {
+        return this.guiSessionMap;
     }
 }

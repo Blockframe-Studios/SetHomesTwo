@@ -6,6 +6,7 @@ import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.DebugLevel;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
@@ -65,11 +66,12 @@ public class GetPlayerHomes implements CommandExecutor {
         Player player = Bukkit.getPlayer(UUID.fromString(uuidString));
         if (player == null) return true;
 
-        HomesGui homesGui = new HomesGui(requester, "Homes of " + player.getDisplayName());
-        homesGui.setHomes(playersHomes);
-        homesGui.displayInventory(requester);
+        HomesGui adminGui = new HomesGui(requester, "Homes of " + player.getDisplayName());
+        adminGui.setHomes(playersHomes);
 
-        plugin.getServer().getPluginManager().registerEvents(homesGui, plugin);
+        GuiSession session = plugin.getGuiSessionMap().computeIfAbsent(requester.getUniqueId(), uuid -> new GuiSession(new HomesGui(requester)));
+        session.setActiveScreen(adminGui);
+        adminGui.displayInventory(requester);
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
             Bukkit.getLogger().info(String.format("%s is viewing homes of player %s", requester.getDisplayName(), player.getDisplayName()));

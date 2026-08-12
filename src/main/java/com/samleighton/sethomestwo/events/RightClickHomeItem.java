@@ -6,6 +6,7 @@ import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentString;
 import com.samleighton.sethomestwo.enums.DebugLevel;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
@@ -73,7 +74,13 @@ public class RightClickHomeItem implements Listener {
         Dao<Home> homesDao = new HomesDao();
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
-        HomesGui.openFor(plugin, player, playersHomes);
+        GuiSession session = plugin.getGuiSessionMap().get(player.getUniqueId());
+        if (session == null) {
+            session = new GuiSession(new HomesGui(player));
+            plugin.getGuiSessionMap().put(player.getUniqueId(), session);
+        }
+        session.getHomesGui().setHomes(playersHomes);
+        session.openHomeList(player);
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
             Bukkit.getLogger().info(String.format("%s has clicked with home item id %s", player.getDisplayName(), homeItemUUID));
@@ -81,13 +88,17 @@ public class RightClickHomeItem implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        HomesGui homesGui = plugin.getHomesGuiMap().get(event.getWhoClicked().getUniqueId());
-        homesGui.onInventoryClick(event);
+        GuiSession session = plugin.getGuiSessionMap().get(event.getWhoClicked().getUniqueId());
+        if (session == null) return;
+
+        session.handleClick(event);
     }
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        HomesGui homesGui = plugin.getHomesGuiMap().get(event.getWhoClicked().getUniqueId());
-        homesGui.onInventoryDrag(event);
+        GuiSession session = plugin.getGuiSessionMap().get(event.getWhoClicked().getUniqueId());
+        if (session == null) return;
+
+        session.handleDrag(event);
     }
 }

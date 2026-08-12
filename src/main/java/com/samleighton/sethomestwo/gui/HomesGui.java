@@ -11,10 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class HomesGui implements Listener {
+public class HomesGui implements GuiScreen {
     private final Inventory inv;
     private final int inventoryWidth = 9;
     private final int inventoryHeight = 6;
@@ -44,17 +41,6 @@ public class HomesGui implements Listener {
 
     public HomesGui(Player player, String title) {
         inv = Bukkit.createInventory(player, inventorySize, title);
-    }
-
-    /**
-     * Gets or creates the player's GUI (the join listener normally seeds this
-     * map; compute a fresh one if absent, e.g. plugin reloaded while online),
-     * loads the given homes into it, and opens it.
-     */
-    public static void openFor(SetHomesTwo plugin, Player player, List<Home> homes) {
-        HomesGui homesGui = plugin.getHomesGuiMap().computeIfAbsent(player.getUniqueId(), uuid -> new HomesGui(player));
-        homesGui.setHomes(homes);
-        homesGui.displayInventory(player);
     }
 
     // Ingest players homes into a hash map of home lists for pagination
@@ -170,19 +156,20 @@ public class HomesGui implements Listener {
         return item;
     }
 
-    @EventHandler
-    public void onInventoryClick(final @NotNull InventoryClickEvent event) {
-        // Guard to ensure this is the correct inventory to be using
-        if (!event.getInventory().equals(inv)) return;
+    @Override
+    public Inventory getInventory() {
+        return inv;
+    }
 
-        // Cancel default click event
-        event.setCancelled(true);
-
+    @Override
+    public void onClick(InventoryClickEvent event, GuiSession session) {
         ItemStack clickedItem = event.getCurrentItem();
         NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
 
         // Guard for user actually clicking item.
         if (clickedItem == null || clickedItem.getType().isAir() || clickedItem.getItemMeta() == null) return;
+
+        Player player = (Player) event.getWhoClicked();
 
         // Guard to check if item is actually home destination
         if (!clickedItem.getItemMeta().getPersistentDataContainer().has(homeKey, new PersistentHome())) {
@@ -193,14 +180,14 @@ public class HomesGui implements Listener {
             if (!(clickedItem.getType().equals(backPageMaterial) || clickedItem.getType().equals(nextPageMaterial)))
                 return;
 
-            // Move to next page
+            // Move to prev page
             if (clickedItem.getType().equals(backPageMaterial)) currentPage--;
 
-            // Move to prev page
+            // Move to next page
             if (clickedItem.getType().equals(nextPageMaterial)) currentPage++;
 
             // Display new inv state to player
-            this.displayInventory((Player) event.getWhoClicked());
+            this.displayInventory(player);
             return;
         }
 
@@ -212,24 +199,9 @@ public class HomesGui implements Listener {
         // The home object was not retrievable via item meta
         if (home == null) return;
 
-        // Get the player who clicked the item.
-        Player player = (Player) event.getWhoClicked();
         player.closeInventory();
 
         // Teleport player to home
         home.teleport(player);
-
-        // Reset page
-        this.currentPage = 1;
-        this.pagesMap.clear();
-    }
-
-    // Cancel inventory dragging
-    @EventHandler
-    public void onInventoryDrag(final @NotNull InventoryDragEvent event) {
-        // Cancel all inventory drag events
-        if (event.getInventory().equals(inv)) {
-            event.setCancelled(true);
-        }
     }
 }
