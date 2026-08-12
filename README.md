@@ -222,6 +222,7 @@ Behaviour changes to be aware of before updating:
 - Added the `sh2.manage-homes` permission, which controls the management menu and defaults to granted.
 - Added config keys for the management menu: `manageHomeTitle`, `renamePromptTitle`, `manageHomeHint`, `maxHomeNameLength`, the button item and name pairs, and the new success and error messages. See the example config above.
 - Fixed home updates and deletes not being scoped to the owning player.
+- Fixed the homes list hiding a home behind the previous-page button once a player had 46 or more homes, and showing an empty second page to a player with exactly 45 homes.
 
 #### 1.1.0 (2026-08-11)
 - Added `/sethome`, `/delhome`, and `/home` as classic aliases for `/create-home`, `/delete-home`, and `/go-home`.

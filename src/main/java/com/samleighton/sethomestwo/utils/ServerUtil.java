@@ -31,8 +31,13 @@ public class ServerUtil {
     /**
      * Retrieve dimensions mapping.
      * <p>
-     * Worlds are matched by position, so a server that disables the Nether or
-     * the End simply contributes no entry for it rather than failing.
+     * Worlds are matched by list position, not by their actual environment,
+     * so this mapping is only correct when all three dimensions are present
+     * and returned in the usual order. The size checks below stop a server
+     * with fewer than three worlds from crashing, but they do not fix the
+     * mapping: a server with the Nether disabled but the End enabled will
+     * map the End's world onto NETHER and produce no THE_END entry at all.
+     * This is a pre-existing limitation worth fixing separately.
      *
      * @return Map<String, String>
      */
