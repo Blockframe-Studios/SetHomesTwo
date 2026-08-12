@@ -164,4 +164,76 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         String sql = "delete from %s where player_uuid = ? and name = ?";
         return DatabaseUtil.execute(this.conn, String.format(sql, TABLE_NAME), homeToRemove.getUUIDBelongingTo(), homeToRemove.getName());
     }
+
+    @Override
+    public boolean update(Object object) {
+        if (!(object instanceof Home)) return false;
+
+        Home home = (Home) object;
+
+        if (home.getId() == null) {
+            Bukkit.getLogger().severe("Refusing to update a home that has no id.");
+            return false;
+        }
+
+        String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ? where id = ?";
+        return DatabaseUtil.execute(
+                this.conn,
+                String.format(sql, TABLE_NAME),
+                home.getMaterial(),
+                home.getWorld(),
+                home.getName(),
+                home.getDescription(),
+                home.getX(),
+                home.getY(),
+                home.getZ(),
+                home.getPitch(),
+                home.getYaw(),
+                home.getDimension(),
+                home.getId()
+        );
+    }
+
+    /**
+     * Fetch a single home by its primary key, scoped to its owner so one player
+     * can never address another player's home by guessing an id.
+     *
+     * @param playerUUID The owning player
+     * @param id         The players_homes primary key
+     * @return Home, or null when no such row exists
+     */
+    public Home getById(UUID playerUUID, int id) {
+        String sql = "select * from %s where player_uuid = ? and id = ?";
+        ResultSet rs = DatabaseUtil.fetch(this.conn, String.format(sql, TABLE_NAME), playerUUID.toString(), id);
+
+        if (rs == null) return null;
+
+        try {
+            if (rs.next()) {
+                Location homeLocation = new Location(
+                        Bukkit.getWorld(UUID.fromString(rs.getString("world"))),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch")
+                );
+                Home home = new Home(
+                        rs.getString("player_uuid"),
+                        rs.getString("material"),
+                        homeLocation,
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("dimension")
+                );
+                home.setId(rs.getInt("id"));
+                return home;
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("There was an issue reading home id " + id);
+            Bukkit.getLogger().info(e.getMessage());
+        }
+
+        return null;
+    }
 }
