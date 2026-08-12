@@ -3,12 +3,18 @@ package com.samleighton.sethomestwo.dao;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,10 +62,13 @@ class HomesDaoTest extends ServerTestBase {
         HomeFixtures.persist(player, "base");
 
         Home unsaved = HomeFixtures.home(player, "base");
-
         HomesDao dao = new HomesDao();
-        assertFalse(dao.delete(unsaved));
+
+        List<LogRecord> logged = captureLog(() -> assertFalse(dao.delete(unsaved)));
+
         assertEquals(1, dao.getAll(player.getUniqueId()).size());
+        assertTrue(loggedSevere(logged, "Refusing to delete a home that has no id."),
+                "Expected the no-id guard to log a SEVERE refusal message");
     }
 
     @Test
@@ -80,8 +89,12 @@ class HomesDaoTest extends ServerTestBase {
     void updateRefusesAHomeWithNoId() {
         PlayerMock player = server.addPlayer();
         Home unsaved = HomeFixtures.home(player, "base");
+        HomesDao dao = new HomesDao();
 
-        assertFalse(new HomesDao().update(unsaved));
+        List<LogRecord> logged = captureLog(() -> assertFalse(dao.update(unsaved)));
+
+        assertTrue(loggedSevere(logged, "Refusing to update a home that has no id."),
+                "Expected the no-id guard to log a SEVERE refusal message");
     }
 
     @Test
@@ -173,5 +186,44 @@ class HomesDaoTest extends ServerTestBase {
         Home home = new HomesDao(true).getAll(player.getUniqueId()).get(0);
 
         assertTrue(home.getCanTeleport());
+    }
+
+    /**
+     * Attach a temporary handler to the Bukkit logger for the duration of
+     * {@code action}, so a test can assert on what got logged rather than only
+     * on a method's return value. The handler is always removed afterward so
+     * it cannot leak into other tests.
+     */
+    private List<LogRecord> captureLog(Runnable action) {
+        List<LogRecord> captured = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                captured.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        Logger logger = Bukkit.getLogger();
+        logger.addHandler(handler);
+        try {
+            action.run();
+        } finally {
+            logger.removeHandler(handler);
+        }
+
+        return captured;
+    }
+
+    private boolean loggedSevere(List<LogRecord> records, String message) {
+        return records.stream().anyMatch(
+                record -> record.getLevel() == Level.SEVERE && message.equals(record.getMessage()));
     }
 }
