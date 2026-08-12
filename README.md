@@ -184,6 +184,15 @@ emptyHandForIcon: "Hold the item you want to use as the icon, then click again."
 cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension because it has been blacklisted."
 ~~~
 
+### Running tests
+The plugin has an automated test suite built on MockBukkit, JUnit, and an in-memory SQLite database.
+
+```
+mvn test
+```
+
+This runs under MockBukkit and needs no Minecraft server. `mvn verify` additionally builds the shaded jar, which checks the AnvilGUI relocation.
+
 ### Donations
 Please feel free to donate via the button below, any amount is greatly appreciated. Donating will help keep this plugin up to date. Thank you!
 
