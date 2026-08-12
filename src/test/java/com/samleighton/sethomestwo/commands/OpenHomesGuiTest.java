@@ -15,7 +15,6 @@ class OpenHomesGuiTest extends ServerTestBase {
     @Test
     void consoleIsTurnedAway() {
         server.executeConsole("homes").assertSucceeded();
-        // The command reports back rather than doing anything.
         assertTrue(server.getConsoleSender().nextMessage().contains("Only players"));
     }
 

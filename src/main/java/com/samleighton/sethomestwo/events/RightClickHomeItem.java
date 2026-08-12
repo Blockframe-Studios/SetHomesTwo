@@ -41,11 +41,9 @@ public class RightClickHomeItem implements Listener {
         Action action = event.getAction();
         Material homeMaterial = Material.matchMaterial(ConfigUtil.getConfig().getString("openHomeItem", Material.COMPASS.name()));
 
-        // Basic item guard
         if ((action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) || event.getItem() == null || event.getItem().getType() != homeMaterial || event.getItem().getItemMeta() == null)
             return;
 
-        // Get item in hand
         ItemStack itemInHand = event.getItem();
         NamespacedKey playerKey = new NamespacedKey(SetHomesTwo.instance(), "belongs-to");
         NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "list-id");
@@ -55,7 +53,6 @@ public class RightClickHomeItem implements Listener {
         if (!(itemDataContainer.has(playerKey, new PersistentString()) && itemDataContainer.has(homeKey, new PersistentString())))
             return;
 
-        // Permission guard
         if (!player.hasPermission("sh2.teleport")) {
             ChatUtils.invalidPermissions(player);
             return;

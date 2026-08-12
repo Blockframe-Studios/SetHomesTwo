@@ -18,8 +18,6 @@ public class ServerUtil {
      * Read live rather than cached in a static initialiser: the cached form
      * bound itself to whichever server loaded the class first, and threw
      * outright on a server with fewer than three worlds.
-     *
-     * @return List
      */
     public static List<String> getValidDimensions() {
         List<String> validDimensions = new ArrayList<>();
