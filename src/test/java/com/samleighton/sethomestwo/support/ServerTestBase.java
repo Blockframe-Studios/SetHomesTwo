@@ -44,4 +44,17 @@ public abstract class ServerTestBase {
     protected void stopServer() {
         MockBukkit.unmock();
     }
+
+    /**
+     * Register a player that tolerates MockBukkit's unimplemented calls. Use this
+     * instead of server.addPlayer() for any test that reaches Home.teleport.
+     *
+     * @param name The player name
+     * @return The registered player
+     */
+    protected TestPlayer addTestPlayer(String name) {
+        TestPlayer player = new TestPlayer(server, name);
+        server.addPlayer(player);
+        return player;
+    }
 }
