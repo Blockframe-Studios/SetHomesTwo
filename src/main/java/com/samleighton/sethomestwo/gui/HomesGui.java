@@ -33,15 +33,22 @@ public class HomesGui implements GuiScreen {
     private final String defaultBackPageMaterial = "red_stained_glass_pane";
     private final String defaultNextPageMaterial = "green_stained_glass_pane";
 
+    // True when this screen is the viewer's own home list; false for the
+    // admin view of another player's homes (GetPlayerHomes), where the
+    // right-click management submenu must not be offered.
+    private final boolean isOwnList;
+
     public HomesGui(Player player) {
         String title = ConfigUtil.getConfig().getString("inventoryTitle", "Your homes");
 
         // Create a 6x9 double chest inventory
         inv = Bukkit.createInventory(player, inventorySize, title);
+        this.isOwnList = true;
     }
 
     public HomesGui(Player player, String title) {
         inv = Bukkit.createInventory(player, inventorySize, title);
+        this.isOwnList = false;
     }
 
     // Ingest players homes into a hash map of home lists for pagination
@@ -88,6 +95,7 @@ public class HomesGui implements GuiScreen {
         List<Home> homesForDisplay = pagesMap.get(this.currentPage);
 
         if (homesForDisplay == null || homesForDisplay.isEmpty()) {
+            player.closeInventory();
             String noHomesError = ConfigUtil.getConfig().getString("noHomes", UserError.NO_HOMES.getValue());
             ChatUtils.sendError(player, noHomesError);
             return;
@@ -200,8 +208,10 @@ public class HomesGui implements GuiScreen {
         // The home object was not retrievable via item meta
         if (home == null) return;
 
-        // Right-click opens management, left-click teleports.
-        if (event.isRightClick()) {
+        // Right-click opens management, left-click teleports. Management is only
+        // offered on the viewer's own list; the admin view of another player's
+        // homes falls through to teleport behaviour on any click.
+        if (event.isRightClick() && isOwnList) {
             if (!player.hasPermission("sh2.manage-homes")) return;
 
             HomesDao homesDao = new HomesDao();

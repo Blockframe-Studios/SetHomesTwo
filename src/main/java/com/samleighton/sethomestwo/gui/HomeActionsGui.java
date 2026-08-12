@@ -53,23 +53,13 @@ public class HomeActionsGui implements GuiScreen {
 
     private final Inventory inv;
     private final int homeId;
-    private final String homeName;
     private boolean confirmingDelete = false;
 
     public HomeActionsGui(Player player, Home home) {
         this.homeId = home.getId();
-        this.homeName = home.getName();
 
         String titleTemplate = ConfigUtil.getConfig().getString("manageHomeTitle", "Manage: %s");
         this.inv = Bukkit.createInventory(player, 9, String.format(titleTemplate, home.getName()));
-    }
-
-    public int getHomeId() {
-        return homeId;
-    }
-
-    public String getHomeName() {
-        return homeName;
     }
 
     @Override
@@ -311,7 +301,7 @@ public class HomeActionsGui implements GuiScreen {
 
                     return Arrays.asList(
                             AnvilGUI.ResponseAction.close(),
-                            AnvilGUI.ResponseAction.run(() -> returnToRefreshedList(player, session))
+                            AnvilGUI.ResponseAction.run(() -> Bukkit.getScheduler().runTask(plugin, () -> returnToRefreshedList(player, session)))
                     );
                 })
                 .open(player);
@@ -345,6 +335,7 @@ public class HomeActionsGui implements GuiScreen {
      * @param session The owning session
      */
     private void returnToRefreshedList(Player player, GuiSession session) {
+        player.closeInventory();
         HomesDao homesDao = new HomesDao();
         session.getHomesGui().setHomes(homesDao.getAll(player.getUniqueId()));
         session.openHomeList(player);

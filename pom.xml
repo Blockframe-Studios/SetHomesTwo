@@ -13,7 +13,6 @@
 
     <description>Give your players the ability to set homes and admins the ability to monitor them.</description>
     <properties>
-        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -99,10 +98,13 @@
             <version>5.4</version>
             <scope>provided</scope>
         </dependency>
+        <!-- No stable release exists upstream (mvn.wesjd.net/net/wesjd/anvilgui/maven-metadata.xml
+             lists only 1.10.13-SNAPSHOT). Pinned to the resolved timestamped snapshot so the
+             dependency cannot silently change out from under a branch with no test suite. -->
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.10.13-SNAPSHOT</version>
+            <version>1.10.13-20260714.043149-1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
