@@ -167,8 +167,8 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
             return false;
         }
 
-        String sql = "delete from %s where id = ?";
-        return DatabaseUtil.executeUpdate(this.conn, String.format(sql, TABLE_NAME), homeToRemove.getId()) > 0;
+        String sql = "delete from %s where id = ? and player_uuid = ?";
+        return DatabaseUtil.executeUpdate(this.conn, String.format(sql, TABLE_NAME), homeToRemove.getId(), homeToRemove.getUUIDBelongingTo()) > 0;
     }
 
     @Override
@@ -182,7 +182,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
             return false;
         }
 
-        String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ? where id = ?";
+        String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ? where id = ? and player_uuid = ?";
         return DatabaseUtil.executeUpdate(
                 this.conn,
                 String.format(sql, TABLE_NAME),
@@ -196,7 +196,8 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.getPitch(),
                 home.getYaw(),
                 home.getDimension(),
-                home.getId()
+                home.getId(),
+                home.getUUIDBelongingTo()
         ) > 0;
     }
 
