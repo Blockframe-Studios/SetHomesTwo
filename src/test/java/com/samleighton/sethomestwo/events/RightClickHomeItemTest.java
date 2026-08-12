@@ -1,5 +1,7 @@
 package com.samleighton.sethomestwo.events;
 
+import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.datatypes.PersistentString;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.items.HomeItem;
@@ -7,6 +9,7 @@ import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -14,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,6 +33,22 @@ class RightClickHomeItemTest extends ServerTestBase {
 
     private GuiSession sessionFor(TestPlayer player) {
         return plugin.getGuiSessionMap().get(player.getUniqueId());
+    }
+
+    /**
+     * Build an item that carries both persistent home-item tags but is not
+     * the configured openHomeItem material, so that only the material check
+     * in the basic item guard stands between it and the rest of the handler.
+     */
+    private ItemStack taggedItem(Material material, TestPlayer owner) {
+        ItemStack item = new ItemStack(material, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(
+                new NamespacedKey(SetHomesTwo.instance(), "belongs-to"), new PersistentString(), owner.getUniqueId().toString());
+        meta.getPersistentDataContainer().set(
+                new NamespacedKey(SetHomesTwo.instance(), "list-id"), new PersistentString(), java.util.UUID.randomUUID().toString());
+        item.setItemMeta(meta);
+        return item;
     }
 
     @Test
@@ -61,6 +81,10 @@ class RightClickHomeItemTest extends ServerTestBase {
         interact(player, Action.RIGHT_CLICK_AIR, new ItemStack(Material.COMPASS, 1));
 
         assertNull(sessionFor(player).getActiveScreen());
+        // Proves the click was dropped silently by the tag-presence guard,
+        // not merely stopped by a different, noisier guard further down
+        // (e.g. the ownership check, which also leaves activeScreen null).
+        player.assertNoMoreSaid();
     }
 
     @Test
@@ -68,9 +92,13 @@ class RightClickHomeItemTest extends ServerTestBase {
         TestPlayer player = addTestPlayer("owner");
         HomeFixtures.persist(player, "base");
 
-        interact(player, Action.RIGHT_CLICK_AIR, new ItemStack(Material.DIAMOND, 1));
+        // Tagged with the player's own uuid so the tag-presence, permission,
+        // and ownership guards all pass - the material check is the only
+        // thing left that can reject this click.
+        interact(player, Action.RIGHT_CLICK_AIR, taggedItem(Material.DIAMOND, player));
 
         assertNull(sessionFor(player).getActiveScreen());
+        player.assertNoMoreSaid();
     }
 
     @Test
