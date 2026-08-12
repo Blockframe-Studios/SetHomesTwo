@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.models.Home;
@@ -86,7 +87,7 @@ public class HomesGui implements GuiScreen {
         // Get homes for current page
         List<Home> homesForDisplay = pagesMap.get(this.currentPage);
 
-        if (homesForDisplay.isEmpty()) {
+        if (homesForDisplay == null || homesForDisplay.isEmpty()) {
             String noHomesError = ConfigUtil.getConfig().getString("noHomes", UserError.NO_HOMES.getValue());
             ChatUtils.sendError(player, noHomesError);
             return;
@@ -198,6 +199,23 @@ public class HomesGui implements GuiScreen {
 
         // The home object was not retrievable via item meta
         if (home == null) return;
+
+        // Right-click opens management, left-click teleports.
+        if (event.isRightClick()) {
+            if (!player.hasPermission("sh2.manage-homes")) return;
+
+            HomesDao homesDao = new HomesDao();
+            Home fresh = home.getId() == null ? null : homesDao.getById(player.getUniqueId(), home.getId());
+
+            if (fresh == null) {
+                player.closeInventory();
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString("homeNoLongerExists", UserError.HOME_NO_LONGER_EXISTS.getValue()));
+                return;
+            }
+
+            session.openHomeActions(player, fresh);
+            return;
+        }
 
         player.closeInventory();
 

@@ -1,5 +1,6 @@
 package com.samleighton.sethomestwo.gui;
 
+import com.samleighton.sethomestwo.models.Home;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -37,6 +38,18 @@ public class GuiSession {
     public void openHomeList(Player player) {
         setActiveScreen(homesGui);
         homesGui.displayInventory(player);
+    }
+
+    /**
+     * Open the management submenu for one home.
+     *
+     * @param player The viewing player
+     * @param home   The home to manage
+     */
+    public void openHomeActions(Player player, Home home) {
+        HomeActionsGui actions = new HomeActionsGui(player, home);
+        setActiveScreen(actions);
+        actions.displayInventory(player);
     }
 
     /**
