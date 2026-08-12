@@ -216,7 +216,33 @@ public class HomeActionsGui implements GuiScreen {
             return;
         }
 
-        // Remaining actions are implemented in later tasks.
+        if (ACTION_DELETE.equals(action)) {
+            setConfirmingDelete(true);
+            displayInventory(player);
+            return;
+        }
+
+        if (ACTION_CANCEL_DELETE.equals(action)) {
+            setConfirmingDelete(false);
+            displayInventory(player);
+            return;
+        }
+
+        if (ACTION_CONFIRM_DELETE.equals(action)) {
+            Home fresh = reloadHome(player, session);
+            if (fresh == null) return;
+
+            HomesDao homesDao = new HomesDao();
+            if (!homesDao.delete(fresh)) {
+                ChatUtils.pluginError(player);
+                return;
+            }
+
+            String deleted = ConfigUtil.getConfig().getString("homeDeleted", UserSuccess.HOME_DELETED.getValue());
+            ChatUtils.sendSuccess(player, String.format(deleted, fresh.getName()));
+            returnToRefreshedList(player, session);
+            return;
+        }
     }
 
     /**
