@@ -38,7 +38,7 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void rightClickOnOwnListOpensTheManagementSubmenu() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         HomesGui gui = openOwnList(player);
@@ -51,7 +51,7 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void rightClickWithoutManagePermissionDoesNothing() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.manage-homes", false);
         HomeFixtures.persist(player, "base");
 
@@ -65,7 +65,7 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void rightClickOnAHomeDeletedUnderneathThePlayerReportsItIsGone() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         HomesGui gui = openOwnList(player);
@@ -118,7 +118,7 @@ class HomesGuiClickTest extends ServerTestBase {
 
     @Test
     void anEmptyHomeListClosesTheMenuAndExplainsWhy() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
 
         HomesGui gui = new HomesGui(player);
         gui.setHomes(new HomesDao().getAll(player.getUniqueId()));

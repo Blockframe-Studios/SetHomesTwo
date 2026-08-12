@@ -23,7 +23,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void aHomeIsCreatedAtThePlayersLocation() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 12, 65, -8));
 
         server.execute("create-home", player, "base").assertSucceeded();
@@ -36,7 +36,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void missingNameIsRejected() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
 
         server.execute("create-home", player).assertSucceeded();
 
@@ -46,7 +46,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void aDuplicateNameIsRejected() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         server.execute("create-home", player, "BASE").assertSucceeded();
@@ -57,7 +57,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void anInvalidMaterialIsRejected() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
 
         server.execute("create-home", player, "base", "not_a_material").assertSucceeded();
 
@@ -67,7 +67,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void aSuppliedMaterialIsStored() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
 
         server.execute("create-home", player, "base", "diamond").assertSucceeded();
 
@@ -76,7 +76,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void aBlacklistedDimensionIsRejected() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.blacklist(overworld.getName());
 
@@ -88,7 +88,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void theSingularMaxHomesLimitIsEnforced() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         plugin.getConfig().set("maxHomeEnabled", true);
         plugin.getConfig().set("maxHomesType", "singular");
         plugin.getConfig().set("maxHomes", 1);
@@ -103,7 +103,7 @@ class CreateHomeTest extends ServerTestBase {
 
     @Test
     void groupLimitsAreSkippedWhenLuckPermsIsAbsent() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         plugin.getConfig().set("maxHomeEnabled", true);
         plugin.getConfig().set("maxHomesType", "groups");
 

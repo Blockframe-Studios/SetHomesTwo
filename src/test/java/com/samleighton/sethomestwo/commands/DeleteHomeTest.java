@@ -22,7 +22,7 @@ class DeleteHomeTest extends ServerTestBase {
 
     @Test
     void wrongArgumentCountReportsUsage() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         server.execute("delete-home", player).assertSucceeded();
@@ -33,7 +33,7 @@ class DeleteHomeTest extends ServerTestBase {
 
     @Test
     void anUnknownHomeIsReportedAndNothingIsDeleted() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         server.execute("delete-home", player, "nowhere").assertSucceeded();
@@ -44,7 +44,7 @@ class DeleteHomeTest extends ServerTestBase {
 
     @Test
     void aHomeIsDeleted() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
         HomeFixtures.persist(player, "camp");
 
@@ -57,7 +57,7 @@ class DeleteHomeTest extends ServerTestBase {
 
     @Test
     void withTwoHomesSharingANameOnlyOneIsDeleted() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
         HomeFixtures.persist(player, "base");
 

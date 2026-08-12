@@ -20,7 +20,7 @@ class OpenHomesGuiTest extends ServerTestBase {
 
     @Test
     void aPlayerWithNoHomesIsTold() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
 
         server.execute("homes", player).assertSucceeded();
 
@@ -29,7 +29,7 @@ class OpenHomesGuiTest extends ServerTestBase {
 
     @Test
     void aPlayerWithHomesGetsASession() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         server.execute("homes", player).assertSucceeded();
@@ -41,7 +41,7 @@ class OpenHomesGuiTest extends ServerTestBase {
 
     @Test
     void theSessionIsReusedAcrossInvocations() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         // PlayerJoin unconditionally seeds a session on join, before either

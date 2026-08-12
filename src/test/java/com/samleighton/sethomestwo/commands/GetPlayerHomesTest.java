@@ -15,7 +15,7 @@ class GetPlayerHomesTest extends ServerTestBase {
 
     @Test
     void aNonOpIsRefused() {
-        PlayerMock admin = server.addPlayer();
+        PlayerMock admin = addPlayer();
 
         server.execute("get-player-homes", admin, "someone").assertSucceeded();
 
@@ -29,7 +29,7 @@ class GetPlayerHomesTest extends ServerTestBase {
 
     @Test
     void anOfflineOrUnknownPlayerIsReported() {
-        PlayerMock admin = server.addPlayer();
+        PlayerMock admin = addPlayer();
         admin.setOp(true);
 
         server.execute("get-player-homes", admin, "nobody").assertSucceeded();
@@ -39,7 +39,7 @@ class GetPlayerHomesTest extends ServerTestBase {
 
     @Test
     void wrongArgumentCountIsReported() {
-        PlayerMock admin = server.addPlayer();
+        PlayerMock admin = addPlayer();
         admin.setOp(true);
 
         server.execute("get-player-homes", admin).assertSucceeded();
@@ -49,8 +49,8 @@ class GetPlayerHomesTest extends ServerTestBase {
 
     @Test
     void anAdminSeesAnotherPlayersHomes() {
-        PlayerMock target = server.addPlayer("target");
-        PlayerMock admin = server.addPlayer("admin");
+        PlayerMock target = addPlayer("target");
+        PlayerMock admin = addPlayer("admin");
         admin.setOp(true);
         HomeFixtures.persist(target, "base");
 

@@ -26,7 +26,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void savedHomeComesBackFromGetAll() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         List<Home> homes = new HomesDao().getAll(player.getUniqueId());
@@ -38,7 +38,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void getReturnsNullForUnknownName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         assertNull(new HomesDao().get(player.getUniqueId(), "nowhere"));
@@ -46,8 +46,8 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void getByIdIsScopedToTheOwningPlayer() {
-        PlayerMock owner = server.addPlayer();
-        PlayerMock stranger = server.addPlayer();
+        PlayerMock owner = addPlayer();
+        PlayerMock stranger = addPlayer();
         Home home = HomeFixtures.persist(owner, "base");
 
         HomesDao dao = new HomesDao();
@@ -58,7 +58,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void deleteRefusesAHomeWithNoId() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         Home unsaved = HomeFixtures.home(player, "base");
@@ -73,7 +73,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void deleteRemovesExactlyOneRowWhenTwoHomesShareAName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home first = HomeFixtures.persist(player, "base");
         Home second = HomeFixtures.persist(player, "base");
 
@@ -87,7 +87,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void updateRefusesAHomeWithNoId() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home unsaved = HomeFixtures.home(player, "base");
         HomesDao dao = new HomesDao();
 
@@ -99,7 +99,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void updatePersistsNameMaterialAndLocation() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         home.setName("camp");
@@ -122,7 +122,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void nameExistsIsCaseInsensitive() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "Base");
 
         assertTrue(new HomesDao().nameExists(player.getUniqueId(), "bAsE", null));
@@ -130,7 +130,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void nameExistsIsFalseForAFreeName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         assertFalse(new HomesDao().nameExists(player.getUniqueId(), "camp", null));
@@ -138,7 +138,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void nameExistsIgnoresTheHomeBeingRenamed() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         // Renaming a home to the name it already has is not a conflict.
@@ -147,7 +147,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void nameExistsStillCatchesAnotherHomesName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home first = HomeFixtures.persist(player, "base");
         HomeFixtures.persist(player, "camp");
 
@@ -156,8 +156,8 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void nameExistsDoesNotLeakAcrossPlayers() {
-        PlayerMock owner = server.addPlayer();
-        PlayerMock stranger = server.addPlayer();
+        PlayerMock owner = addPlayer();
+        PlayerMock stranger = addPlayer();
         HomeFixtures.persist(owner, "base");
 
         assertFalse(new HomesDao().nameExists(stranger.getUniqueId(), "base", null));
@@ -165,7 +165,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void blacklistedDimensionBlocksTeleportForPlayers() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.persist(player, "base");
         HomeFixtures.blacklist(overworld.getName());
@@ -178,7 +178,7 @@ class HomesDaoTest extends ServerTestBase {
 
     @Test
     void blacklistedDimensionStillAllowsTheAdminView() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.persist(player, "base");
         HomeFixtures.blacklist(overworld.getName());

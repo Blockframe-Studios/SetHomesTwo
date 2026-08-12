@@ -50,7 +50,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void actionOfIgnoresAnEmptySlot() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
 
@@ -60,7 +60,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void actionOfReadsTheTagOffAButton() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
         gui.displayInventory(player);
@@ -71,7 +71,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void backReturnsToTheHomeList() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         HomesGui homesGui = new HomesGui(player);
@@ -86,7 +86,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void deleteShowsTheConfirmationLayoutAndCancelRestoresIt() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         GuiSession session = new GuiSession(new HomesGui(player));
 
@@ -104,7 +104,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void confirmDeleteRemovesTheHome() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         HomesGui homesGui = new HomesGui(player);
@@ -120,7 +120,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void moveWritesThePlayersCurrentLocation() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 10, 64, 10));
         Home home = HomeFixtures.persist(player, "base");
 
@@ -146,7 +146,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void moveIntoABlacklistedDimensionIsRefusedAndWritesNothing() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 10, 64, 10));
         Home home = HomeFixtures.persist(player, "base");
         HomeFixtures.blacklist(overworld.getName());
@@ -167,7 +167,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void setIconRefusesAnEmptyHand() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         GuiSession session = new GuiSession(new HomesGui(player));
 
@@ -181,7 +181,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void setIconTakesTheHeldItem() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         HomesGui homesGui = new HomesGui(player);
@@ -197,7 +197,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void applyRenameRejectsABlankName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
 
@@ -207,7 +207,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void applyRenameRejectsAnOverLongName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
 
@@ -217,7 +217,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void applyRenameRejectsAnotherHomesName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeFixtures.persist(player, "camp");
         HomeActionsGui gui = new HomeActionsGui(player, home);
@@ -228,7 +228,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void applyRenameAllowsTheHomesOwnName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
 
@@ -237,7 +237,7 @@ class HomeActionsGuiTest extends ServerTestBase {
 
     @Test
     void applyRenamePersistsTheNewName() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
         HomeActionsGui gui = new HomeActionsGui(player, home);
 

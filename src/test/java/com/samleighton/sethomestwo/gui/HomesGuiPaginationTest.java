@@ -97,7 +97,7 @@ class HomesGuiPaginationTest extends ServerTestBase {
 
     @Test
     void fortyFiveHomesFitOnASinglePage() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomesGui gui = new HomesGui(player);
         gui.setHomes(homes(player, 45));
         gui.displayInventory(player);
@@ -108,7 +108,7 @@ class HomesGuiPaginationTest extends ServerTestBase {
 
     @Test
     void fortySixHomesSplitFortyFiveThenOne() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomesGui gui = new HomesGui(player);
         GuiSession session = new GuiSession(gui);
         gui.setHomes(homes(player, 46));
@@ -130,7 +130,7 @@ class HomesGuiPaginationTest extends ServerTestBase {
 
     @Test
     void ninetyHomesFillTwoPagesWithNoneHidden() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomesGui gui = new HomesGui(player);
         GuiSession session = new GuiSession(gui);
         gui.setHomes(homes(player, 90));

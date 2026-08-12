@@ -65,7 +65,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void clickIsIgnoredWhenNoScreenIsActive() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
         InventoryClickEvent event = clickOn(player, Bukkit.createInventory(player, 9, "other"), 0);
@@ -76,7 +76,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void clickInAForeignInventoryIsNeitherCancelledNorRouted() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
         RecordingScreen screen = new RecordingScreen(Bukkit.createInventory(player, 9, "active"));
@@ -91,7 +91,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void clickInTheActiveScreenIsCancelledAndRouted() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
         Inventory inventory = Bukkit.createInventory(player, 9, "active");
@@ -107,7 +107,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void dragIsIgnoredWhenNoScreenIsActive() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
         InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, "other"));
@@ -118,7 +118,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void dragInAForeignInventoryIsNotCancelled() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
         session.setActiveScreen(new RecordingScreen(Bukkit.createInventory(player, 9, "active")));
 
@@ -130,7 +130,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void dragInTheActiveScreenIsCancelled() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Inventory inventory = Bukkit.createInventory(player, 9, "active");
         GuiSession session = new GuiSession(new HomesGui(player));
         session.setActiveScreen(new RecordingScreen(inventory));
@@ -143,7 +143,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void openHomeListMakesTheHomeListActive() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
         HomesGui homesGui = new HomesGui(player);
@@ -157,7 +157,7 @@ class GuiSessionTest extends ServerTestBase {
 
     @Test
     void openHomeActionsMakesTheSubmenuActive() {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayer();
         Home home = HomeFixtures.persist(player, "base");
 
         GuiSession session = new GuiSession(new HomesGui(player));
