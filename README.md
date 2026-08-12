@@ -72,7 +72,7 @@ As of 1.1.0, the player permissions below default to granted for all players; th
 - `sh2.get-player-homes` - Retrieve a list of a given player's homes.
 - `sh2.set-max-homes` - Set the max number of homes all players, or individual groups, can have.
 - `sh2.import-homes` - Import homes from another homes plugin (Set Homes v1 or EssentialsX).
-- `sh2.manage-homes` - Allow player to rename, move, re-icon, or delete their homes from the GUI. Defaults to granted for all players.
+- `sh2.manage-homes` - Allow player to rename, move, re-icon, or delete their homes from the GUI.
 
 ### Extra Features
 - The time it takes to teleport to a saved home can be configured
@@ -148,6 +148,7 @@ renamePromptTitle: "New home name"
 maxHomeNameLength: 32
 
 # Buttons in the management menu.
+# Button names support '&' colour codes (e.g. &c for red).
 renameButtonItem: "name_tag"
 renameButtonName: "Rename"
 moveHomeButtonItem: "ender_pearl"
@@ -155,13 +156,13 @@ moveHomeButtonName: "Move home here"
 setIconButtonItem: "item_frame"
 setIconButtonName: "Set icon to held item"
 deleteButtonItem: "barrier"
-deleteButtonName: "Delete"
+deleteButtonName: "&cDelete"
 backButtonItem: "arrow"
 backButtonName: "Back"
 confirmButtonItem: "lime_wool"
-confirmButtonName: "Confirm delete"
+confirmButtonName: "&aConfirm delete"
 cancelButtonItem: "red_wool"
-cancelButtonName: "Cancel"
+cancelButtonName: "&cCancel"
 
 # -- HOME MANAGEMENT MESSAGES --
 homeRenamed: "%s has been renamed to %s." # First %s is the old name, second is the new name.

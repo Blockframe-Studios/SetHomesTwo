@@ -98,7 +98,7 @@ public class HomeActionsGui implements GuiScreen {
         ItemStack item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
 
-        Objects.requireNonNull(meta).setDisplayName(ChatColor.RESET + ConfigUtil.getConfig().getString(displayNameKey, defaultLabel));
+        Objects.requireNonNull(meta).setDisplayName(ChatColor.translateAlternateColorCodes('&', ConfigUtil.getConfig().getString(displayNameKey, defaultLabel)));
         meta.getPersistentDataContainer().set(actionKey(), new PersistentString(), action);
 
         item.setItemMeta(meta);
@@ -114,8 +114,8 @@ public class HomeActionsGui implements GuiScreen {
         inv.clear();
 
         if (confirmingDelete) {
-            inv.setItem(SLOT_CONFIRM, button("confirmButtonItem", Material.LIME_WOOL, "confirmButtonName", ChatColor.GREEN + "Confirm delete", ACTION_CONFIRM_DELETE));
-            inv.setItem(SLOT_CANCEL, button("cancelButtonItem", Material.RED_WOOL, "cancelButtonName", ChatColor.RED + "Cancel", ACTION_CANCEL_DELETE));
+            inv.setItem(SLOT_CONFIRM, button("confirmButtonItem", Material.LIME_WOOL, "confirmButtonName", "&aConfirm delete", ACTION_CONFIRM_DELETE));
+            inv.setItem(SLOT_CANCEL, button("cancelButtonItem", Material.RED_WOOL, "cancelButtonName", "&cCancel", ACTION_CANCEL_DELETE));
             player.openInventory(inv);
             return;
         }
@@ -123,7 +123,7 @@ public class HomeActionsGui implements GuiScreen {
         inv.setItem(SLOT_RENAME, button("renameButtonItem", Material.NAME_TAG, "renameButtonName", "Rename", ACTION_RENAME));
         inv.setItem(SLOT_MOVE, button("moveHomeButtonItem", Material.ENDER_PEARL, "moveHomeButtonName", "Move home here", ACTION_MOVE));
         inv.setItem(SLOT_ICON, button("setIconButtonItem", Material.ITEM_FRAME, "setIconButtonName", "Set icon to held item", ACTION_ICON));
-        inv.setItem(SLOT_DELETE, button("deleteButtonItem", Material.BARRIER, "deleteButtonName", ChatColor.RED + "Delete", ACTION_DELETE));
+        inv.setItem(SLOT_DELETE, button("deleteButtonItem", Material.BARRIER, "deleteButtonName", "&cDelete", ACTION_DELETE));
         inv.setItem(SLOT_BACK, button("backButtonItem", Material.ARROW, "backButtonName", "Back", ACTION_BACK));
 
         player.openInventory(inv);
