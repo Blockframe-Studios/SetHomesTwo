@@ -17,7 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +54,36 @@ class HomesGuiPaginationTest extends ServerTestBase {
         return count;
     }
 
+    /**
+     * Collect the display names of every home-tagged item in the inventory, so
+     * a test can assert on which homes are present rather than merely how many -
+     * a count alone cannot distinguish "45 correct homes" from "44 correct homes
+     * plus one duplicate."
+     */
+    private Set<String> homeNames(Inventory inventory) {
+        NamespacedKey key = new NamespacedKey(SetHomesTwo.instance(), "home");
+        Set<String> names = new HashSet<>();
+
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null || item.getItemMeta() == null) continue;
+            if (!item.getItemMeta().getPersistentDataContainer().has(key, new PersistentHome())) continue;
+            names.add(item.getItemMeta().getDisplayName());
+        }
+
+        return names;
+    }
+
+    /**
+     * The expected set of fixture names "home-{start}" .. "home-{endExclusive - 1}".
+     */
+    private Set<String> expectedNames(int start, int endExclusive) {
+        Set<String> names = new HashSet<>();
+        for (int i = start; i < endExclusive; i++) {
+            names.add("home-" + i);
+        }
+        return names;
+    }
+
     private void clickSlot(HomesGui gui, GuiSession session, PlayerMock player, int slot) {
         InventoryClickEvent event = new InventoryClickEvent(
                 player.getOpenInventory(),
@@ -82,12 +114,17 @@ class HomesGuiPaginationTest extends ServerTestBase {
         gui.setHomes(homes(player, 46));
         gui.displayInventory(player);
 
-        assertEquals(45, homeItemCount(gui.getInventory()));
+        // Identity, not just count: page 0 must be exactly home-0..home-44, so a
+        // regression that dropped one of these and duplicated another would not
+        // slip past a count-only check.
+        assertEquals(expectedNames(0, 45), homeNames(gui.getInventory()));
         assertNotNull(gui.getInventory().getItem(NEXT_PAGE_SLOT));
 
         clickSlot(gui, session, player, NEXT_PAGE_SLOT);
 
-        assertEquals(1, homeItemCount(gui.getInventory()));
+        // The 46th home (home-45) must be the one that rolled over, not some
+        // other home standing in for it.
+        assertEquals(expectedNames(45, 46), homeNames(gui.getInventory()));
         assertNotNull(gui.getInventory().getItem(PREV_PAGE_SLOT));
     }
 
@@ -99,13 +136,24 @@ class HomesGuiPaginationTest extends ServerTestBase {
         gui.setHomes(homes(player, 90));
         gui.displayInventory(player);
 
-        assertEquals(45, homeItemCount(gui.getInventory()));
+        // Identity, not just count: a count of 45 is also what you would see if
+        // one home were dropped and another duplicated in its place. Pin exactly
+        // which homes are on this page.
+        Set<String> page0Names = homeNames(gui.getInventory());
+        assertEquals(expectedNames(0, 45), page0Names);
 
         clickSlot(gui, session, player, NEXT_PAGE_SLOT);
 
         // The previous-page button occupies slot 45, so a page that packed 46
         // homes would silently lose the one underneath it.
-        assertEquals(45, homeItemCount(gui.getInventory()));
+        Set<String> page1Names = homeNames(gui.getInventory());
+        assertEquals(expectedNames(45, 90), page1Names);
         assertEquals(Material.RED_STAINED_GLASS_PANE, gui.getInventory().getItem(PREV_PAGE_SLOT).getType());
+
+        // The union across both pages must be all 90 distinct homes: nothing
+        // missing, nothing duplicated across the page boundary.
+        Set<String> union = new HashSet<>(page0Names);
+        union.addAll(page1Names);
+        assertEquals(expectedNames(0, 90), union);
     }
 }
