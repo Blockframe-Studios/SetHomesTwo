@@ -185,6 +185,37 @@ public class HomeActionsGui implements GuiScreen {
             return;
         }
 
+        if (ACTION_ICON.equals(action)) {
+            Home fresh = reloadHome(player, session);
+            if (fresh == null) return;
+
+            ItemStack held = player.getInventory().getItemInMainHand();
+
+            if (held.getType().isAir()) {
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString("emptyHandForIcon", UserError.EMPTY_HAND_FOR_ICON.getValue()));
+                return;
+            }
+
+            // Same validity rule create-home applies to a supplied material.
+            if (!held.getType().isItem()) {
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString("invalidHomeItem", UserError.INVALID_MATERIAL.getValue()));
+                return;
+            }
+
+            fresh.setMaterial(held.getType().name());
+
+            HomesDao homesDao = new HomesDao();
+            if (!homesDao.update(fresh)) {
+                ChatUtils.pluginError(player);
+                return;
+            }
+
+            String changed = ConfigUtil.getConfig().getString("homeIconChanged", UserSuccess.HOME_ICON_CHANGED.getValue());
+            ChatUtils.sendSuccess(player, String.format(changed, fresh.getName(), held.getType().name()));
+            returnToRefreshedList(player, session);
+            return;
+        }
+
         // Remaining actions are implemented in later tasks.
     }
 
