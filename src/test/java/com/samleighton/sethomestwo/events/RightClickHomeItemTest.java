@@ -14,11 +14,15 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,6 +37,18 @@ class RightClickHomeItemTest extends ServerTestBase {
 
     private GuiSession sessionFor(TestPlayer player) {
         return plugin.getGuiSessionMap().get(player.getUniqueId());
+    }
+
+    /**
+     * Build a drag event on the player's currently open inventory, matching
+     * GuiSessionTest's dragOn helper.
+     */
+    private InventoryDragEvent dragOn(TestPlayer player) {
+        Map<Integer, ItemStack> newItems = new HashMap<>();
+        newItems.put(0, new ItemStack(Material.DIAMOND, 1));
+
+        return new InventoryDragEvent(
+                player.getOpenInventory(), null, new ItemStack(Material.DIAMOND, 1), false, newItems);
     }
 
     /**
@@ -169,6 +185,33 @@ class RightClickHomeItemTest extends ServerTestBase {
                 ClickType.LEFT,
                 InventoryAction.PICKUP_ALL
         );
+        server.getPluginManager().callEvent(event);
+
+        assertFalse(event.isCancelled());
+    }
+
+    @Test
+    void anInventoryDragIsRoutedToTheSessionAndCancelled() {
+        TestPlayer player = addTestPlayer("owner");
+        HomeFixtures.persist(player, "base");
+
+        interact(player, Action.RIGHT_CLICK_AIR, new HomeItem(player));
+        GuiSession session = sessionFor(player);
+        assertTrue(session.getActiveScreen() instanceof HomesGui);
+
+        InventoryDragEvent event = dragOn(player);
+        server.getPluginManager().callEvent(event);
+
+        assertTrue(event.isCancelled());
+    }
+
+    @Test
+    void anInventoryDragFromAPlayerWithNoSessionIsIgnored() {
+        TestPlayer player = addTestPlayer("owner");
+        plugin.getGuiSessionMap().clear();
+
+        player.openInventory(org.bukkit.Bukkit.createInventory(player, 9, "unrelated"));
+        InventoryDragEvent event = dragOn(player);
         server.getPluginManager().callEvent(event);
 
         assertFalse(event.isCancelled());
