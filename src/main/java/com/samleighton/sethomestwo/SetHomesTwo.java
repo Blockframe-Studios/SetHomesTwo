@@ -55,10 +55,13 @@ public class SetHomesTwo extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Create the directories for the plugin
         createDirectories();
 
+        // Create config
         initConfig();
 
+        // Plugin startup logic
         registerCommands();
         registerEventListeners();
 
@@ -67,6 +70,7 @@ public class SetHomesTwo extends JavaPlugin {
             guiSessionMap.put(player.getUniqueId(), new GuiSession(new HomesGui(player)));
         }
 
+        // Init database connections
         boolean success = connectionManager.createConnection("homes", "homes");
         if (success) {
             if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
@@ -92,17 +96,22 @@ public class SetHomesTwo extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Clear teleport attempts for all players
         for (Player player : Bukkit.getOnlinePlayers()) {
+            // Attempt to find a teleport attempt for the player
             TeleportAttemptsDao tad = new TeleportAttemptsDao();
             TeleportAttempt currAttempt = tad.get(player);
 
+            // Skip if no teleport attempt was found
             if (currAttempt == null) continue;
 
+            // If the player has a teleport attempt, clear it
             tad.delete(player.getUniqueId());
             player.resetTitle();
             player.removePotionEffect(PotionEffectType.NAUSEA);
         }
 
+        // Close database connections
         connectionManager.closeConnections();
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
@@ -197,6 +206,7 @@ public class SetHomesTwo extends JavaPlugin {
      * Creates the directories necessary for plugin functionality
      */
     public void createDirectories() {
+        // Create the plugin directory
         if (!getDataFolder().exists()) {
             boolean success = getDataFolder().mkdir();
             if (!success)
@@ -213,6 +223,8 @@ public class SetHomesTwo extends JavaPlugin {
 
     /**
      * Retrieves the plugin's connection manager.
+     *
+     * @return ConnectionManager
      */
     public ConnectionManager getConnectionManager() {
         return this.connectionManager;

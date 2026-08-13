@@ -54,6 +54,7 @@ public class HomesGui implements GuiScreen {
 
     // Ingest players homes into a hash map of home lists for pagination
     public void setHomes(List<Home> homes) {
+        // Clear any preexisting homes
         pagesMap.clear();
 
         // Determine slots available. The bottom row is reserved for the page
@@ -87,6 +88,7 @@ public class HomesGui implements GuiScreen {
     public void displayInventory(Player player) {
         inv.clear();
 
+        // Get homes for current page
         List<Home> homesForDisplay = pagesMap.get(this.currentPage);
 
         if (homesForDisplay == null || homesForDisplay.isEmpty()) {
@@ -100,21 +102,25 @@ public class HomesGui implements GuiScreen {
         // management submenu, which onClick gates on the same two conditions.
         boolean showManageHint = isOwnList && player.hasPermission("sh2.manage-homes");
 
+        // Draw home items in inventory
         for (Home home : homesForDisplay) {
             inv.addItem(createGuiItem(Material.matchMaterial(home.getMaterial()), home, showManageHint));
         }
 
+        // Open inventory without page items
         if (!(maxPages > 1)) {
             player.openInventory(inv);
             return;
         }
 
+        // Build previous page item
         Material backPageMaterial = Material.matchMaterial(ConfigUtil.getConfig().getString("previousPageItem", defaultBackPageMaterial));
         ItemStack prevPageItem = new ItemStack(Objects.requireNonNull(backPageMaterial), 1);
         ItemMeta prevPageItemMeta = prevPageItem.getItemMeta();
         Objects.requireNonNull(prevPageItemMeta).setDisplayName(ChatColor.DARK_RED + "Previous Page");
         prevPageItem.setItemMeta(prevPageItemMeta);
 
+        // Build next page item
         Material nextPageMaterial = Material.matchMaterial(ConfigUtil.getConfig().getString("nextPageItem", defaultNextPageMaterial));
         ItemStack nextPageItem = new ItemStack(Objects.requireNonNull(nextPageMaterial), 1);
         ItemMeta nextPageItemMeta = nextPageItem.getItemMeta();
@@ -137,12 +143,16 @@ public class HomesGui implements GuiScreen {
     /**
      * Create a new item to be placed in the inventory.
      *
-     * @param showManageHint Whether to append the "right click to edit" lore line
+     * @param mat,             The material of the item
+     * @param home,            The home designated for this item
+     * @param showManageHint, Whether to append the "right click to edit" lore line
+     * @return ItemStack
      */
     protected ItemStack createGuiItem(final Material mat, @NotNull Home home, boolean showManageHint) {
         ItemStack item = new ItemStack(mat, 1);
         ItemMeta meta = item.getItemMeta();
 
+        // Setup item lore and display name
         Objects.requireNonNull(meta).setDisplayName(home.getName());
 
         List<String> lore = new ArrayList<>();
@@ -157,9 +167,11 @@ public class HomesGui implements GuiScreen {
 
         if (!lore.isEmpty()) meta.setLore(lore);
 
+        // Persist the home to the item
         NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
         meta.getPersistentDataContainer().set(homeKey, new PersistentHome(), home);
 
+        // Apply item meta
         item.setItemMeta(meta);
 
         return item;
@@ -175,29 +187,37 @@ public class HomesGui implements GuiScreen {
         ItemStack clickedItem = event.getCurrentItem();
         NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
 
+        // Guard for user actually clicking item.
         if (clickedItem == null || clickedItem.getType().isAir() || clickedItem.getItemMeta() == null) return;
 
         Player player = (Player) event.getWhoClicked();
 
+        // Guard to check if item is actually home destination
         if (!clickedItem.getItemMeta().getPersistentDataContainer().has(homeKey, new PersistentHome())) {
             Material backPageMaterial = Material.matchMaterial(ConfigUtil.getConfig().getString("previousPageItem", defaultBackPageMaterial));
             Material nextPageMaterial = Material.matchMaterial(ConfigUtil.getConfig().getString("nextPageItem", defaultNextPageMaterial));
 
+            // Guard to check if item is pagination material
             if (!(clickedItem.getType().equals(backPageMaterial) || clickedItem.getType().equals(nextPageMaterial)))
                 return;
 
+            // Move to prev page
             if (clickedItem.getType().equals(backPageMaterial)) currentPage--;
 
+            // Move to next page
             if (clickedItem.getType().equals(nextPageMaterial)) currentPage++;
 
+            // Display new inv state to player
             this.displayInventory(player);
             return;
         }
 
         ItemMeta clickedItemMeta = clickedItem.getItemMeta();
 
+        // Attempt to get the home from the clicked item
         Home home = clickedItemMeta.getPersistentDataContainer().get(homeKey, new PersistentHome());
 
+        // The home object was not retrievable via item meta
         if (home == null) return;
 
         // Right-click opens management, left-click teleports. Management is only
@@ -221,6 +241,7 @@ public class HomesGui implements GuiScreen {
 
         player.closeInventory();
 
+        // Teleport player to home
         home.teleport(player);
     }
 }

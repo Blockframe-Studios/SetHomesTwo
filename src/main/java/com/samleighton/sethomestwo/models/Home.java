@@ -91,6 +91,7 @@ public class Home implements Serializable {
      * Bukkit world UUID
      *
      * @implNote Use UUID.fromString() to create UUID obj
+     * @return String
      */
     public String getWorld() {
         return world;
@@ -184,6 +185,7 @@ public class Home implements Serializable {
     }
 
     public void teleport(Player player) {
+        // Home is blacklisted guard
         if(!this.getCanTeleport()) {
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportToBlacklistedDimension", UserError.TELEPORT_IS_BLACKLISTED.getValue()));
             return;
@@ -192,11 +194,13 @@ public class Home implements Serializable {
         Dao<TeleportAttempt> teleportAttemptsDao = new TeleportAttemptsDao();
         boolean isAlreadyTeleporting = teleportAttemptsDao.get(player) != null;
 
+        // Guard to check if player is currently teleporting
         if (isAlreadyTeleporting) {
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportedWhileTeleporting", UserError.ALREADY_TELEPORTING.getValue()));
             return;
         }
 
+        // Track player teleport attempt
         teleportAttemptsDao.save(new TeleportAttempt(player, player.getLocation()));
 
         Plugin plugin = SetHomesTwo.instance();
@@ -209,9 +213,12 @@ public class Home implements Serializable {
             TeleportSafetyUtil.prefetchChunks(prefetchDestination, plugin);
         }
 
+        // Send player countdown title.
         AtomicInteger seconds = new AtomicInteger(ConfigUtil.getConfig().getInt("delay"));
 
+        // Schedule repeating task for every second
         plugin.getServer().getScheduler().runTaskTimer(plugin, bukkitTask -> {
+            // Guard to check if task has been cancelled.
             if(bukkitTask.isCancelled()) return;
 
             // Guard if the player has moved
