@@ -109,12 +109,7 @@ class CreateHomeTest extends ServerTestBase {
 
         HomeFixtures.persist(player, "base");
 
-        // LuckPerms is a soft dependency and is not installed here, so the
-        // guard should short-circuit - logging a distinctive warning - and
-        // the home should still be created. Asserting only the creation
-        // count would also pass if maxHomeEnabled/maxHomesType were ignored
-        // for an unrelated reason, so assert the warning too, proving the
-        // groups branch was actually reached.
+        // The count alone would pass even if the groups branch were never reached.
         List<LogRecord> logged = captureLog(() ->
                 server.execute("create-home", player, "camp").assertSucceeded());
 
@@ -125,12 +120,8 @@ class CreateHomeTest extends ServerTestBase {
     }
 
     /**
-     * Attach a temporary handler to the Bukkit logger for the duration of
-     * {@code action}, so a test can assert on what got logged rather than
-     * only on a method's return value. The handler is always removed
-     * afterward so it cannot leak into other tests. Mirrors the helper in
-     * HomesDaoTest; not shared because it is only two call sites in
-     * different classes.
+     * Captures what gets logged during {@code action}. The handler is always
+     * removed afterward so it cannot leak into other tests.
      */
     private List<LogRecord> captureLog(Runnable action) {
         List<LogRecord> captured = new ArrayList<>();

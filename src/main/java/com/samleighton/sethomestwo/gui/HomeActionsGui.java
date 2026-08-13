@@ -260,13 +260,7 @@ public class HomeActionsGui implements GuiScreen {
     }
 
     /**
-     * Validate and apply a new name, messaging the player in every branch.
-     *
-     * @param player    The acting player
-     * @param home      The home being renamed, freshly read
-     * @param rawName   The name as typed
-     * @param maxLength The configured maximum length
-     * @return Why the attempt ended
+     * Validates and applies a new name, messaging the player on every outcome.
      */
     RenameOutcome applyRename(Player player, Home home, String rawName, int maxLength) {
         String candidate = HomeNameValidator.normalise(rawName);

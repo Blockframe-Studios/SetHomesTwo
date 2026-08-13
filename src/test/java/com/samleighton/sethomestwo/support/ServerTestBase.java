@@ -50,11 +50,8 @@ public abstract class ServerTestBase {
     }
 
     /**
-     * Register a player that tolerates MockBukkit's unimplemented calls. Use this
-     * instead of server.addPlayer() for any test that reaches Home.teleport.
-     *
-     * @param name The player name
-     * @return The registered player
+     * Tolerates MockBukkit's unimplemented calls. Use instead of server.addPlayer()
+     * for any test that reaches Home.teleport.
      */
     protected TestPlayer addTestPlayer(String name) {
         TestPlayer player = new TestPlayer(server, name);
@@ -63,23 +60,15 @@ public abstract class ServerTestBase {
     }
 
     /**
-     * Register a {@link TestPlayer} with a generated name, mirroring
-     * {@code ServerMock.addPlayer()}. Prefer this over {@code server.addPlayer()}
-     * everywhere: {@link TestPlayer} only patches a MockBukkit gap nothing in the
-     * plugin branches on, so there is no downside to using it by default, and it
-     * removes a per-test decision about which player type a given test needs.
-     *
-     * @return The registered player
+     * Registers a {@link TestPlayer} with a generated name. Prefer this over
+     * server.addPlayer() everywhere - it only patches MockBukkit gaps, no downside.
      */
     protected TestPlayer addPlayer() {
         return addTestPlayer("TestPlayer-" + UUID.randomUUID());
     }
 
     /**
-     * Register a {@link TestPlayer} with the given name. See {@link #addPlayer()}.
-     *
-     * @param name The player name
-     * @return The registered player
+     * Registers a {@link TestPlayer} with the given name. See {@link #addPlayer()}.
      */
     protected TestPlayer addPlayer(String name) {
         return addTestPlayer(name);

@@ -128,11 +128,8 @@ class HomeActionsGuiTest extends ServerTestBase {
         homesGui.setHomes(new HomesDao().getAll(player.getUniqueId()));
         GuiSession session = new GuiSession(homesGui);
 
-        // Teleport before opening the submenu: MockBukkit's PlayerMock.teleport()
-        // closes any open non-CRAFTING inventory view (InventoryCloseEvent.Reason.TELEPORT),
-        // which would leave a SimpleInventoryViewMock behind whose convertSlot() is
-        // unimplemented. Opening the GUI after the teleport keeps the click testable
-        // while still exercising the player's post-move location.
+        // Teleport before opening the submenu: PlayerMock.teleport() closes any open
+        // inventory view, leaving one whose convertSlot() MockBukkit doesn't implement.
         player.teleport(new Location(overworld, 200, 70, -150));
         HomeActionsGui gui = openSubmenu(player, home, session);
         click(gui, session, player, SLOT_MOVE);

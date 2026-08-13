@@ -52,9 +52,8 @@ class RightClickHomeItemTest extends ServerTestBase {
     }
 
     /**
-     * Build an item that carries both persistent home-item tags but is not
-     * the configured openHomeItem material, so that only the material check
-     * in the basic item guard stands between it and the rest of the handler.
+     * Carries both home-item tags but not the configured material, isolating
+     * the material check from the rest of the guard.
      */
     private ItemStack taggedItem(Material material, TestPlayer owner) {
         ItemStack item = new ItemStack(material, 1);
@@ -147,13 +146,8 @@ class RightClickHomeItemTest extends ServerTestBase {
         TestPlayer player = addTestPlayer("owner");
         HomeFixtures.persist(player, "base");
 
-        // The left click below on slot 0 falls through HomesGui.onClick into
-        // Home.teleport, which - same as HomesGuiClickTest's admin-view test -
-        // would otherwise prefetch chunks via a WorldMock API MockBukkit does
-        // not implement. That teleport machinery is not what this test is
-        // about; it only cares that the click reached the session and got
-        // cancelled, so teleport safety is turned off to let it run to
-        // completion instead of aborting as skipped.
+        // Turned off because the click falls through to Home.teleport, which
+        // prefetches chunks via a WorldMock API MockBukkit doesn't implement.
         plugin.getConfig().set("teleportSafety", false);
 
         interact(player, Action.RIGHT_CLICK_AIR, new HomeItem(player));

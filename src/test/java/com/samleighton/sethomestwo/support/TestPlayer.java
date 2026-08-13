@@ -4,12 +4,9 @@ import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 /**
- * A player that tolerates the corners of the Bukkit API MockBukkit declares
- * but does not implement.
- * <p>
- * Keep this minimal. Only override calls the plugin's logic never consults,
- * and give each one a comment naming the gap it patches. Overriding something
- * the code actually branches on would hide real failures behind a mock.
+ * Patches Bukkit API calls MockBukkit doesn't implement. Keep minimal: only
+ * override calls the plugin never branches on, or a real failure could hide
+ * behind a mock.
  */
 public class TestPlayer extends PlayerMock {
 

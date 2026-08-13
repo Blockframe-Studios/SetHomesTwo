@@ -15,9 +15,8 @@ public class ServerUtil {
     /**
      * Retrieve a list of the server's valid dimensions.
      * <p>
-     * Read live rather than cached in a static initialiser: the cached form
-     * bound itself to whichever server loaded the class first, and threw
-     * outright on a server with fewer than three worlds.
+     * Read live, not cached - the cached form bound to whichever server loaded
+     * the class first and threw on fewer than three worlds.
      *
      * @return List
      */
@@ -31,13 +30,9 @@ public class ServerUtil {
     /**
      * Retrieve dimensions mapping.
      * <p>
-     * Worlds are matched by list position, not by their actual environment,
-     * so this mapping is only correct when all three dimensions are present
-     * and returned in the usual order. The size checks below stop a server
-     * with fewer than three worlds from crashing, but they do not fix the
-     * mapping: a server with the Nether disabled but the End enabled will
-     * map the End's world onto NETHER and produce no THE_END entry at all.
-     * This is a pre-existing limitation worth fixing separately.
+     * Worlds are matched by list position, so this is only correct when all three
+     * dimensions exist in the usual order. The size checks prevent a crash on a
+     * smaller server, not a wrong mapping. Pre-existing limitation.
      *
      * @return Map<String, String>
      */

@@ -19,11 +19,8 @@ class GetPlayerHomesTest extends ServerTestBase {
 
         server.execute("get-player-homes", admin, "someone").assertSucceeded();
 
-        // plugin.yml declares the command-level permission "sh2.get-player-homes"
-        // (default: op), so Bukkit's command dispatcher rejects a non-op sender
-        // before GetPlayerHomes#onCommand ever runs, sending its own generic
-        // denial rather than ChatUtils.invalidPermissions(). "do not have
-        // permission" is the substring common to both, so it holds either way.
+        // Bukkit's dispatcher rejects non-op senders before onCommand runs, so this
+        // is its denial message, not the plugin's. The substring matches both.
         assertTrue(admin.nextMessage().contains("do not have permission"));
     }
 

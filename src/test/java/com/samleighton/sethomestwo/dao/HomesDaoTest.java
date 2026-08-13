@@ -189,10 +189,8 @@ class HomesDaoTest extends ServerTestBase {
     }
 
     /**
-     * Attach a temporary handler to the Bukkit logger for the duration of
-     * {@code action}, so a test can assert on what got logged rather than only
-     * on a method's return value. The handler is always removed afterward so
-     * it cannot leak into other tests.
+     * Captures what gets logged during {@code action}. The handler is always
+     * removed afterward so it cannot leak into other tests.
      */
     private List<LogRecord> captureLog(Runnable action) {
         List<LogRecord> captured = new ArrayList<>();

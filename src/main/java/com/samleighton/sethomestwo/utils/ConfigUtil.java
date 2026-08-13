@@ -7,11 +7,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ConfigUtil {
 
     /**
-     * Read from the live plugin on every call. Caching this in a static
-     * initialiser bound it to the first plugin instance loaded in the JVM,
-     * which left the plugin reading stale values after a /reload.
-     *
-     * @return The plugin's current configuration
+     * Read live, not cached - a static initialiser bound the value to the
+     * first plugin instance loaded, leaving it stale after a /reload.
      */
     public static FileConfiguration getConfig() {
         return SetHomesTwo.instance().getConfig();

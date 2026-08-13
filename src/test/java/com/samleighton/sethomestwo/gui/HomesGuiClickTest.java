@@ -84,18 +84,12 @@ class HomesGuiClickTest extends ServerTestBase {
     void rightClickOnTheAdminListDoesNotOpenTheSubmenu() {
         PlayerMock admin = addTestPlayer("admin");
 
-        // The clicked home must belong to the clicker, or the ownership-scoped
-        // getById lookup inside onClick would return null and take the "home no
-        // longer exists" branch instead - which also never opens the submenu,
-        // rescuing this test for the wrong reason. Give admin a home of their
-        // own so that lookup succeeds, and isOwnList is the only thing left
-        // standing between the click and the management submenu.
+        // Admin needs their own home, or the ownership-scoped lookup fails and
+        // takes the "gone" branch instead, passing this test for the wrong reason.
         HomeFixtures.persist(admin, "base");
 
-        // Falling through to teleport behaviour actually invokes Home.teleport(),
-        // which with teleport safety on would prefetch chunks via a WorldMock API
-        // MockBukkit does not implement. That machinery is not what this test is
-        // about, so it is turned off to let the routing decision run to completion.
+        // Turned off because falling through invokes Home.teleport, which would
+        // otherwise prefetch chunks via a WorldMock API MockBukkit doesn't implement.
         plugin.getConfig().set("teleportSafety", false);
 
         // The admin view is the two-argument constructor, which sets isOwnList

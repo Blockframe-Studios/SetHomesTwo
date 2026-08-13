@@ -39,8 +39,7 @@ class HomesGuiPaginationTest extends ServerTestBase {
     }
 
     /**
-     * Count the items carrying the persistent home tag, so page buttons are not
-     * mistaken for homes.
+     * Counts home-tagged items only, so page buttons aren't counted as homes.
      */
     private int homeItemCount(Inventory inventory) {
         NamespacedKey key = new NamespacedKey(SetHomesTwo.instance(), "home");
@@ -55,10 +54,8 @@ class HomesGuiPaginationTest extends ServerTestBase {
     }
 
     /**
-     * Collect the display names of every home-tagged item in the inventory, so
-     * a test can assert on which homes are present rather than merely how many -
-     * a count alone cannot distinguish "45 correct homes" from "44 correct homes
-     * plus one duplicate."
+     * Collects display names of home-tagged items, so tests can assert which
+     * homes are present, not just how many - a count can't catch a drop-and-duplicate.
      */
     private Set<String> homeNames(Inventory inventory) {
         NamespacedKey key = new NamespacedKey(SetHomesTwo.instance(), "home");

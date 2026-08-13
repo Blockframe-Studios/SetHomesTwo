@@ -43,9 +43,8 @@ public final class HomeFixtures {
     }
 
     /**
-     * Save a home and return it with its generated id populated. The row just
-     * inserted is the one with the highest id, since id is an autoincrementing
-     * primary key.
+     * Saves a home and returns it with its generated id, found via the highest
+     * id for this player - relies on id being autoincrementing.
      */
     public static Home persist(Home home) {
         HomesDao dao = new HomesDao();
