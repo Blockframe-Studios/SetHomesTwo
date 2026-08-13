@@ -25,7 +25,7 @@ public class ConnectionManager {
     }
 
     public boolean createConnection(String key, String dbName) {
-        SetHomesTwo plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        SetHomesTwo plugin = SetHomesTwo.instance();
         String dbURL = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/database/" + dbName + ".db";
 
         try {

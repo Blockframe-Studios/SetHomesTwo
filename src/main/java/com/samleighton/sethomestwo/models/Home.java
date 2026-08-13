@@ -203,7 +203,7 @@ public class Home implements Serializable {
         // Track player teleport attempt
         teleportAttemptsDao.save(new TeleportAttempt(player, player.getLocation()));
 
-        Plugin plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        Plugin plugin = SetHomesTwo.instance();
         boolean teleportSafetyEnabled = ConfigUtil.getConfig().getBoolean("teleportSafety", true);
         Location prefetchDestination = this.asLocation();
 

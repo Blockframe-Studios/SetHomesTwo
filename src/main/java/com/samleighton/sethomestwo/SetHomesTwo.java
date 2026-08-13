@@ -36,6 +36,14 @@ public class SetHomesTwo extends JavaPlugin {
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
 
+    /**
+     * Looked up by name because JavaPlugin.getPlugin(SetHomesTwo.class) needs the
+     * class loaded by Bukkit's PluginClassLoader, which never holds under MockBukkit.
+     */
+    public static SetHomesTwo instance() {
+        return (SetHomesTwo) Bukkit.getPluginManager().getPlugin("SetHomesTwo");
+    }
+
     @Override
     public void onEnable() {
         // Create the directories for the plugin

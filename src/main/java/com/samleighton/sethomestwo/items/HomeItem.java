@@ -37,10 +37,10 @@ public class HomeItem extends ItemStack implements Serializable {
         Objects.requireNonNull(initItemMeta).setLore(baseLore);
 
         // Setup persistent data
-        NamespacedKey playerKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "belongs-to");
+        NamespacedKey playerKey = new NamespacedKey(SetHomesTwo.instance(), "belongs-to");
         initItemMeta.getPersistentDataContainer().set(playerKey, new PersistentString(), getPlayerUUID().toString());
 
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "list-id");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "list-id");
         initItemMeta.getPersistentDataContainer().set(homeKey, new PersistentString(), getHomeUUID().toString());
 
         // Apply item meta

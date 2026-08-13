@@ -57,11 +57,12 @@ public class HomesGui implements GuiScreen {
         // Clear any preexisting homes
         pagesMap.clear();
 
-        // Determine slots available
+        // Determine slots available. The bottom row is reserved for the page
+        // buttons, so a page holds at most one full inventory minus that row.
         int inventorySlotsAvailable = inventorySize - inventoryWidth;
 
         this.currentPage = 0;
-        this.maxPages = (homes.size() / inventorySlotsAvailable) + 1;
+        this.maxPages = Math.max(1, (int) Math.ceil((double) homes.size() / inventorySlotsAvailable));
 
         for (int i = 0; i < this.maxPages; i++) {
             pagesMap.put(i, new ArrayList<>());
@@ -70,18 +71,13 @@ public class HomesGui implements GuiScreen {
         int pageToBuild = 0;
         int slotIndex = 0;
         for (Home home : homes) {
-            // Add home to current page being built
-            pagesMap.get(pageToBuild).add(home);
-
-            // Increment page and reset slot index if
-            // index has reached last slot available.
+            // Roll over before placing, so a page never exceeds the slots it owns.
             if (slotIndex == inventorySlotsAvailable) {
                 slotIndex = 0;
                 pageToBuild++;
-                continue;
             }
 
-            // Increment slot index
+            pagesMap.get(pageToBuild).add(home);
             slotIndex++;
         }
     }
@@ -172,7 +168,7 @@ public class HomesGui implements GuiScreen {
         if (!lore.isEmpty()) meta.setLore(lore);
 
         // Persist the home to the item
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
         meta.getPersistentDataContainer().set(homeKey, new PersistentHome(), home);
 
         // Apply item meta
@@ -189,7 +185,7 @@ public class HomesGui implements GuiScreen {
     @Override
     public void onClick(InventoryClickEvent event, GuiSession session) {
         ItemStack clickedItem = event.getCurrentItem();
-        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), "home");
+        NamespacedKey homeKey = new NamespacedKey(SetHomesTwo.instance(), "home");
 
         // Guard for user actually clicking item.
         if (clickedItem == null || clickedItem.getType().isAir() || clickedItem.getItemMeta() == null) return;

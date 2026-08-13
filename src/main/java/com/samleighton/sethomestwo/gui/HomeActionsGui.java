@@ -51,6 +51,18 @@ public class HomeActionsGui implements GuiScreen {
     private static final int SLOT_CONFIRM = 2;
     private static final int SLOT_CANCEL = 6;
 
+    /**
+     * Why a rename attempt ended the way it did. Extracted so the decision tree
+     * can be tested without opening an anvil, which needs NMS.
+     */
+    enum RenameOutcome {
+        EMPTY,
+        TOO_LONG,
+        DUPLICATE,
+        UPDATE_FAILED,
+        RENAMED
+    }
+
     private final Inventory inv;
     private final int homeId;
     private boolean confirmingDelete = false;
@@ -68,7 +80,7 @@ public class HomeActionsGui implements GuiScreen {
     }
 
     private static NamespacedKey actionKey() {
-        return new NamespacedKey(SetHomesTwo.getPlugin(SetHomesTwo.class), ACTION_KEY_NAME);
+        return new NamespacedKey(SetHomesTwo.instance(), ACTION_KEY_NAME);
     }
 
     /**
@@ -248,6 +260,45 @@ public class HomeActionsGui implements GuiScreen {
     }
 
     /**
+     * Validates and applies a new name, messaging the player on every outcome.
+     */
+    RenameOutcome applyRename(Player player, Home home, String rawName, int maxLength) {
+        String candidate = HomeNameValidator.normalise(rawName);
+        HomeNameValidator.Result result = HomeNameValidator.validate(candidate, maxLength);
+
+        if (result == HomeNameValidator.Result.EMPTY) {
+            ChatUtils.sendError(player, ConfigUtil.getConfig().getString("invalidHomeName", UserError.INVALID_HOME_NAME.getValue()));
+            return RenameOutcome.EMPTY;
+        }
+
+        if (result == HomeNameValidator.Result.TOO_LONG) {
+            String tooLong = ConfigUtil.getConfig().getString("homeNameTooLong", UserError.HOME_NAME_TOO_LONG.getValue());
+            ChatUtils.sendError(player, String.format(tooLong, maxLength));
+            return RenameOutcome.TOO_LONG;
+        }
+
+        HomesDao homesDao = new HomesDao();
+
+        if (homesDao.nameExists(player.getUniqueId(), candidate, home.getId())) {
+            String duplicate = ConfigUtil.getConfig().getString("duplicateHomeName", UserError.DUPLICATE_HOME_NAME.getValue());
+            ChatUtils.sendError(player, String.format(duplicate, candidate));
+            return RenameOutcome.DUPLICATE;
+        }
+
+        String previousName = home.getName();
+        home.setName(candidate);
+
+        if (!homesDao.update(home)) {
+            ChatUtils.pluginError(player);
+            return RenameOutcome.UPDATE_FAILED;
+        }
+
+        String renamed = ConfigUtil.getConfig().getString("homeRenamed", UserSuccess.HOME_RENAMED.getValue());
+        ChatUtils.sendSuccess(player, String.format(renamed, previousName, candidate));
+        return RenameOutcome.RENAMED;
+    }
+
+    /**
      * Open an anvil prompt for the new home name. Validation failures re-prompt
      * with the reason rather than closing.
      *
@@ -256,7 +307,7 @@ public class HomeActionsGui implements GuiScreen {
      * @param home    The home being renamed, freshly read
      */
     private void openRenamePrompt(Player player, GuiSession session, Home home) {
-        SetHomesTwo plugin = SetHomesTwo.getPlugin(SetHomesTwo.class);
+        SetHomesTwo plugin = SetHomesTwo.instance();
         int maxLength = ConfigUtil.getConfig().getInt("maxHomeNameLength", 32);
 
         new AnvilGUI.Builder()
@@ -266,43 +317,24 @@ public class HomeActionsGui implements GuiScreen {
                 .onClick((slot, stateSnapshot) -> {
                     if (slot != AnvilGUI.Slot.OUTPUT) return Collections.emptyList();
 
-                    String candidate = HomeNameValidator.normalise(stateSnapshot.getText());
-                    HomeNameValidator.Result result = HomeNameValidator.validate(candidate, maxLength);
+                    // Captured before the call, because a successful rename
+                    // mutates the home's name in place.
+                    String currentName = home.getName();
+                    RenameOutcome outcome = applyRename(player, home, stateSnapshot.getText(), maxLength);
 
-                    if (result == HomeNameValidator.Result.EMPTY) {
-                        ChatUtils.sendError(player, ConfigUtil.getConfig().getString("invalidHomeName", UserError.INVALID_HOME_NAME.getValue()));
-                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
+                    switch (outcome) {
+                        case EMPTY:
+                        case TOO_LONG:
+                        case DUPLICATE:
+                            return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(currentName));
+                        case UPDATE_FAILED:
+                            return Collections.singletonList(AnvilGUI.ResponseAction.close());
+                        default:
+                            return Arrays.asList(
+                                    AnvilGUI.ResponseAction.close(),
+                                    AnvilGUI.ResponseAction.run(() -> Bukkit.getScheduler().runTask(plugin, () -> returnToRefreshedList(player, session)))
+                            );
                     }
-
-                    if (result == HomeNameValidator.Result.TOO_LONG) {
-                        String tooLong = ConfigUtil.getConfig().getString("homeNameTooLong", UserError.HOME_NAME_TOO_LONG.getValue());
-                        ChatUtils.sendError(player, String.format(tooLong, maxLength));
-                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
-                    }
-
-                    HomesDao homesDao = new HomesDao();
-
-                    if (homesDao.nameExists(player.getUniqueId(), candidate, home.getId())) {
-                        String duplicate = ConfigUtil.getConfig().getString("duplicateHomeName", UserError.DUPLICATE_HOME_NAME.getValue());
-                        ChatUtils.sendError(player, String.format(duplicate, candidate));
-                        return Collections.singletonList(AnvilGUI.ResponseAction.replaceInputText(home.getName()));
-                    }
-
-                    String previousName = home.getName();
-                    home.setName(candidate);
-
-                    if (!homesDao.update(home)) {
-                        ChatUtils.pluginError(player);
-                        return Collections.singletonList(AnvilGUI.ResponseAction.close());
-                    }
-
-                    String renamed = ConfigUtil.getConfig().getString("homeRenamed", UserSuccess.HOME_RENAMED.getValue());
-                    ChatUtils.sendSuccess(player, String.format(renamed, previousName, candidate));
-
-                    return Arrays.asList(
-                            AnvilGUI.ResponseAction.close(),
-                            AnvilGUI.ResponseAction.run(() -> Bukkit.getScheduler().runTask(plugin, () -> returnToRefreshedList(player, session)))
-                    );
                 })
                 .open(player);
     }
