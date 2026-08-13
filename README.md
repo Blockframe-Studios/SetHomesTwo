@@ -28,6 +28,20 @@ Good to know:
 - A v1 "default" home (set with plain `/sethome`) is imported under the name `default`.
 - After migrating, remove the old plugin's jar if you have not already - Set Homes Two provides `/sethome`, `/home`, and `/delhome`, and two plugins registering the same commands will conflict.
 
+### Update notifications
+On startup the plugin asks GitHub once whether a newer release exists. If there is one, it is written to the
+server console and shown to players holding `sh2.update-notify` (operators by default) when they join. Players
+who cannot replace the jar are never shown it.
+
+The request runs off the main thread a few seconds after startup, so it never delays boot or stalls the server,
+and any failure - no outbound network, a rate limit, GitHub being down - is ignored silently.
+
+Set `checkForUpdates: false` in `config.yml` to stop the plugin making any outbound request. Servers upgrading
+from an earlier version do not need to add the key: it defaults to enabled when absent.
+
+Note that a server only learns about releases newer than the one it is running - the check ships inside the jar,
+so it cannot reach installs that predate it.
+
 ### Soft Dependencies
 - [LuckPerms](https://luckperms.net/download)
 

@@ -42,6 +42,11 @@ public abstract class ServerTestBase {
         end.setEnvironment(World.Environment.THE_END);
 
         plugin = MockBukkit.load(SetHomesTwo.class);
+
+        // The update check is scheduled during onEnable. MockBukkit does not run
+        // a delayed task until something drains the scheduler, and turning the
+        // setting off here happens first, so no test can reach the GitHub API.
+        plugin.getConfig().set("checkForUpdates", false);
     }
 
     @AfterEach
