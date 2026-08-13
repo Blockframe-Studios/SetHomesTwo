@@ -16,7 +16,7 @@ public class PlayerLeave implements Listener {
     }
 
     private void handlePlayerDisconnect(Player player){
-        plugin.getHomesGuiMap().remove(player.getUniqueId());
+        plugin.getGuiSessionMap().remove(player.getUniqueId());
     }
 
     @EventHandler

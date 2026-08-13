@@ -1,6 +1,5 @@
 package com.samleighton.sethomestwo.commands;
 
-import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
@@ -60,14 +59,10 @@ public class CreateHome implements CommandExecutor {
             return true;
         }
 
-        // Grab list of blacklisted dimensions, dimension player is in, and dimensions map
-        Dao<String> blacklistDao = new BlacklistDao();
-        List<String> blacklistedDimensions = blacklistDao.getAll();
-        Map<String, String> dimensionsMap = ServerUtil.getDimensionsMap();
         String playerDimension = player.getWorld().getEnvironment().toString();
 
         // Check if player is in a blacklisted dimension before creating home
-        if (blacklistedDimensions.contains(dimensionsMap.get(playerDimension))) {
+        if (ServerUtil.isDimensionBlacklisted(playerDimension)) {
             String errorMessage = ConfigUtil.getConfig().getString("dimensionBlacklisted", UserError.DIMENSION_IS_BLACKLISTED.getValue());
             ChatUtils.sendError(player, errorMessage);
             return true;
@@ -111,6 +106,14 @@ public class CreateHome implements CommandExecutor {
             }
 
             description = stringBuilder.toString();
+        }
+
+        // Duplicate name guard
+        HomesDao homesLookup = new HomesDao();
+        if (homesLookup.nameExists(player.getUniqueId(), homeName, null)) {
+            String duplicateMessage = ConfigUtil.getConfig().getString("duplicateHomeName", UserError.DUPLICATE_HOME_NAME.getValue());
+            ChatUtils.sendError(player, String.format(duplicateMessage, homeName));
+            return true;
         }
 
         // Create the home

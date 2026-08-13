@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
@@ -49,7 +50,11 @@ public class OpenHomesGui implements CommandExecutor {
             return true;
         }
 
-        HomesGui.openFor(plugin, player, playersHomes);
+        // The join listener normally seeds this map; compute a fresh session if absent
+        // (e.g. plugin reloaded while the player was online).
+        GuiSession session = plugin.getGuiSessionMap().computeIfAbsent(player.getUniqueId(), uuid -> new GuiSession(new HomesGui(player)));
+        session.getHomesGui().setHomes(playersHomes);
+        session.openHomeList(player);
         return true;
     }
 }

@@ -45,6 +45,17 @@ If the plugin is set up to allow different groupings or tiers for players, you w
 If the plugin is set up to only have one group or tier, you only need to provide the number of max homes.
 - `/import-homes [sethomes|essentialsx] [confirm]` - Imports homes from Set Homes v1 or EssentialsX. Dry-run unless confirm is given.
 
+### Managing homes from the GUI
+
+Open your homes with `/homes` or by right-clicking the homes item, then:
+
+- **Left-click** a home to teleport to it.
+- **Right-click** a home to open its management menu, where you can rename it, move it to where you are standing, set its icon to the item you are holding, or delete it.
+
+Deleting always asks for confirmation first. Renaming opens an anvil where you type the new name. Home names must be unique per player and are compared without regard to case, so you cannot have both `base` and `Base`.
+
+Management is controlled by the `sh2.manage-homes` permission, which defaults to true.
+
 ### Permissions
 
 As of 1.1.0, the player permissions below default to granted for all players; the admin permissions default to OP only.
@@ -61,6 +72,7 @@ As of 1.1.0, the player permissions below default to granted for all players; th
 - `sh2.get-player-homes` - Retrieve a list of a given player's homes.
 - `sh2.set-max-homes` - Set the max number of homes all players, or individual groups, can have.
 - `sh2.import-homes` - Import homes from another homes plugin (Set Homes v1 or EssentialsX).
+- `sh2.manage-homes` - Allow player to rename, move, re-icon, or delete their homes from the GUI.
 
 ### Extra Features
 - The time it takes to teleport to a saved home can be configured
@@ -123,6 +135,53 @@ movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the n
 
 # -- DEBUGGING --
 debugLevel: "error" # Choices are: error | info
+
+# -- HOME MANAGEMENT GUI --
+# Title of the per-home management menu.
+# %s is replaced with the home name.
+manageHomeTitle: "Manage: %s"
+
+# Title of the anvil prompt shown when renaming a home.
+renamePromptTitle: "New home name"
+
+# Hint shown on each home in the homes list, below the description.
+# Only shown to players who can actually manage the home (sh2.manage-homes)
+# and never on another player's homes. Supports '&' colour codes.
+# Set to "" to hide it.
+manageHomeHint: "&7Right click to edit home"
+
+# Maximum number of characters allowed in a home name.
+maxHomeNameLength: 32
+
+# Buttons in the management menu.
+# Button names support '&' colour codes (e.g. &c for red).
+renameButtonItem: "name_tag"
+renameButtonName: "Rename"
+moveHomeButtonItem: "ender_pearl"
+moveHomeButtonName: "Move home here"
+setIconButtonItem: "item_frame"
+setIconButtonName: "Set icon to held item"
+deleteButtonItem: "barrier"
+deleteButtonName: "&cDelete"
+backButtonItem: "arrow"
+backButtonName: "Back"
+confirmButtonItem: "lime_wool"
+confirmButtonName: "&aConfirm delete"
+cancelButtonItem: "red_wool"
+cancelButtonName: "&cCancel"
+
+# -- HOME MANAGEMENT MESSAGES --
+homeRenamed: "%s has been renamed to %s." # First %s is the old name, second is the new name.
+homeMoved: "%s has been moved to your current location." # %s is the home name.
+homeIconChanged: "The icon for %s is now %s." # First %s is the home name, second is the material.
+
+# -- HOME MANAGEMENT ERROR MESSAGES --
+duplicateHomeName: "You already have a home called '%s'." # %s is the duplicate name.
+invalidHomeName: "That home name is not valid. Names must not be blank."
+homeNameTooLong: "That home name is too long. The maximum is %d characters." # %d is the configured maximum.
+homeNoLongerExists: "That home no longer exists."
+emptyHandForIcon: "Hold the item you want to use as the icon, then click again."
+cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension because it has been blacklisted."
 ~~~
 
 ### Donations
@@ -141,13 +200,31 @@ Please feel free to donate via the button below, any amount is greatly appreciat
   **A:** You will need to install the permission plugin, [LuckPerms](https://luckperms.net/download) then configure the config.yml to allow for multiple groups (see above for example config).
 
 ### Changelog
-- Fixed issue where players missing sh2.teleport could not break blocks.
-- Fixed issue where a player who has an open homes gui has their inventory overwritten by the next person to open a homes gui.
-- Added go-home and list-homes commands
+
+#### 1.2.0 (2026-08-12)
+
+Behaviour changes to be aware of before updating:
+- Home names are now unique per player without regard to case, so you can no longer create both `base` and `Base`. Homes you already have are untouched, including any existing duplicates.
+- `/delete-home` now deletes a single home. Previously it deleted every home whose name matched, so a player with duplicate names lost all of them at once.
+- The plugin now requires Java 21 to run (previously Java 9). Minecraft 1.21 servers already require Java 21, so most setups need no change.
+
+- Added a home management menu: right-click a home in the homes GUI to rename it, move it to where you are standing, set its icon to the item you are holding, or delete it. Deleting asks for confirmation first, and renaming opens an anvil prompt for the new name.
+- Added a "Right click to edit home" hint to homes in the list, shown only to players who are able to manage them.
+- Added the `sh2.manage-homes` permission, which controls the management menu and defaults to granted.
+- Added config keys for the management menu: `manageHomeTitle`, `renamePromptTitle`, `manageHomeHint`, `maxHomeNameLength`, the button item and name pairs, and the new success and error messages. See the example config above.
+- Fixed home updates and deletes not being scoped to the owning player.
+
+#### 1.1.0 (2026-08-11)
 - Added `/sethome`, `/delhome`, and `/home` as classic aliases for `/create-home`, `/delete-home`, and `/go-home`.
 - Player permissions (create-home, go-home, list-homes, delete-home, teleport, give-homes-item) now default to granted for all players; admin permissions still default to OP.
-- Fixed stale teleport attempts surviving a server restart, which could block a player's next teleport (finishes #14).
 - Added the `/homes` command, which opens the homes GUI directly; `/list-homes` still prints the chat listing.
-- Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
 - Added `/import-homes` to import homes from Set Homes v1 or EssentialsX (dry-run by default, pass `confirm` to apply).
+- Added a teleport safety check that relocates players to the nearest safe spot, or cancels the teleport, when a home would put them in blocks, lava, or a dangerous fall.
+- Teleport destination chunks are now loaded during the countdown, so arriving at a distant home is smoother.
+- Fixed stale teleport attempts surviving a server restart, which could block a player's next teleport (finishes #14).
 - Fixed error when maxHomesType is groups and LuckPerms is not installed. The limit is now skipped with a console warning instead.
+
+#### Earlier releases
+- Added go-home and list-homes commands.
+- Fixed issue where players missing sh2.teleport could not break blocks.
+- Fixed issue where a player who has an open homes gui has their inventory overwritten by the next person to open a homes gui.

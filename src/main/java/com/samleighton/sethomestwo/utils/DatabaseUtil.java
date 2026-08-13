@@ -73,6 +73,26 @@ public class DatabaseUtil {
     }
 
     /**
+     * Execute a statement and report how many rows it changed.
+     *
+     * @param connection The database connection
+     * @param sql        The sql string to execute
+     * @param params     Optional bind parameters
+     * @return The affected row count, or -1 when the statement failed
+     */
+    public static int executeUpdate(Connection connection, String sql, Object... params) {
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            setParams(statement, params);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("Could not execute sql update statement.");
+        }
+
+        return -1;
+    }
+
+    /**
      * Fetch a set of results from the database.
      *
      * @param connection, The database connection to fetch from

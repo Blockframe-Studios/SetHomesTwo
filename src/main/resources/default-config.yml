@@ -60,3 +60,50 @@ movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the n
 
 # -- DEBUGGING --
 debugLevel: "error" # Choices are: error | info
+
+# -- HOME MANAGEMENT GUI --
+# Title of the per-home management menu.
+# %s is replaced with the home name.
+manageHomeTitle: "Manage: %s"
+
+# Title of the anvil prompt shown when renaming a home.
+renamePromptTitle: "New home name"
+
+# Hint shown on each home in the homes list, below the description.
+# Only shown to players who can actually manage the home (sh2.manage-homes)
+# and never on another player's homes. Supports '&' colour codes.
+# Set to "" to hide it.
+manageHomeHint: "&7Right click to edit home"
+
+# Maximum number of characters allowed in a home name.
+maxHomeNameLength: 32
+
+# Buttons in the management menu.
+# Button names support '&' colour codes (e.g. &c for red).
+renameButtonItem: "name_tag"
+renameButtonName: "Rename"
+moveHomeButtonItem: "ender_pearl"
+moveHomeButtonName: "Move home here"
+setIconButtonItem: "item_frame"
+setIconButtonName: "Set icon to held item"
+deleteButtonItem: "barrier"
+deleteButtonName: "&cDelete"
+backButtonItem: "arrow"
+backButtonName: "Back"
+confirmButtonItem: "lime_wool"
+confirmButtonName: "&aConfirm delete"
+cancelButtonItem: "red_wool"
+cancelButtonName: "&cCancel"
+
+# -- HOME MANAGEMENT MESSAGES --
+homeRenamed: "%s has been renamed to %s." # First %s is the old name, second is the new name.
+homeMoved: "%s has been moved to your current location." # %s is the home name.
+homeIconChanged: "The icon for %s is now %s." # First %s is the home name, second is the material.
+
+# -- HOME MANAGEMENT ERROR MESSAGES --
+duplicateHomeName: "You already have a home called '%s'." # %s is the duplicate name.
+invalidHomeName: "That home name is not valid. Names must not be blank."
+homeNameTooLong: "That home name is too long. The maximum is %d characters." # %d is the configured maximum.
+homeNoLongerExists: "That home no longer exists."
+emptyHandForIcon: "Hold the item you want to use as the icon, then click again."
+cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension because it has been blacklisted."

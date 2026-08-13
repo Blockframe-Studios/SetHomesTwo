@@ -27,4 +27,16 @@ public interface Dao<T> {
      * @param object The model to delete
      */
     boolean delete(Object object);
+
+    /**
+     * Update a single existing model.
+     *
+     * @param object The model to update
+     * @return true when a row was updated
+     * @implNote Default returns false. Only implementations that own a mutable
+     * table override this.
+     */
+    default boolean update(Object object) {
+        return false;
+    }
 }

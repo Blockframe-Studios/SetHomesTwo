@@ -68,6 +68,9 @@ permissions:
   sh2.give-homes-item:
     description: Allow player to get the homes viewing item.
     default: true
+  sh2.manage-homes:
+    description: Allow player to rename, move, re-icon, and delete their homes from the GUI.
+    default: true
   sh2.add-to-blacklist:
     description: Add dimensions to the blacklist.
     default: op

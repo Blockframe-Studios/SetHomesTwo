@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Home implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
+    private Integer id;
     private String uuidBelongingTo;
     private String material;
     private String name;
@@ -53,6 +56,19 @@ public class Home implements Serializable {
         setName(name);
         setDescription(description);
         setDimension(dimension);
+    }
+
+    /**
+     * Primary key from the players_homes table.
+     *
+     * @return Integer, or null if this home has not been persisted yet.
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUUIDBelongingTo() {
