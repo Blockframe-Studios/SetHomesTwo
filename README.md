@@ -224,6 +224,18 @@ workflow computes the next version from every changeset present, updates
 and publishes to GitHub Releases and BukkitDev. A pull request with no
 changeset releases nothing.
 
+The workflow cannot resume a release it already started. Once the version
+commit and tag are pushed to `master`, the changesets that drove them are
+gone, so re-running the workflow just reports nothing to release - it will
+not retry the part that failed. If the BukkitDev upload or the GitHub
+Release step fails after that point, finish it by hand: build the jar at
+the pushed tag and upload it to whichever destination did not complete.
+BukkitDev is uploaded before the GitHub Release is created, deliberately,
+so a failure there is caught before anything goes public. Also keep
+`pom.xml` off a `-SNAPSHOT` version between releases - the workflow's
+version computation rejects it outright, and the release fails at the
+planning step before anything else runs.
+
 ### Changelog
 
 #### 1.2.0 (2026-08-12)
