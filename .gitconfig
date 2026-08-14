@@ -1,0 +1,7 @@
+# Shared git aliases. Opt in once per clone:
+#
+#     git config --local include.path ../.gitconfig
+
+[alias]
+	# "!" runs from the repository root, so this works from any subdirectory.
+	changeset = "!bash scripts/changeset.sh"
