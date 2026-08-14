@@ -8,7 +8,7 @@
 
 ## Why Set Homes Two
 
-- **A menu, or a list of commands.** Homes live in a chest-style GUI. Players open it with `/homes` or by right-clicking a compass.
+- **A menu, or a list of commands.** Homes live in a chest-style GUI. Players open it with `/homes` or by right-clicking the configured "Home Item".
 - **Every home gets its own icon.** Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.
 - **Rename, move and delete in-game.** Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.
 - **Teleports that do not kill you.** Set Homes Two checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
@@ -148,7 +148,7 @@ To pick one up, copy the key you want out of the [full config](https://github.co
 <details>
 <summary>How do my players teleport home?</summary>
 
-Three ways, all equivalent: `/home <name>`, opening `/homes` and left-clicking, or right-clicking the compass from `/give-homes-item`.
+Three ways, all equivalent: `/home <name>`, opening `/homes` and left-clicking, or right-clicking the assigned "Home Item" from `/give-homes-item`.
 
 </details>
 
