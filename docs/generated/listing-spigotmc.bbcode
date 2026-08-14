@@ -1,0 +1,182 @@
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/logo.png[/IMG]
+
+[B]Set Homes Two gives every player a menu of their homes.[/B] Left-click one to teleport. Right-click it to rename it, move it, change its icon, or delete it.
+
+[URL=https://github.com/Blockframe-Studios/SetHomesTwo]Source[/URL] | [URL=https://github.com/Blockframe-Studios/SetHomesTwo/issues]Report a bug[/URL] | [URL=https://www.paypal.com/donate/?business=8LXCRFX27B37C&no_recurring=0&item_name=Thanks+for+your+support.+It+helps+keep+this+plugin+up+to+date+%3A%29&currency_code=USD]Donate[/URL]
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/homes-menu.png[/IMG]
+
+[SIZE=5][B]Why Set Homes Two[/B][/SIZE]
+
+[LIST]
+[*][B]A menu, or a list of commands.[/B] Homes live in a chest-style GUI. Players open it with /homes or by right-clicking a compass.
+[*][B]Every home gets its own icon.[/B] Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.
+[*][B]Rename, move and delete in-game.[/B] Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.
+[*][B]Teleports that do not kill you.[/B] Set Homes Two checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
+[*][B]Switch without losing anything.[/B] One command imports every home from EssentialsX or Set Homes v1, and shows you exactly what it will do before it does it.
+[*][B]Per-rank home limits.[/B] Give donors more homes than default players with LuckPerms groups, or set one server-wide limit.
+[/LIST]
+
+[SIZE=5][B]Quick start[/B][/SIZE]
+
+[LIST=1]
+[*]Drop the jar into your plugins folder and restart the server.
+[*]Run /sethome base where you are standing.
+[*]Run /homes and click it.
+[/LIST]
+
+That is genuinely the whole setup. Since 1.1.0 the player-facing permissions default to granted, so your players can create and use homes the moment the plugin loads. You only need a permissions plugin if you want per-rank home limits.
+
+[SIZE=5][B]Managing homes[/B][/SIZE]
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/manage-menu.png[/IMG]
+
+Open your homes with /homes, or right-click the homes item. Then:
+
+[TABLE]
+[TR][TH]Action[/TH][TH]What happens[/TH][/TR]
+[TR][TD]Left-click a home[/TD][TD]Teleports you there[/TD][/TR]
+[TR][TD]Right-click a home[/TD][TD]Opens the management menu below[/TD][/TR]
+[TR][TD]Rename[/TD][TD]Opens an anvil prompt - type the new name[/TD][/TR]
+[TR][TD]Move home here[/TD][TD]Repoints the home at where you are standing[/TD][/TR]
+[TR][TD]Set icon to held item[/TD][TD]The home's icon becomes whatever you are holding[/TD][/TR]
+[TR][TD]Delete[/TD][TD]Asks for confirmation first[/TD][/TR]
+[/TABLE]
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/rename.gif[/IMG]
+
+Home names are unique per player and ignore case, so base and Base are the same home. Management is controlled by sh2.manage-homes, which defaults to granted.
+
+Changing a home's icon works the same way - hold the item you want and click [B]Set icon to held item[/B]:
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/change-icon.gif[/IMG]
+
+[SIZE=5][B]Teleporting[/B][/SIZE]
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/teleport-delay.gif[/IMG]
+
+By default players wait three seconds before a teleport fires, and moving cancels it - so a home is not a free escape from a fight. Set delay: 0 for instant teleports, or cancelOnMove: false to let players walk during the countdown.
+
+[IMG]https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/teleport-instant.gif[/IMG]
+
+Before it drops anyone anywhere, Set Homes Two checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is cancelled and they are told why. Turn it off with teleportSafety: false.
+
+[SIZE=5][B]Coming from EssentialsX or Set Homes v1[/B][/SIZE]
+
+Your players keep their homes. The old plugin does not even need to be running - the importer reads its data files directly.
+
+[LIST]
+[*]Run /import-homes essentialsx (or /import-homes sethomes). This is a [B]preview only[/B]. It reports how many homes it would import and warns about any it would skip, and changes nothing.
+[*]Happy with the numbers? Run it again with confirm on the end.
+[*]Existing homes are never overwritten, so re-running it is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
+[/LIST]
+
+Afterwards, remove the old jar. Set Homes Two provides /sethome, /home and /delhome, and two plugins claiming the same commands will fight over them.
+
+[SIZE=5][B]Commands[/B][/SIZE]
+
+[TABLE]
+[TR][TH]Command[/TH][TH]Long form[/TH][TH]What it does[/TH][/TR]
+[TR][TD]/sethome <name> [item] [description][/TD][TD]/create-home[/TD][TD]Creates a home where you stand. The optional item becomes its icon.[/TD][/TR]
+[TR][TD]/home <name>[/TD][TD]/go-home[/TD][TD]Teleports you to a home.[/TD][/TR]
+[TR][TD]/homes[/TD][TD]-[/TD][TD]Opens the homes menu.[/TD][/TR]
+[TR][TD]/delhome <name>[/TD][TD]/delete-home[/TD][TD]Deletes a home.[/TD][/TR]
+[TR][TD]/list-homes[/TD][TD]-[/TD][TD]Lists your homes in chat. Click a name to teleport.[/TD][/TR]
+[TR][TD]/give-homes-item[/TD][TD]-[/TD][TD]Gives you the item that opens the menu.[/TD][/TR]
+[/TABLE]
+
+[SPOILER=Admin commands]
+[TABLE]
+[TR][TH]Command[/TH][TH]What it does[/TH][/TR]
+[TR][TD]/set-max-homes [group] <number>[/TD][TD]Sets the home limit, per LuckPerms group or server-wide.[/TD][/TR]
+[TR][TD]/get-player-homes <player>[/TD][TD]Lists another player's homes.[/TD][/TR]
+[TR][TD]/add-to-blacklist <dimension...>[/TD][TD]Stops homes being set in a dimension.[/TD][/TR]
+[TR][TD]/remove-from-blacklist <dimension...>[/TD][TD]Lifts the restriction again.[/TD][/TR]
+[TR][TD]/get-blacklisted-dimensions[/TD][TD]Shows which dimensions are blacklisted.[/TD][/TR]
+[TR][TD]/import-homes <sethomes|essentialsx> [confirm][/TD][TD]Imports homes from another plugin. Dry-run unless confirm is given.[/TD][/TR]
+[/TABLE]
+[/SPOILER]
+
+[SIZE=5][B]Permissions[/B][/SIZE]
+
+[SPOILER=Full permission list]
+[TABLE]
+[TR][TH]Permission[/TH][TH]Default[/TH][TH]Allows[/TH][/TR]
+[TR][TD]sh2.create-home[/TD][TD]everyone[/TD][TD]Creating homes[/TD][/TR]
+[TR][TD]sh2.go-home[/TD][TD]everyone[/TD][TD]Using the go-home command[/TD][/TR]
+[TR][TD]sh2.teleport[/TD][TD]everyone[/TD][TD]Actually teleporting to a home[/TD][/TR]
+[TR][TD]sh2.list-homes[/TD][TD]everyone[/TD][TD]Listing homes in chat, and /homes[/TD][/TR]
+[TR][TD]sh2.delete-home[/TD][TD]everyone[/TD][TD]Deleting your own homes[/TD][/TR]
+[TR][TD]sh2.give-homes-item[/TD][TD]everyone[/TD][TD]Getting the menu item[/TD][/TR]
+[TR][TD]sh2.manage-homes[/TD][TD]everyone[/TD][TD]Renaming, moving, re-iconing and deleting from the GUI[/TD][/TR]
+[TR][TD]sh2.set-max-homes[/TD][TD]OP[/TD][TD]Setting home limits[/TD][/TR]
+[TR][TD]sh2.get-player-homes[/TD][TD]OP[/TD][TD]Viewing another player's homes[/TD][/TR]
+[TR][TD]sh2.add-to-blacklist[/TD][TD]OP[/TD][TD]Blacklisting a dimension[/TD][/TR]
+[TR][TD]sh2.remove-from-blacklist[/TD][TD]OP[/TD][TD]Un-blacklisting a dimension[/TD][/TR]
+[TR][TD]sh2.get-blacklisted-dimensions[/TD][TD]OP[/TD][TD]Listing blacklisted dimensions[/TD][/TR]
+[TR][TD]sh2.import-homes[/TD][TD]OP[/TD][TD]Importing from another plugin[/TD][/TR]
+[/TABLE]
+[/SPOILER]
+
+[SIZE=5][B]Configuration[/B][/SIZE]
+
+Settings live in [B]plugins/SetHomesTwo/config.yml[/B] on your server, written the first time the plugin starts. Edit it in any text editor, save, then [B]restart the server[/B] - there is no in-game reload command, so changes do not apply until the server comes back up.
+
+The file is commented throughout, and every message the plugin sends can be rewritten in it. These are the settings most servers actually change:
+
+[TABLE]
+[TR][TH]Setting[/TH][TH]Default[/TH][TH]What it does[/TH][/TR]
+[TR][TD]delay[/TD][TD]3[/TD][TD]Seconds you must stand still before teleporting. 0 is instant.[/TD][/TR]
+[TR][TD]cancelOnMove[/TD][TD]true[/TD][TD]Cancel the teleport if the player moves during the countdown.[/TD][/TR]
+[TR][TD]teleportSafety[/TD][TD]true[/TD][TD]Relocate to the nearest safe spot instead of teleporting into danger.[/TD][/TR]
+[TR][TD]maxHomeEnabled[/TD][TD]false[/TD][TD]Turn home limits on.[/TD][/TR]
+[TR][TD]maxHomesType[/TD][TD]groups[/TD][TD]singular for one server-wide limit, groups for per-rank limits.[/TD][/TR]
+[TR][TD]openHomeItem[/TD][TD]compass[/TD][TD]The item players right-click to open the menu.[/TD][/TR]
+[TR][TD]defaultHomeItem[/TD][TD]white_wool[/TD][TD]Icon used when a home is created without one.[/TD][/TR]
+[TR][TD]inventoryTitle[/TD][TD]Your homes[/TD][TD]Title of the homes menu.[/TD][/TR]
+[TR][TD]maxHomeNameLength[/TD][TD]32[/TD][TD]Longest home name allowed.[/TD][/TR]
+[/TABLE]
+
+Per-rank limits need [URL=https://luckperms.net/download]LuckPerms[/URL] and maxHomesType: groups. The [URL=https://github.com/Blockframe-Studios/SetHomesTwo#example-config]full annotated config[/URL] is on GitHub.
+
+[SPOILER=Upgrading? Your existing config.yml will not gain the new settings]
+Set Homes Two never touches a config.yml that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks - but you cannot change a setting you cannot see.
+
+To pick one up, copy the key you want out of the [URL=https://github.com/Blockframe-Studios/SetHomesTwo#example-config]full config[/URL] into your file and restart. To start clean, rename your config.yml and restart - a fresh one is written with everything in it, and you can copy your old values across.
+[/SPOILER]
+
+[SIZE=5][B]FAQ[/B][/SIZE]
+
+[SPOILER=How do my players teleport home?]
+Three ways, all equivalent: /home <name>, opening /homes and left-clicking, or right-clicking the compass from /give-homes-item.
+[/SPOILER]
+
+[SPOILER=Only OPs can create homes. How do I let everyone in?]
+Update to 1.1.0 or later. On older versions every permission defaulted to OP; they now default to granted for players. If you use a permissions plugin that denies unlisted nodes, grant sh2.create-home, sh2.go-home and sh2.teleport.
+[/SPOILER]
+
+[SPOILER=How do I give donors more homes than everyone else?]
+Install LuckPerms, set maxHomeEnabled: true and maxHomesType: groups, then run /set-max-homes <group> <number> for each rank.
+[/SPOILER]
+
+[SPOILER=Can I run it alongside EssentialsX?]
+Not comfortably - both register /sethome, /home and /delhome, and whichever loads last wins. Import your homes, then remove one of the two.
+[/SPOILER]
+
+[SPOILER=Where are homes stored?]
+In a SQLite database in plugins/SetHomesTwo/. Nothing external to install and nothing to configure.
+[/SPOILER]
+
+[SIZE=5][B]Requirements[/B][/SIZE]
+
+[LIST]
+[*]Paper or Spigot [B]1.21+[/B]
+[*][B]Java 21[/B], which Minecraft 1.21 servers already require
+[*]Optional: [URL=https://luckperms.net/download]LuckPerms[/URL], only for per-rank home limits
+[/LIST]
+
+[SIZE=5][B]Support[/B][/SIZE]
+
+Found a bug or want a feature? Open an issue on [URL=https://github.com/Blockframe-Studios/SetHomesTwo/issues]GitHub[/URL] - it gets seen faster than a comment on this page.
+
+[URL=https://github.com/Blockframe-Studios/SetHomesTwo]Source[/URL] | [URL=https://github.com/Blockframe-Studios/SetHomesTwo/issues]Report a bug[/URL] | [URL=https://www.paypal.com/donate/?business=8LXCRFX27B37C&no_recurring=0&item_name=Thanks+for+your+support.+It+helps+keep+this+plugin+up+to+date+%3A%29&currency_code=USD]Donate[/URL]

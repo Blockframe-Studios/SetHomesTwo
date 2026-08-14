@@ -1,10 +1,10 @@
-![Set Homes Two](docs/img/logo.png)
+![Set Homes Two](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/logo.png)
 
 **Set Homes Two gives every player a menu of their homes.** Left-click one to teleport. Right-click it to rename it, move it, change its icon, or delete it.
 
 [Source](https://github.com/Blockframe-Studios/SetHomesTwo) | [Report a bug](https://github.com/Blockframe-Studios/SetHomesTwo/issues) | [Donate](https://www.paypal.com/donate/?business=8LXCRFX27B37C&no_recurring=0&item_name=Thanks+for+your+support.+It+helps+keep+this+plugin+up+to+date+%3A%29&currency_code=USD)
 
-![The homes menu, with each home shown as its own item](docs/img/homes-menu.png)
+![The homes menu, with each home shown as its own item](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/homes-menu.png)
 
 ## Why Set Homes Two
 
@@ -25,7 +25,7 @@ That is genuinely the whole setup. Since 1.1.0 the player-facing permissions def
 
 ## Managing homes
 
-![The per-home management menu](docs/img/manage-menu.png)
+![The per-home management menu](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/manage-menu.png)
 
 Open your homes with `/homes`, or right-click the homes item. Then:
 
@@ -38,21 +38,21 @@ Open your homes with `/homes`, or right-click the homes item. Then:
 | Set icon to held item | The home's icon becomes whatever you are holding |
 | Delete | Asks for confirmation first |
 
-![Right-clicking a home to rename it](docs/img/rename.gif)
+![Right-clicking a home to rename it](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/rename.gif)
 
 Home names are unique per player and ignore case, so `base` and `Base` are the same home. Management is controlled by `sh2.manage-homes`, which defaults to granted.
 
 Changing a home's icon works the same way - hold the item you want and click **Set icon to held item**:
 
-![Changing a home's icon to the item being held](docs/img/change-icon.gif)
+![Changing a home's icon to the item being held](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/change-icon.gif)
 
 ## Teleporting
 
-![The stand-still countdown before a teleport](docs/img/teleport-delay.gif)
+![The stand-still countdown before a teleport](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/teleport-delay.gif)
 
 By default players wait three seconds before a teleport fires, and moving cancels it - so a home is not a free escape from a fight. Set `delay: 0` for instant teleports, or `cancelOnMove: false` to let players walk during the countdown.
 
-![Instant teleport](docs/img/teleport-instant.gif)
+![Instant teleport](https://raw.githubusercontent.com/Blockframe-Studios/SetHomesTwo/master/docs/img/teleport-instant.gif)
 
 Before it drops anyone anywhere, Set Homes Two checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is cancelled and they are told why. Turn it off with `teleportSafety: false`.
 
