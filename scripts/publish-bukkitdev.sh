@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-# Upload the release jar to BukkitDev project 312833.
+# Upload the release jar to BukkitDev project 913275 (set-homes-two).
+#
+# The project id is NOT 312833. That id is the original Set Homes (v1) project,
+# and the two are indistinguishable by eye. Verified by following the redirect:
+#   /projects/913275 -> /projects/set-homes-two   (this plugin)
+#   /projects/312833 -> /projects/set-homes       (v1, do not publish here)
+# Re-check the redirect before changing this number.
 #
 # CurseForge has no game-version range syntax, so the supported versions are
 # resolved at release time: every version whose name starts with 1.21. That
@@ -8,7 +14,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-PROJECT_ID=312833
+PROJECT_ID=913275
 API=https://dev.bukkit.org/api
 
 if [ -z "${CURSEFORGE_TOKEN:-}" ]; then
