@@ -194,6 +194,10 @@ Found a bug or want a feature? Open an issue on [GitHub](https://github.com/Bloc
 
 ## Changelog
 
+#### 1.2.1 (2026-08-14)
+
+- Added an update notice: the console at startup, and admins holding `sh2.update-notify` as they join, are told when a newer release is on GitHub. Set `checkForUpdates: false` to stop the plugin making the request at all.
+
 #### 1.2.0 (2026-08-12)
 
 Behaviour changes to be aware of before updating:
