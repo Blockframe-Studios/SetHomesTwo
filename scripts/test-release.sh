@@ -180,6 +180,18 @@ test_rejects_a_readme_with_no_changelog_heading() {
   fi
 }
 
+test_inserts_into_a_crlf_readme_preserving_endings() {
+  local readme=$'### Changelog\r\n\r\n#### 1.2.0 (2026-08-12)\r\n\r\n- Older thing\r\n'
+  render_section "1.3.0" "2026-08-13" "New thing"
+  if insert_changelog "$readme" "$RENDERED_SECTION"; then
+    assert_eq "insert_changelog: CRLF readme keeps CRLF" \
+      $'### Changelog\r\n\r\n#### 1.3.0 (2026-08-13)\r\n\r\n- New thing\r\n\r\n#### 1.2.0 (2026-08-12)\r\n\r\n- Older thing\r\n' \
+      "$INSERTED_TEXT"
+  else
+    fail "insert_changelog: CRLF readme keeps CRLF" "unexpected failure: $INSERT_ERROR"
+  fi
+}
+
 ### Cli #######################################################################
 
 test_plan_exits_3_when_no_changesets() {
@@ -351,6 +363,7 @@ test_next_version_rejects_non_numeric
 test_renders_heading_and_entries
 test_inserts_directly_below_the_changelog_heading
 test_rejects_a_readme_with_no_changelog_heading
+test_inserts_into_a_crlf_readme_preserving_endings
 
 test_plan_exits_3_when_no_changesets
 test_plan_reports_the_highest_bump

@@ -208,43 +208,6 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 - **Q: How can I give players permission to set named homes?**
   **A:** You will need to install the permission plugin, [LuckPerms](https://luckperms.net/download) then configure the config.yml to allow for multiple groups (see above for example config).
 
-### Releasing
-
-Releases are automated. A pull request that should change the version adds a
-changeset:
-
-    git changeset
-
-**One-time setup per clone**, to get the `git changeset` command:
-
-    git config --local include.path ../.gitconfig
-
-Git will not read a config file out of a working tree on its own - that would
-let any repository you clone run commands you never agreed to - so this opt-in
-is deliberate. Skip it and use `bash scripts/changeset.sh` instead; the two are
-the same script.
-
-It asks whether the change is a patch, minor or major and for a one-line
-summary, then writes a file under `.changeset/`.
-
-When a pull request carrying a changeset merges to `master`, the release
-workflow computes the next version from every changeset present, updates
-`pom.xml` and the changelog below, runs the full test suite, tags the commit,
-and publishes to GitHub Releases and BukkitDev. A pull request with no
-changeset releases nothing.
-
-The workflow cannot resume a release it already started. Once the version
-commit and tag are pushed to `master`, the changesets that drove them are
-gone, so re-running the workflow just reports nothing to release - it will
-not retry the part that failed. If the BukkitDev upload or the GitHub
-Release step fails after that point, finish it by hand: build the jar at
-the pushed tag and upload it to whichever destination did not complete.
-BukkitDev is uploaded before the GitHub Release is created, deliberately,
-so a failure there is caught before anything goes public. Also keep
-`pom.xml` off a `-SNAPSHOT` version between releases - the workflow's
-version computation rejects it outright, and the release fails at the
-planning step before anything else runs.
-
 ### Changelog
 
 #### 1.2.0 (2026-08-12)

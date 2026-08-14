@@ -14,6 +14,7 @@
 #   release.sh notes  --readme README.md --version X
 
 CHANGELOG_HEADING=$'### Changelog\n'
+CRLF_HEADING=$'### Changelog\r\n'
 
 # ---------------------------------------------------------------------------
 # parse_changeset TEXT
@@ -188,20 +189,30 @@ render_section() {
 insert_changelog() {
   local readme="$1" section="$2"
 
-  if [[ "$readme" != *"$CHANGELOG_HEADING"* ]]; then
+  # Match a CRLF README too (any Windows checkout) and keep its endings.
+  local heading="$CHANGELOG_HEADING" eol=$'\n'
+  if [[ "$readme" == *"$CRLF_HEADING"* ]]; then
+    heading="$CRLF_HEADING"
+    eol=$'\r\n'
+  elif [[ "$readme" != *"$heading"* ]]; then
     INSERT_ERROR="README has no '### Changelog' heading"
     return 1
   fi
 
   local before after
-  before="${readme%%"$CHANGELOG_HEADING"*}"
-  after="${readme#*"$CHANGELOG_HEADING"}"
+  before="${readme%%"$heading"*}"
+  after="${readme#*"$heading"}"
 
-  while [[ "$after" == $'\n'* ]]; do
-    after="${after#$'\n'}"
+  while [[ "$after" == "$eol"* ]]; do
+    after="${after#"$eol"}"
   done
 
-  INSERTED_TEXT="${before}${CHANGELOG_HEADING}"$'\n'"${section}"$'\n'"${after}"
+  local body="$section"
+  if [[ "$eol" != $'\n' ]]; then
+    body="${section//$'\n'/$'\r\n'}"
+  fi
+
+  INSERTED_TEXT="${before}${heading}${eol}${body}${eol}${after}"
   return 0
 }
 
