@@ -1,0 +1,33 @@
+name: Changeset
+
+# Its own workflow rather than a job in Tests: a job skipped by an `if:` still
+# reports a check run, so the push event would publish a second, skipped
+# "changeset" result for the same commit.
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changeset:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Require a changeset for shippable changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Written to a file rather than piped, so a failing gh call cannot be
+          # mistaken for an empty diff and pass the gate.
+          gh api --paginate "repos/${{ github.repository }}/pulls/$PR/files" --jq '.[].filename' > changed-files.txt
+          cat changed-files.txt
+          bash scripts/require-changeset.sh < changed-files.txt

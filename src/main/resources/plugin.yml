@@ -89,3 +89,6 @@ permissions:
   sh2.import-homes:
     description: Import homes from other plugins.
     default: op
+  sh2.update-notify:
+    description: Be told on join when a newer SetHomesTwo release is available.
+    default: op

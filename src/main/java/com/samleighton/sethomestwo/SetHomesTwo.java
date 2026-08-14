@@ -11,6 +11,8 @@ import com.samleighton.sethomestwo.events.RightClickHomeItem;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
+import com.samleighton.sethomestwo.updates.GitHubReleaseSource;
+import com.samleighton.sethomestwo.updates.UpdateChecker;
 import com.samleighton.sethomestwo.tabcompleters.DimensionTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.HomesTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
@@ -35,6 +37,7 @@ import java.util.UUID;
 public class SetHomesTwo extends JavaPlugin {
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
+    private UpdateChecker updateChecker;
 
     /**
      * Looked up by name because JavaPlugin.getPlugin(SetHomesTwo.class) needs the
@@ -51,6 +54,14 @@ public class SetHomesTwo extends JavaPlugin {
 
         // Create config
         initConfig();
+
+        // Built before the listeners: the join listener is handed this instance.
+        updateChecker = new UpdateChecker(
+                this,
+                getDescription().getVersion(),
+                new GitHubReleaseSource(getDescription().getVersion())
+        );
+        updateChecker.checkLater();
 
         // Plugin startup logic
         registerCommands();
@@ -187,7 +198,7 @@ public class SetHomesTwo extends JavaPlugin {
      * Register all event listeners for the plugin
      */
     public void registerEventListeners() {
-        getServer().getPluginManager().registerEvents(new PlayerJoin(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoin(this, updateChecker), this);
         getServer().getPluginManager().registerEvents(new PlayerLeave(this), this);
         getServer().getPluginManager().registerEvents(new RightClickHomeItem(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveWhileTeleporting(), this);
@@ -219,6 +230,10 @@ public class SetHomesTwo extends JavaPlugin {
      */
     public ConnectionManager getConnectionManager() {
         return this.connectionManager;
+    }
+
+    public UpdateChecker getUpdateChecker() {
+        return this.updateChecker;
     }
 
     public Map<UUID, GuiSession> getGuiSessionMap() {

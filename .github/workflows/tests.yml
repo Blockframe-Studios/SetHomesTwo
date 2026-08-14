@@ -31,6 +31,9 @@ jobs:
       - name: Run the release script tests
         run: bash scripts/test-release.sh
 
+      - name: Run the changeset gate tests
+        run: bash scripts/test-require-changeset.sh
+
       - name: Validate changesets
         run: |
           bash scripts/release.sh plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]

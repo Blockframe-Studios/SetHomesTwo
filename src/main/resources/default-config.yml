@@ -107,3 +107,10 @@ homeNameTooLong: "That home name is too long. The maximum is %d characters." # %
 homeNoLongerExists: "That home no longer exists."
 emptyHandForIcon: "Hold the item you want to use as the icon, then click again."
 cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension because it has been blacklisted."
+
+# -- UPDATE NOTIFICATIONS --
+# Ask GitHub once, shortly after startup, whether a newer SetHomesTwo release
+# exists. The answer is written to the console and shown on join to players
+# holding sh2.update-notify (operators by default). Set to false to stop the
+# plugin making any outbound request at all.
+checkForUpdates: true

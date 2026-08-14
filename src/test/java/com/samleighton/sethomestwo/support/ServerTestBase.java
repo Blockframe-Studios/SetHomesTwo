@@ -42,6 +42,10 @@ public abstract class ServerTestBase {
         end.setEnvironment(World.Environment.THE_END);
 
         plugin = MockBukkit.load(SetHomesTwo.class);
+
+        // Turned off before anything drains the scheduler, so the check
+        // scheduled during onEnable can never reach the GitHub API.
+        plugin.getConfig().set("checkForUpdates", false);
     }
 
     @AfterEach
