@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Upload the release jar to BukkitDev.
 #
-# CurseForge has no game-version range syntax, so 1.21+ is resolved from the
-# API at release time rather than hardcoded. Snapshots are excluded.
+# CurseForge has no game-version range syntax, so supported versions are
+# resolved from the API at release time. See scripts/game-versions.jq.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,10 +17,18 @@ if [ -z "${CURSEFORGE_TOKEN:-}" ]; then
 fi
 
 GAME_VERSIONS=$(curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" "$API/game/versions" \
-  | jq -c '[.[] | select((.name // "") | test("^1[.]21([.][0-9]+)?$")) | .id]')
+  | jq -f "$SCRIPT_DIR/game-versions.jq" \
+  | jq -c 'map(.id)')
 
-if [ "$(echo "$GAME_VERSIONS" | jq 'length')" -eq 0 ]; then
-  echo "no 1.21 game versions returned by the API" >&2
+COUNT=$(echo "$GAME_VERSIONS" | jq 'length')
+if [ "$COUNT" -eq 0 ]; then
+  echo "no supported game versions returned by the API" >&2
+  exit 1
+fi
+# A correct filter returns on the order of 16. A jump to hundreds means the
+# type filter stopped matching and a wrong taxonomy is being published.
+if [ "$COUNT" -gt 100 ]; then
+  echo "$COUNT game versions matched - expected ~16, refusing to publish" >&2
   exit 1
 fi
 
