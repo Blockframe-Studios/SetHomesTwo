@@ -27,3 +27,10 @@ jobs:
 
       - name: Build and test
         run: mvn -B verify
+
+      - name: Run the release script tests
+        run: python3 scripts/test_release.py
+
+      - name: Validate changesets
+        run: |
+          python3 scripts/release.py plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]
