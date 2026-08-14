@@ -20,7 +20,11 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    # A real release may only ever run from master. A dry run is allowed from
+    # any branch, because that is the only way to exercise a changeset before
+    # it lands: merging one to master fires the push trigger and releases for
+    # real, so there is no window to dry-run it on master first.
+    if: github.ref == 'refs/heads/master' || inputs.dry_run
 
     steps:
       - name: Check out
