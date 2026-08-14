@@ -61,12 +61,14 @@ jobs:
 
           echo "$PLAN"
           echo "release=true" >> "$GITHUB_OUTPUT"
-          echo "next=$(echo "$PLAN" | python3 -c 'import json,sys; print(json.load(sys.stdin)["next"])')" >> "$GITHUB_OUTPUT"
+          NEXT=$(echo "$PLAN" | python3 -c 'import json,sys; print(json.load(sys.stdin)["next"])')
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
 
+          DELIM="PLANEOF_$(openssl rand -hex 8)"
           {
-            echo 'plan_json<<PLANEOF'
+            echo "plan_json<<$DELIM"
             echo "$PLAN"
-            echo 'PLANEOF'
+            echo "$DELIM"
           } >> "$GITHUB_OUTPUT"
 
       - name: Apply the version and changelog
