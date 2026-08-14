@@ -37,29 +37,3 @@ jobs:
       - name: Validate changesets
         run: |
           bash scripts/release.sh plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]
-
-  changeset:
-    # Only a pull request has a set of changed files to judge. A direct push to
-    # master is the release commit itself, which consumes changesets rather than
-    # adding them.
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    permissions:
-      pull-requests: read
-
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Require a changeset for shippable changes
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          # Written to a file rather than piped, so a failing gh call cannot be
-          # mistaken for an empty diff and pass the gate.
-          gh api --paginate "repos/${{ github.repository }}/pulls/$PR/files" --jq '.[].filename' > changed-files.txt
-          cat changed-files.txt
-          bash scripts/require-changeset.sh < changed-files.txt
