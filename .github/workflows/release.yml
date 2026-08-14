@@ -107,12 +107,12 @@ jobs:
           fi
           curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" https://dev.bukkit.org/api/game/versions \
             | jq -r '
-              [ .[] | select((.name // "") | startswith("1.21")) ] as $matched
+              [ .[] | select((.name // "") | test("^1[.]21([.][0-9]+)?$")) ] as $matched
               | if ($matched | length) == 0 then
                   error("No 1.21 game versions matched - the live upload would fail here.")
                 else
                   "Resolved \($matched | length) game versions for 1.21:",
-                  ($matched[] | "  \(.name) -> \(.id)")
+                  ($matched[] | "  \(.name) [type \(.gameVersionTypeID)] -> \(.id)")
                 end
             '
 
