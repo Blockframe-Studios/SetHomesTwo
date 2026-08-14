@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Compute and print the release without publishing anything
+        description: Dry run - compute and print the release, publish nothing
         type: boolean
         default: true
 
