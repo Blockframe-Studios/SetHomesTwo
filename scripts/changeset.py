@@ -87,7 +87,10 @@ def main(argv):
     path = write_changeset(bump, summary, changeset_dir)
     relative = os.path.relpath(path, os.getcwd())
 
-    staged = subprocess.call(["git", "add", path]) == 0
+    try:
+        staged = subprocess.call(["git", "add", path]) == 0
+    except OSError:
+        staged = False
     sys.stdout.write("\n  Created %s%s\n\n" % (relative, "  (staged)" if staged else ""))
     return 0
 
