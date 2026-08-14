@@ -9,7 +9,7 @@
 [SIZE=5][B]Why Set Homes Two[/B][/SIZE]
 
 [LIST]
-[*][B]A menu, or a list of commands.[/B] Homes live in a chest-style GUI. Players open it with /homes or by right-clicking a compass.
+[*][B]A menu, or a list of commands.[/B] Homes live in a chest-style GUI. Players open it with /homes or by right-clicking the configured "Home Item".
 [*][B]Every home gets its own icon.[/B] Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.
 [*][B]Rename, move and delete in-game.[/B] Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.
 [*][B]Teleports that do not kill you.[/B] Set Homes Two checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
@@ -148,7 +148,7 @@ To pick one up, copy the key you want out of the [URL=https://github.com/Blockfr
 [SIZE=5][B]FAQ[/B][/SIZE]
 
 [SPOILER=How do my players teleport home?]
-Three ways, all equivalent: /home <name>, opening /homes and left-clicking, or right-clicking the compass from /give-homes-item.
+Three ways, all equivalent: /home <name>, opening /homes and left-clicking, or right-clicking the assigned "Home Item" from /give-homes-item.
 [/SPOILER]
 
 [SPOILER=Only OPs can create homes. How do I let everyone in?]
@@ -160,7 +160,7 @@ Install LuckPerms, set maxHomeEnabled: true and maxHomesType: groups, then run /
 [/SPOILER]
 
 [SPOILER=Can I run it alongside EssentialsX?]
-Not comfortably - both register /sethome, /home and /delhome, and whichever loads last wins. Import your homes, then remove one of the two.
+Not comfortably - both register /sethome, /home and /delhome, and whichever loads last wins. Import your homes, then remove EssentialsX.
 [/SPOILER]
 
 [SPOILER=Where are homes stored?]

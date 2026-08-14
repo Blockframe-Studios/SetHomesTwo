@@ -9,7 +9,7 @@
 <h2>Why Set Homes Two</h2>
 
 <ul>
-<li><strong>A menu, or a list of commands.</strong> Homes live in a chest-style GUI. Players open it with <code>/homes</code> or by right-clicking a compass.</li>
+<li><strong>A menu, or a list of commands.</strong> Homes live in a chest-style GUI. Players open it with <code>/homes</code> or by right-clicking the configured "Home Item".</li>
 <li><strong>Every home gets its own icon.</strong> Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.</li>
 <li><strong>Rename, move and delete in-game.</strong> Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.</li>
 <li><strong>Teleports that do not kill you.</strong> Set Homes Two checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.</li>
@@ -145,7 +145,7 @@
 <h2>FAQ</h2>
 
 <h4>How do my players teleport home?</h4>
-<p>Three ways, all equivalent: <code>/home &lt;name&gt;</code>, opening <code>/homes</code> and left-clicking, or right-clicking the compass from <code>/give-homes-item</code>.</p>
+<p>Three ways, all equivalent: <code>/home &lt;name&gt;</code>, opening <code>/homes</code> and left-clicking, or right-clicking the assigned "Home Item" from <code>/give-homes-item</code>.</p>
 
 <h4>Only OPs can create homes. How do I let everyone in?</h4>
 <p>Update to 1.1.0 or later. On older versions every permission defaulted to OP; they now default to granted for players. If you use a permissions plugin that denies unlisted nodes, grant <code>sh2.create-home</code>, <code>sh2.go-home</code> and <code>sh2.teleport</code>.</p>
@@ -154,7 +154,7 @@
 <p>Install LuckPerms, set <code>maxHomeEnabled: true</code> and <code>maxHomesType: groups</code>, then run <code>/set-max-homes &lt;group&gt; &lt;number&gt;</code> for each rank.</p>
 
 <h4>Can I run it alongside EssentialsX?</h4>
-<p>Not comfortably - both register <code>/sethome</code>, <code>/home</code> and <code>/delhome</code>, and whichever loads last wins. Import your homes, then remove one of the two.</p>
+<p>Not comfortably - both register <code>/sethome</code>, <code>/home</code> and <code>/delhome</code>, and whichever loads last wins. Import your homes, then remove EssentialsX.</p>
 
 <h4>Where are homes stored?</h4>
 <p>In a SQLite database in <code>plugins/SetHomesTwo/</code>. Nothing external to install and nothing to configure.</p>
