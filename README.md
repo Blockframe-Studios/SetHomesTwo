@@ -213,7 +213,16 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 Releases are automated. A pull request that should change the version adds a
 changeset:
 
-    bash scripts/changeset.sh
+    git changeset
+
+**One-time setup per clone**, to get the `git changeset` command:
+
+    git config --local include.path ../.gitconfig
+
+Git will not read a config file out of a working tree on its own - that would
+let any repository you clone run commands you never agreed to - so this opt-in
+is deliberate. Skip it and use `bash scripts/changeset.sh` instead; the two are
+the same script.
 
 It asks whether the change is a patch, minor or major and for a one-line
 summary, then writes a file under `.changeset/`.

@@ -4,12 +4,22 @@ Every pull request that should change the released version adds one file here.
 
 Create it with:
 
-    bash scripts/changeset.sh
+    git changeset
+
+**One-time setup per clone**, to get the `git changeset` command:
+
+    git config --local include.path ../.gitconfig
+
+Git will not read a config file out of a working tree on its own - that would
+let any repository you clone run commands you never agreed to - so this opt-in
+is deliberate. Skip it and use `bash scripts/changeset.sh` instead; the two are
+the same script.
+
 
 It asks for the kind of change and a one-line summary, then writes the file
 and stages it. Pass arguments to skip the prompts:
 
-    bash scripts/changeset.sh minor "Notify operators when a newer release is available"
+    git changeset minor "Notify operators when a newer release is available"
 
 A pull request with no changeset releases nothing, which is what you want for
 documentation, tests, CI and refactors. Holding a changeset back is also how

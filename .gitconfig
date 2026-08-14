@@ -1,0 +1,15 @@
+# Shared git aliases for this repository.
+#
+# Not picked up automatically - git will not read a config file out of a
+# working tree on its own, because that would let a cloned repository run
+# commands you never agreed to. Opt in once per clone:
+#
+#     git config --local include.path ../.gitconfig
+#
+# The path is relative to .git/config, so ../.gitconfig is this file.
+
+[alias]
+	# `git changeset` from anywhere in the working tree - a "!" alias runs
+	# from the repository root, so the relative path always resolves.
+	# Arguments pass through: git changeset minor "summary"
+	changeset = "!bash scripts/changeset.sh"
