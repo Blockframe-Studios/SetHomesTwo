@@ -169,7 +169,7 @@ Install LuckPerms, set `maxHomeEnabled: true` and `maxHomesType: groups`, then r
 <details>
 <summary>Can I run it alongside EssentialsX?</summary>
 
-Not comfortably - both register `/sethome`, `/home` and `/delhome`, and whichever loads last wins. Import your homes, then remove one of the two.
+Not comfortably - both register `/sethome`, `/home` and `/delhome`, and whichever loads last wins. Import your homes, then remove EssentialsX.
 
 </details>
 
