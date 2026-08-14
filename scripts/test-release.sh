@@ -180,6 +180,18 @@ test_rejects_a_readme_with_no_changelog_heading() {
   fi
 }
 
+test_inserts_below_a_level_two_changelog_heading() {
+  local readme=$'## Changelog\n\n#### 1.2.0 (2026-08-12)\n\n- Older thing\n'
+  render_section "1.3.0" "2026-08-13" "New thing"
+  if insert_changelog "$readme" "$RENDERED_SECTION"; then
+    assert_eq "insert_changelog: keeps a level two heading" \
+      $'## Changelog\n\n#### 1.3.0 (2026-08-13)\n\n- New thing\n\n#### 1.2.0 (2026-08-12)\n\n- Older thing\n' \
+      "$INSERTED_TEXT"
+  else
+    fail "insert_changelog: keeps a level two heading" "unexpected failure: $INSERT_ERROR"
+  fi
+}
+
 test_inserts_into_a_crlf_readme_preserving_endings() {
   local readme=$'### Changelog\r\n\r\n#### 1.2.0 (2026-08-12)\r\n\r\n- Older thing\r\n'
   render_section "1.3.0" "2026-08-13" "New thing"
@@ -328,6 +340,58 @@ test_entries_command_lists_all_summaries() {
   rm -rf "$d"
 }
 
+### Check ####################################################################
+
+test_check_passes_a_release_ready_repository() {
+  local d out status
+  d="$(new_tmpdir)"
+  mkdir -p "$d/.changeset"
+  printf -- '---\nbump: patch\n---\n\nA patch thing\n' > "$d/.changeset/a.md"
+  printf -- '## Changelog\n\n#### 1.2.0 (x)\n\n- Older\n' > "$d/README.md"
+  out="$( cd "$d" && bash "$RELEASE_SH" check --changeset-dir .changeset --readme README.md 2>&1 )"
+  status=$?
+  assert_status "cli: check passes a release-ready repository" "0" "$status"
+  assert_contains "cli: check reports what it read" "$out" "1 changeset(s) parse"
+  rm -rf "$d"
+}
+
+test_check_fails_a_readme_with_no_changelog_heading() {
+  local d out status
+  d="$(new_tmpdir)"
+  mkdir -p "$d/.changeset"
+  printf -- '---\nbump: patch\n---\n\nA patch thing\n' > "$d/.changeset/a.md"
+  printf -- '# Readme\n\nNo changelog here\n' > "$d/README.md"
+  out="$( cd "$d" && bash "$RELEASE_SH" check --changeset-dir .changeset --readme README.md 2>&1 )"
+  status=$?
+  assert_status "cli: check fails a readme with no changelog heading" "1" "$status"
+  assert_contains "cli: check names the missing heading" "$out" "no 'Changelog' heading"
+  rm -rf "$d"
+}
+
+test_check_fails_a_broken_readme_even_with_no_changesets() {
+  local d status
+  d="$(new_tmpdir)"
+  mkdir -p "$d/.changeset"
+  printf -- '# Readme\n\nNo changelog here\n' > "$d/README.md"
+  ( cd "$d" && bash "$RELEASE_SH" check --changeset-dir .changeset --readme README.md >/dev/null 2>&1 )
+  status=$?
+  assert_status "cli: check fails a broken readme with no changesets to release" "1" "$status"
+  rm -rf "$d"
+}
+
+test_check_fails_a_malformed_changeset() {
+  local d out status
+  d="$(new_tmpdir)"
+  mkdir -p "$d/.changeset"
+  printf -- 'no frontmatter here\n' > "$d/.changeset/a.md"
+  printf -- '## Changelog\n\n#### 1.2.0 (x)\n\n- Older\n' > "$d/README.md"
+  out="$( cd "$d" && bash "$RELEASE_SH" check --changeset-dir .changeset --readme README.md 2>&1 )"
+  status=$?
+  assert_status "cli: check fails a malformed changeset" "1" "$status"
+  assert_contains "cli: check names the malformed changeset" "$out" "a.md"
+  rm -rf "$d"
+}
+
 test_plan_entries_notes_never_mutate() {
   local d before after
   d="$(new_tmpdir)"
@@ -338,8 +402,9 @@ test_plan_entries_notes_never_mutate() {
   ( cd "$d" && bash "$RELEASE_SH" plan --current-version 1.2.0 --changeset-dir .changeset >/dev/null 2>&1 )
   ( cd "$d" && bash "$RELEASE_SH" entries --changeset-dir .changeset >/dev/null 2>&1 )
   ( cd "$d" && bash "$RELEASE_SH" notes --readme README.md --version 1.2.0 >/dev/null 2>&1 )
+  ( cd "$d" && bash "$RELEASE_SH" check --changeset-dir .changeset --readme README.md >/dev/null 2>&1 )
   after="$(cd "$d" && find . -type f | sort | xargs -I{} sh -c 'printf "%s " {}; cat {}')"
-  assert_eq "plan/entries/notes never write, delete or modify anything" "$before" "$after"
+  assert_eq "plan/entries/notes/check never write, delete or modify anything" "$before" "$after"
   rm -rf "$d"
 }
 
@@ -363,6 +428,7 @@ test_next_version_rejects_non_numeric
 test_renders_heading_and_entries
 test_inserts_directly_below_the_changelog_heading
 test_rejects_a_readme_with_no_changelog_heading
+test_inserts_below_a_level_two_changelog_heading
 test_inserts_into_a_crlf_readme_preserving_endings
 
 test_plan_exits_3_when_no_changesets
@@ -375,6 +441,12 @@ test_cli_rejects_bad_version_format_before_arithmetic
 test_cli_malformed_changeset_exits_1
 test_notes_extracts_entry_for_version_only
 test_entries_command_lists_all_summaries
+
+test_check_passes_a_release_ready_repository
+test_check_fails_a_readme_with_no_changelog_heading
+test_check_fails_a_broken_readme_even_with_no_changesets
+test_check_fails_a_malformed_changeset
+
 test_plan_entries_notes_never_mutate
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
