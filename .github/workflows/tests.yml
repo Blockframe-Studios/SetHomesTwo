@@ -27,3 +27,10 @@ jobs:
 
       - name: Build and test
         run: mvn -B verify
+
+      - name: Run the release script tests
+        run: bash scripts/test-release.sh
+
+      - name: Validate changesets
+        run: |
+          bash scripts/release.sh plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]

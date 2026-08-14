@@ -1,0 +1,155 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run - compute and print the release, publish nothing
+        type: boolean
+        default: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Real releases are master-only. Dry runs are allowed from any branch so a
+    # changeset can be exercised before it merges.
+    if: github.ref == 'refs/heads/master' || inputs.dry_run
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # The "Master Protection" ruleset blocks GITHUB_TOKEN from pushing to
+          # master; this PAT belongs to an actor on the bypass list.
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Plan the release
+        id: plan
+        run: |
+          CURRENT=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
+          set +e
+          PLAN=$(bash scripts/release.sh plan --current-version "$CURRENT" --changeset-dir .changeset)
+          STATUS=$?
+          set -e
+
+          if [ "$STATUS" -eq 3 ]; then
+            echo "No changesets present - nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$STATUS" -ne 0 ]; then
+            echo "$PLAN"
+            exit "$STATUS"
+          fi
+
+          echo "$PLAN"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+          echo "$PLAN" >> "$GITHUB_OUTPUT"
+
+      - name: Apply the version and changelog
+        if: steps.plan.outputs.release == 'true'
+        env:
+          CURRENT: ${{ steps.plan.outputs.current }}
+          NEXT: ${{ steps.plan.outputs.next }}
+        run: |
+          mvn -B versions:set -DnewVersion="$NEXT" -DgenerateBackupPoms=false
+          bash scripts/release.sh apply \
+            --current-version "$CURRENT" \
+            --changeset-dir .changeset \
+            --readme README.md \
+            --date "$(date -u +%Y-%m-%d)"
+
+      - name: Build and test
+        if: steps.plan.outputs.release == 'true'
+        run: mvn -B clean verify
+
+      - name: Stop here on a dry run
+        if: steps.plan.outputs.release == 'true' && inputs.dry_run
+        env:
+          BUMP: ${{ steps.plan.outputs.bump }}
+          CURRENT: ${{ steps.plan.outputs.current }}
+          NEXT: ${{ steps.plan.outputs.next }}
+        run: |
+          echo "Dry run. Nothing has been committed, tagged or published."
+          echo "--- README changelog diff ---"
+          git --no-pager diff -- README.md
+          echo "--- release plan ---"
+          echo "bump=$BUMP"
+          echo "current=$CURRENT"
+          echo "next=$NEXT"
+
+      - name: Dry run - resolve BukkitDev game versions
+        if: steps.plan.outputs.release == 'true' && inputs.dry_run
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: |
+          if [ -z "${CURSEFORGE_TOKEN:-}" ]; then
+            echo "CURSEFORGE_TOKEN is not set - skipping game-version resolution."
+            exit 0
+          fi
+          curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" https://dev.bukkit.org/api/game/versions \
+            | jq -f scripts/game-versions.jq \
+            | jq -r '
+              if length == 0 then
+                  error("No supported game versions matched - the live upload would fail here.")
+                else
+                  "Resolved \(length) game versions:",
+                  (.[] | "  \(.name) [type \(.gameVersionTypeID)] -> \(.id)")
+                end
+            '
+
+      - name: Commit and tag
+        if: steps.plan.outputs.release == 'true' && !inputs.dry_run
+        env:
+          NEXT: ${{ steps.plan.outputs.next }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pom.xml README.md .changeset
+          git commit -m "chore(release): $NEXT"
+          git tag -a "v$NEXT" -m "Release $NEXT"
+          git push origin HEAD:master --follow-tags
+          git ls-remote --exit-code --tags origin "refs/tags/v$NEXT" > /dev/null \
+            || { echo "Tag v$NEXT did not reach the remote"; exit 1; }
+
+      - name: Rename the jar to the release convention
+        if: steps.plan.outputs.release == 'true' && !inputs.dry_run
+        env:
+          NEXT: ${{ steps.plan.outputs.next }}
+        run: cp "target/SetHomesTwo-$NEXT.jar" "SetHomesTwo.V$NEXT.jar"
+
+      - name: Publish to BukkitDev
+        if: steps.plan.outputs.release == 'true' && !inputs.dry_run
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          VERSION: ${{ steps.plan.outputs.next }}
+        run: bash scripts/publish-bukkitdev.sh
+
+      - name: Publish the GitHub Release
+        if: steps.plan.outputs.release == 'true' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          VERSION: ${{ steps.plan.outputs.next }}
+        run: |
+          NOTES=$(bash scripts/release.sh notes --readme README.md --version "$VERSION")
+          gh release create "v$VERSION" "SetHomesTwo.V$VERSION.jar" \
+            --title "SetHomesTwo V$VERSION" \
+            --notes "$NOTES"
