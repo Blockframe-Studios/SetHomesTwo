@@ -20,8 +20,15 @@ GAME_VERSIONS=$(curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" "$API/game/versions
   | jq -f "$SCRIPT_DIR/game-versions.jq" \
   | jq -c 'map(.id)')
 
-if [ "$(echo "$GAME_VERSIONS" | jq 'length')" -eq 0 ]; then
+COUNT=$(echo "$GAME_VERSIONS" | jq 'length')
+if [ "$COUNT" -eq 0 ]; then
   echo "no supported game versions returned by the API" >&2
+  exit 1
+fi
+# A correct filter returns on the order of 16. A jump to hundreds means the
+# type filter stopped matching and a wrong taxonomy is being published.
+if [ "$COUNT" -gt 100 ]; then
+  echo "$COUNT game versions matched - expected ~16, refusing to publish" >&2
   exit 1
 fi
 
