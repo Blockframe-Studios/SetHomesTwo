@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# Bash port of scripts/test_release.py - defines the release.sh contract.
+# Defines the release.sh contract.
 #
-# Sources release.sh directly so the unit-level tests (parse_changeset,
-# highest_bump, next_version, render_section, insert_changelog) can call the
-# functions in-process, the same way the Python suite imported release.py.
-# The Cli-equivalent tests below shell out to `bash scripts/release.sh ...`
-# the same way the Python suite used subprocess.
+# Sources release.sh so the unit tests can call its functions in-process; the
+# Cli tests shell out instead, to cover argument parsing and exit codes.
 #
 # Run with: bash scripts/test-release.sh
 set -u
@@ -58,9 +55,6 @@ assert_contains() {
   esac
 }
 
-# mktemp -d gives a Windows-style path under Git Bash; release.sh and the
-# tests below only ever use it through bash builtins/coreutils, which handle
-# it fine.
 new_tmpdir() {
   mktemp -d "${TMPDIR:-/tmp}/release-sh-test.XXXXXX"
 }
@@ -186,7 +180,7 @@ test_rejects_a_readme_with_no_changelog_heading() {
   fi
 }
 
-### Cli (subprocess, like the Python suite) ####################################
+### Cli #######################################################################
 
 test_plan_exits_3_when_no_changesets() {
   local d status
@@ -243,11 +237,7 @@ test_apply_edits_the_readme_and_deletes_changesets() {
   rm -rf "$d"
 }
 
-### Extra coverage beyond the Python suite ######################################
-# (behaviours the task spec calls out explicitly: CRLF tolerance, README.md
-#  skipped case-insensitively, version format rejected before arithmetic,
-#  malformed changeset failing loudly at CLI level, plan/entries/notes never
-#  writing anything.)
+### Contract guarantees ########################################################
 
 test_crlf_tolerance() {
   local text=$'---\r\nbump: minor\r\n---\r\n\r\nAdded an update checker\r\n'

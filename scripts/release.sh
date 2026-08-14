@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 # Compute and apply a release from the changeset files in .changeset/.
 #
-# Split into `plan` (compute, touch nothing), `entries` (list summaries,
-# touch nothing), `notes` (read the changelog, touch nothing) and `apply`
-# (edit the README, delete consumed changesets) so the release workflow's
-# dry-run can call `plan` and be guaranteed to write nothing.
+# Only `apply` writes. `plan`, `entries` and `notes` are read-only, which is
+# what makes the workflow's dry-run safe.
 #
-# Every function below communicates through global variables rather than by
-# printing to stdout and being captured with `$(...)`, on purpose: command
-# substitution strips trailing newlines, which would silently corrupt the
-# changelog text this script edits. Only plain CLI output (the key=value
-# lines, `entries`, `notes`) goes to stdout.
+# Functions return values through globals, not stdout: command substitution
+# strips trailing newlines, which would corrupt the changelog text.
 #
 # Usage:
 #   release.sh plan   --current-version X --changeset-dir D
@@ -97,8 +92,7 @@ _is_valid_bump() {
 _trim() {
   local s="$1"
   s="${s%$'\r'}"
-  # Strip leading/trailing space and tab (whitespace \s in the original
-  # Python regex, minus the newlines mapfile already split on).
+  # Strip leading/trailing space and tab.
   while [[ "$s" == [$' \t']* ]]; do s="${s# }"; s="${s#	}"; done
   while [[ "$s" == *[$' \t'] ]]; do s="${s% }"; s="${s%	}"; done
   printf '%s' "$s"

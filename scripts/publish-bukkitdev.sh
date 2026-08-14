@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
-# Upload the release jar to BukkitDev project 913275 (set-homes-two).
+# Upload the release jar to BukkitDev.
 #
-# The project id is NOT 312833. That id is the original Set Homes (v1) project,
-# and the two are indistinguishable by eye. Verified by following the redirect:
-#   /projects/913275 -> /projects/set-homes-two   (this plugin)
-#   /projects/312833 -> /projects/set-homes       (v1, do not publish here)
-# Re-check the redirect before changing this number.
-#
-# CurseForge has no game-version range syntax, so the supported versions are
-# resolved at release time: every version whose name starts with 1.21. That
-# keeps the list correct as Mojang ships patches without editing this file.
+# CurseForge has no game-version range syntax, so 1.21+ is resolved from the
+# API at release time rather than hardcoded.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# 913275 is set-homes-two. Not 312833 - that is Set Homes v1.
 PROJECT_ID=913275
 API=https://dev.bukkit.org/api
 
@@ -34,9 +28,8 @@ echo "Publishing to BukkitDev with game version ids: $GAME_VERSIONS"
 
 CHANGELOG=$(bash "$SCRIPT_DIR/release.sh" notes --readme README.md --version "$VERSION")
 
-# --arg has jq JSON-escape the changelog for us - it is markdown and may
-# contain quotes, backslashes and newlines, so hand-rolled escaping here
-# would be exactly the fragile thing to avoid.
+# --arg JSON-escapes the changelog; it is markdown and may contain quotes,
+# backslashes and newlines.
 METADATA=$(jq -n \
   --arg changelog "$CHANGELOG" \
   --arg displayName "SetHomesTwo V$VERSION" \

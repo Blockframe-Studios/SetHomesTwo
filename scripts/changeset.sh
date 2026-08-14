@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 # Write a changeset file describing how this change affects the version.
 #
-# Pure bash - no jq, no python. This is the command contributors run, and
-# staying free of extra tooling is the entire point.
-#
 # Run with no arguments for prompts, or:
 #   bash scripts/changeset.sh minor "Summary of the change"
 
