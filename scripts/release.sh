@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Compute and apply a release from the changeset files in .changeset/.
 #
-# Only `apply` writes. `plan`, `entries` and `notes` are read-only, which is
-# what makes the workflow's dry-run safe.
+# Only `apply` writes. `plan`, `entries`, `notes` and `check` are read-only,
+# which is what makes the workflow's dry-run safe.
 #
 # Functions return values through globals, not stdout: command substitution
 # strips trailing newlines, which would corrupt the changelog text.
@@ -12,9 +12,10 @@
 #   release.sh entries --changeset-dir D
 #   release.sh apply  --current-version X --changeset-dir D --readme README.md --date YYYY-MM-DD
 #   release.sh notes  --readme README.md --version X
+#   release.sh check  --changeset-dir D --readme README.md
 
-CHANGELOG_HEADING=$'### Changelog\n'
-CRLF_HEADING=$'### Changelog\r\n'
+# Most specific first: "### Changelog" also ends with "## Changelog".
+CHANGELOG_HEADINGS=($'### Changelog' $'## Changelog')
 
 # ---------------------------------------------------------------------------
 # parse_changeset TEXT
@@ -190,12 +191,21 @@ insert_changelog() {
   local readme="$1" section="$2"
 
   # Match a CRLF README too (any Windows checkout) and keep its endings.
-  local heading="$CHANGELOG_HEADING" eol=$'\n'
-  if [[ "$readme" == *"$CRLF_HEADING"* ]]; then
-    heading="$CRLF_HEADING"
-    eol=$'\r\n'
-  elif [[ "$readme" != *"$heading"* ]]; then
-    INSERT_ERROR="README has no '### Changelog' heading"
+  local heading="" eol=$'\n' candidate
+  for candidate in "${CHANGELOG_HEADINGS[@]}"; do
+    if [[ "$readme" == *"$candidate"$'\r\n'* ]]; then
+      heading="$candidate"$'\r\n'
+      eol=$'\r\n'
+      break
+    fi
+    if [[ "$readme" == *"$candidate"$'\n'* ]]; then
+      heading="$candidate"$'\n'
+      break
+    fi
+  done
+
+  if [ -z "$heading" ]; then
+    INSERT_ERROR="README has no 'Changelog' heading"
     return 1
   fi
 
@@ -267,6 +277,7 @@ usage:
   release.sh entries --changeset-dir D
   release.sh apply   --current-version X --changeset-dir D --readme README.md --date YYYY-MM-DD
   release.sh notes   --readme README.md --version X
+  release.sh check   --changeset-dir D --readme README.md
 EOF
 }
 
@@ -432,6 +443,58 @@ cmd_apply() {
   return 0
 }
 
+# ---------------------------------------------------------------------------
+# cmd_check
+#
+# Rehearses the parts of apply that can fail on someone else's change: a
+# changeset that will not parse, or a README with nowhere to put the changelog.
+# Writes nothing.
+#
+# Passes when DIR holds no changesets. A pull request that ships nothing still
+# has to leave the README insertable, which is how the heading went missing.
+# ---------------------------------------------------------------------------
+cmd_check() {
+  local dir=".changeset" readme="README.md"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --changeset-dir)
+        dir="$2"
+        shift 2
+        ;;
+      --readme)
+        readme="$2"
+        shift 2
+        ;;
+      *)
+        echo "unknown argument: $1" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  if ! collect "$dir"; then
+    echo "$COLLECT_ERROR" >&2
+    return 1
+  fi
+
+  if [ ! -f "$readme" ]; then
+    echo "no such file: $readme" >&2
+    return 1
+  fi
+
+  local readme_text=""
+  IFS= read -r -d '' readme_text < "$readme" || true
+
+  render_section "0.0.0" "1970-01-01" "probe"
+  if ! insert_changelog "$readme_text" "$RENDERED_SECTION"; then
+    echo "$INSERT_ERROR" >&2
+    return 1
+  fi
+
+  printf '%s changeset(s) parse, and %s can take the changelog.\n' "${#COLLECT_PATHS[@]}" "$readme"
+  return 0
+}
+
 cmd_notes() {
   local readme="README.md" version=""
   while [ $# -gt 0 ]; do
@@ -490,6 +553,7 @@ main() {
     entries) cmd_entries "$@" ;;
     apply) cmd_apply "$@" ;;
     notes) cmd_notes "$@" ;;
+    check) cmd_check "$@" ;;
     *)
       _usage
       return 1

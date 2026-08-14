@@ -34,6 +34,7 @@ jobs:
       - name: Run the changeset gate tests
         run: bash scripts/test-require-changeset.sh
 
-      - name: Validate changesets
-        run: |
-          bash scripts/release.sh plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]
+      # Rehearses the release on every pull request. The changelog heading went
+      # missing in a docs change, and nothing noticed until a release ran.
+      - name: Check a release could be applied
+        run: bash scripts/release.sh check --changeset-dir .changeset --readme README.md
