@@ -82,8 +82,6 @@ test_the_pom_requires_a_changeset() {
 }
 
 test_an_unrecognised_path_requires_a_changeset() {
-  # Fail closed: a directory nobody has classified yet is treated as shippable
-  # until someone deliberately exempts it.
   assert_requires "lang/en.yml"
   assert_requires "Dockerfile"
 }

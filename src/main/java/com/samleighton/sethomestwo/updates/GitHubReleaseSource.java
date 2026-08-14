@@ -16,11 +16,6 @@ import java.nio.charset.StandardCharsets;
  */
 public class GitHubReleaseSource implements ReleaseSource {
 
-    /**
-     * The repository moved from Xquiset to Blockframe-Studios. The old path still
-     * redirects, but naming the current owner keeps the check working if GitHub
-     * ever stops honouring that redirect.
-     */
     private static final String LATEST_RELEASE_URL =
             "https://api.github.com/repos/Blockframe-Studios/SetHomesTwo/releases/latest";
 
@@ -62,8 +57,7 @@ public class GitHubReleaseSource implements ReleaseSource {
     /**
      * Pulls tag_name out of a releases API response.
      *
-     * @return the tag, or null for any response that does not carry one - an
-     *         error payload, a rate-limit message, or a proxy's HTML error page
+     * @return the tag, or null when the response does not carry one
      */
     static String tagFrom(String body) {
         if (body == null) return null;

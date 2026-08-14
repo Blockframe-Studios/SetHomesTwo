@@ -9,8 +9,7 @@
 
 CHANGESET_DIR=".changeset"
 
-# Nothing under these prefixes reaches a user's server, so changing them
-# releases nothing.
+# Nothing under these prefixes ships to a user's server.
 EXEMPT_PREFIXES=(
   "$CHANGESET_DIR/"
   ".github/"
@@ -27,9 +26,8 @@ EXEMPT_FILES=(
   ".gitignore"
 )
 
-# Returns 0 when changing this path should force a version bump. Anything not
-# explicitly exempted counts: a directory nobody has classified yet is more
-# safely treated as shippable than waved through.
+# Returns 0 when changing this path should force a version bump. Fails closed:
+# anything not explicitly exempted counts.
 requires_changeset() {
   local path="$1" prefix file
 
@@ -54,7 +52,7 @@ requires_changeset() {
 }
 
 # Returns 0 for a changeset written by changeset.sh. The directory's own README
-# is documentation, and must not be able to satisfy the requirement.
+# must not be able to satisfy the requirement.
 is_changeset() {
   local path="$1"
   case "$path" in

@@ -10,11 +10,8 @@ public final class VersionCompare {
     }
 
     /**
-     * Whether candidate names a strictly newer release than current.
-     * <p>
-     * Anything that is not purely numeric segments - a pre-release suffix, a
-     * codename, an empty or null string - is treated as "not newer" so a stray
-     * tag cannot push an update notice to every server running the plugin.
+     * Whether candidate names a strictly newer release than current. Anything
+     * that is not purely numeric segments is treated as not newer.
      *
      * @param candidate the version offered by the release feed
      * @param current   the version this plugin is running
@@ -27,8 +24,7 @@ public final class VersionCompare {
 
         int segments = Math.max(offered.length, running.length);
         for (int i = 0; i < segments; i++) {
-            // A version that runs out of segments is padded with zeroes, so
-            // "1.2" and "1.2.0" compare equal.
+            // Missing segments are zero, so "1.2" and "1.2.0" compare equal.
             int a = i < offered.length ? offered[i] : 0;
             int b = i < running.length ? running[i] : 0;
             if (a != b) return a > b;

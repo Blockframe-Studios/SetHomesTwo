@@ -22,7 +22,6 @@ class GitHubReleaseSourceTest {
 
     @Test
     void rateLimitResponseHasNoTag() {
-        // What GitHub returns once 60 unauthenticated requests an hour are used up.
         String body = "{\"message\":\"API rate limit exceeded\",\"documentation_url\":\"https://docs.github.com\"}";
 
         assertNull(GitHubReleaseSource.tagFrom(body));

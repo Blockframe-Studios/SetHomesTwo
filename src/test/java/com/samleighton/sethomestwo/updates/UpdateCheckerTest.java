@@ -19,9 +19,8 @@ class UpdateCheckerTest extends ServerTestBase {
 
     @BeforeEach
     void allowUpdateChecks() {
-        // The plugin schedules its own check, against the real GitHub API, during
-        // onEnable. Drop it before re-enabling the setting: the tests below drain
-        // the scheduler, which would otherwise fire that real request.
+        // Drop the plugin's own check before re-enabling the setting: the tests
+        // below drain the scheduler, which would fire that real request.
         server.getScheduler().cancelTasks(plugin);
         plugin.getConfig().set("checkForUpdates", true);
     }
@@ -115,9 +114,8 @@ class UpdateCheckerTest extends ServerTestBase {
 
     @Test
     void scheduledCheckRunsOffTheMainThread() {
-        // The startup delay itself cannot be asserted here: MockBukkit's
-        // waitAsyncTasksFinished drains every queued task regardless of whether
-        // its delay has elapsed, so a test for it would pass without the delay.
+        // The delay itself cannot be asserted: waitAsyncTasksFinished drains
+        // queued tasks whether or not their delay has elapsed.
         AtomicBoolean ranOnMainThread = new AtomicBoolean(true);
         UpdateChecker checker = new UpdateChecker(plugin, "1.2.0", () -> {
             ranOnMainThread.set(server.isPrimaryThread());

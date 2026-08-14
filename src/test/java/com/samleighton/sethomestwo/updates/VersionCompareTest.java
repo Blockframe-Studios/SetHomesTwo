@@ -34,7 +34,6 @@ class VersionCompareTest {
 
     @Test
     void segmentsCompareNumericallyNotLexically() {
-        // "1.10.0" sorts before "1.9.0" as text, which is the bug this guards.
         assertTrue(VersionCompare.isNewer("1.10.0", "1.9.0"));
     }
 
@@ -70,8 +69,6 @@ class VersionCompareTest {
 
     @Test
     void preReleaseSuffixIsNotAnnounced() {
-        // A -SNAPSHOT tag is almost always published by accident. Staying quiet
-        // is better than telling every server to install a dev build.
         assertFalse(VersionCompare.isNewer("1.3.0-SNAPSHOT", "1.2.0"));
     }
 

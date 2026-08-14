@@ -1,9 +1,8 @@
 name: Changeset
 
-# Pull request only, and in its own workflow rather than a job in Tests: a
-# job skipped by an `if:` still reports a check run, so a push-event run would
-# publish a second, skipped "changeset" result for the same commit and could
-# satisfy the required check that the pull request run had failed.
+# Its own workflow rather than a job in Tests: a job skipped by an `if:` still
+# reports a check run, so the push event would publish a second, skipped
+# "changeset" result for the same commit.
 on: pull_request
 
 concurrency:

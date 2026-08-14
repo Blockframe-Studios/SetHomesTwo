@@ -9,7 +9,7 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * Asks a {@link ReleaseSource} whether a newer release exists and, if so, tells
- * the console once at startup and each permitted player as they join.
+ * the console and every player holding {@link #NOTIFY_PERMISSION}.
  */
 public class UpdateChecker {
 
@@ -17,20 +17,14 @@ public class UpdateChecker {
 
     public static final String RELEASES_URL = "https://github.com/Blockframe-Studios/SetHomesTwo/releases";
 
-    /**
-     * The first check waits for the server to finish starting rather than adding
-     * network latency to boot.
-     */
+    /** Keeps the request off the boot path. */
     public static final long STARTUP_DELAY_TICKS = 100L;
 
     private final Plugin plugin;
     private final String currentVersion;
     private final ReleaseSource source;
 
-    /**
-     * The newer tag once one has been seen, otherwise null. Written from the
-     * async check and read from the main thread, hence volatile.
-     */
+    /** Written by the async check, read from the main thread. */
     private volatile String availableVersion;
 
     public UpdateChecker(Plugin plugin, String currentVersion, ReleaseSource source) {
@@ -40,23 +34,19 @@ public class UpdateChecker {
     }
 
     /**
-     * Runs the check off the main thread once the server has settled. A network
-     * call on the main thread stalls every player on the server for its duration.
+     * Runs the check off the main thread, once the server has settled.
      */
     public void checkLater() {
         plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-            // Read when the task fires rather than when it is scheduled, so a
-            // reload that turns the setting off is honoured before any request
-            // leaves the server.
+            // Read when the task fires, so a reload can still turn the check off.
             if (!plugin.getConfig().getBoolean("checkForUpdates", true)) return;
             checkNow();
         }, STARTUP_DELAY_TICKS);
     }
 
     /**
-     * Contacts the release source and records the result. Never throws: a server
-     * with no outbound network is not a broken server, so a failure here is
-     * reported at info level and otherwise ignored.
+     * Contacts the release source and records the result. Never throws; a failed
+     * check is logged at info level and otherwise ignored.
      */
     public void checkNow() {
         String latestTag;
@@ -79,13 +69,9 @@ public class UpdateChecker {
     }
 
     /**
-     * Tells everyone already connected when the check lands. Without this an
-     * admin who joins inside the startup delay is never told: the join listener
-     * is the only other reader and it has already run for them.
-     *
-     * <p>The sweep is handed to the main thread because {@link #checkNow()} runs
-     * off it, and the server stopping inside the startup delay would otherwise
-     * leave a task being scheduled against a disabled plugin.
+     * Covers players who joined before the check landed - the join listener has
+     * already run for them. Hops to the main thread because {@link #checkNow()}
+     * runs off it.
      */
     private void notifyPlayersAlreadyOnline() {
         if (!plugin.isEnabled()) return;
@@ -104,10 +90,6 @@ public class UpdateChecker {
         return availableVersion;
     }
 
-    /**
-     * Sends the notice to a player who is allowed to see it. Players who cannot
-     * replace the jar are deliberately left alone.
-     */
     public void notifyIfUpdateAvailable(Player player) {
         String version = availableVersion;
         if (version == null) return;
