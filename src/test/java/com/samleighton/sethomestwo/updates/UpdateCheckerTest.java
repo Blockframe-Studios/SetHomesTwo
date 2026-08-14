@@ -2,6 +2,7 @@ package com.samleighton.sethomestwo.updates;
 
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
+import org.bukkit.Bukkit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -152,5 +153,63 @@ class UpdateCheckerTest extends ServerTestBase {
         server.getScheduler().waitAsyncTasksFinished();
 
         assertEquals(0, calls.get());
+    }
+
+    @Test
+    void playerAlreadyOnlineIsNotifiedWhenTheCheckLands() {
+        TestPlayer player = playerAllowedToSeeNotices();
+        UpdateChecker checker = checkerFor("v1.3.0");
+
+        checker.checkLater();
+        server.getScheduler().waitAsyncTasksFinished();
+        server.getScheduler().performOneTick();
+
+        assertTrue(player.nextMessage().contains("v1.3.0"));
+        assertTrue(player.nextMessage().contains("github.com"));
+    }
+
+    @Test
+    void playerAlreadyOnlineWithoutPermissionIsNotNotifiedWhenTheCheckLands() {
+        TestPlayer player = addPlayer();
+        UpdateChecker checker = checkerFor("v1.3.0");
+
+        checker.checkLater();
+        server.getScheduler().waitAsyncTasksFinished();
+        server.getScheduler().performOneTick();
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void playerAlreadyOnlineIsNotNotifiedWhenAlreadyUpToDate() {
+        TestPlayer player = playerAllowedToSeeNotices();
+        UpdateChecker checker = checkerFor("v1.2.0");
+
+        checker.checkLater();
+        server.getScheduler().waitAsyncTasksFinished();
+        server.getScheduler().performOneTick();
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void playersAlreadyOnlineAreNotifiedFromTheMainThread() {
+        AtomicBoolean onMainThread = new AtomicBoolean();
+        TestPlayer player = new TestPlayer(server, "MainThreadWatcher") {
+            @Override
+            public void sendMessage(String message) {
+                onMainThread.set(Bukkit.isPrimaryThread());
+                super.sendMessage(message);
+            }
+        };
+        server.addPlayer(player);
+        player.addAttachment(plugin, UpdateChecker.NOTIFY_PERMISSION, true);
+        UpdateChecker checker = checkerFor("v1.3.0");
+
+        checker.checkLater();
+        server.getScheduler().waitAsyncTasksFinished();
+        server.getScheduler().performOneTick();
+
+        assertTrue(onMainThread.get());
     }
 }

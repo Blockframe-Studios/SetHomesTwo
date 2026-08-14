@@ -74,6 +74,27 @@ public class UpdateChecker {
         Bukkit.getLogger().info(
                 "SetHomesTwo " + latestTag + " is available (running " + currentVersion + "). " + RELEASES_URL
         );
+
+        notifyPlayersAlreadyOnline();
+    }
+
+    /**
+     * Tells everyone already connected when the check lands. Without this an
+     * admin who joins inside the startup delay is never told: the join listener
+     * is the only other reader and it has already run for them.
+     *
+     * <p>The sweep is handed to the main thread because {@link #checkNow()} runs
+     * off it, and the server stopping inside the startup delay would otherwise
+     * leave a task being scheduled against a disabled plugin.
+     */
+    private void notifyPlayersAlreadyOnline() {
+        if (!plugin.isEnabled()) return;
+
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                notifyIfUpdateAvailable(player);
+            }
+        });
     }
 
     /**
