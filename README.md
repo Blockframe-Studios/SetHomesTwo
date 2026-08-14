@@ -213,7 +213,7 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 Releases are automated. A pull request that should change the version adds a
 changeset:
 
-    python3 scripts/changeset.py
+    bash scripts/changeset.sh
 
 It asks whether the change is a patch, minor or major and for a one-line
 summary, then writes a file under `.changeset/`.

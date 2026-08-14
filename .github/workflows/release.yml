@@ -43,10 +43,9 @@ jobs:
         id: plan
         run: |
           CURRENT=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
 
           set +e
-          PLAN=$(python3 scripts/release.py plan --current-version "$CURRENT" --changeset-dir .changeset)
+          PLAN=$(bash scripts/release.sh plan --current-version "$CURRENT" --changeset-dir .changeset)
           STATUS=$?
           set -e
 
@@ -62,15 +61,7 @@ jobs:
 
           echo "$PLAN"
           echo "release=true" >> "$GITHUB_OUTPUT"
-          NEXT=$(echo "$PLAN" | python3 -c 'import json,sys; print(json.load(sys.stdin)["next"])')
-          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
-
-          DELIM="PLANEOF_$(openssl rand -hex 8)"
-          {
-            echo "plan_json<<$DELIM"
-            echo "$PLAN"
-            echo "$DELIM"
-          } >> "$GITHUB_OUTPUT"
+          echo "$PLAN" >> "$GITHUB_OUTPUT"
 
       - name: Apply the version and changelog
         if: steps.plan.outputs.release == 'true'
@@ -79,7 +70,7 @@ jobs:
           NEXT: ${{ steps.plan.outputs.next }}
         run: |
           mvn -B versions:set -DnewVersion="$NEXT" -DgenerateBackupPoms=false
-          python3 scripts/release.py apply \
+          bash scripts/release.sh apply \
             --current-version "$CURRENT" \
             --changeset-dir .changeset \
             --readme README.md \
@@ -92,13 +83,17 @@ jobs:
       - name: Stop here on a dry run
         if: steps.plan.outputs.release == 'true' && inputs.dry_run
         env:
-          PLAN_JSON: ${{ steps.plan.outputs.plan_json }}
+          BUMP: ${{ steps.plan.outputs.bump }}
+          CURRENT: ${{ steps.plan.outputs.current }}
+          NEXT: ${{ steps.plan.outputs.next }}
         run: |
           echo "Dry run. Nothing has been committed, tagged or published."
           echo "--- README changelog diff ---"
           git --no-pager diff -- README.md
           echo "--- release plan ---"
-          echo "$PLAN_JSON"
+          echo "bump=$BUMP"
+          echo "current=$CURRENT"
+          echo "next=$NEXT"
 
       - name: Dry run - resolve BukkitDev game versions
         if: steps.plan.outputs.release == 'true' && inputs.dry_run
@@ -110,16 +105,15 @@ jobs:
             exit 0
           fi
           curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" https://dev.bukkit.org/api/game/versions \
-            | python3 -c '
-          import json, sys
-          versions = json.load(sys.stdin)
-          matched = [v for v in versions if str(v.get("name", "")).startswith("1.21")]
-          print("Resolved %d game versions for 1.21:" % len(matched))
-          for v in matched:
-              print("  %s -> %s" % (v.get("name"), v.get("id")))
-          if not matched:
-              sys.exit("No 1.21 game versions matched - the live upload would fail here.")
-          '
+            | jq -r '
+              [ .[] | select((.name // "") | startswith("1.21")) ] as $matched
+              | if ($matched | length) == 0 then
+                  error("No 1.21 game versions matched - the live upload would fail here.")
+                else
+                  "Resolved \($matched | length) game versions for 1.21:",
+                  ($matched[] | "  \(.name) -> \(.id)")
+                end
+            '
 
       - name: Commit and tag
         if: steps.plan.outputs.release == 'true' && !inputs.dry_run
@@ -154,15 +148,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           VERSION: ${{ steps.plan.outputs.next }}
         run: |
-          NOTES=$(python3 - <<'PY'
-          import re, io
-          text = io.open("README.md", encoding="utf-8").read()
-          import os
-          version = os.environ["VERSION"]
-          match = re.search(r"^#### " + re.escape(version) + r" \(.*?\)\n\n(.*?)(?=\n#### |\Z)", text, re.S | re.M)
-          print(match.group(1).strip() if match else "")
-          PY
-          )
+          NOTES=$(bash scripts/release.sh notes --readme README.md --version "$VERSION")
           gh release create "v$VERSION" "SetHomesTwo.V$VERSION.jar" \
             --title "SetHomesTwo V$VERSION" \
             --notes "$NOTES"

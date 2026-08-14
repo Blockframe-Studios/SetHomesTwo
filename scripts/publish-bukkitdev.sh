@@ -6,6 +6,8 @@
 # keeps the list correct as Mojang ships patches without editing this file.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 PROJECT_ID=312833
 API=https://dev.bukkit.org/api
 
@@ -15,37 +17,31 @@ if [ -z "${CURSEFORGE_TOKEN:-}" ]; then
 fi
 
 GAME_VERSIONS=$(curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" "$API/game/versions" \
-  | python3 -c '
-import json, sys
-versions = json.load(sys.stdin)
-ids = [v["id"] for v in versions if str(v.get("name", "")).startswith("1.21")]
-if not ids:
-    sys.stderr.write("no 1.21 game versions returned by the API\n")
-    sys.exit(1)
-print(json.dumps(ids))
-')
+  | jq -c '[.[] | select((.name // "") | startswith("1.21")) | .id]')
+
+if [ "$(echo "$GAME_VERSIONS" | jq 'length')" -eq 0 ]; then
+  echo "no 1.21 game versions returned by the API" >&2
+  exit 1
+fi
 
 echo "Publishing to BukkitDev with game version ids: $GAME_VERSIONS"
 
-CHANGELOG=$(python3 - <<'PY'
-import io, os, re
-text = io.open("README.md", encoding="utf-8").read()
-version = os.environ["VERSION"]
-match = re.search(r"^#### " + re.escape(version) + r" \(.*?\)\n\n(.*?)(?=\n#### |\Z)", text, re.S | re.M)
-print(match.group(1).strip() if match else "")
-PY
-)
+CHANGELOG=$(bash "$SCRIPT_DIR/release.sh" notes --readme README.md --version "$VERSION")
 
-METADATA=$(python3 -c '
-import json, os, sys
-print(json.dumps({
-    "changelog": sys.argv[1],
-    "changelogType": "markdown",
-    "displayName": "SetHomesTwo V" + os.environ["VERSION"],
-    "releaseType": "release",
-    "gameVersions": json.loads(sys.argv[2]),
-}))
-' "$CHANGELOG" "$GAME_VERSIONS")
+# --arg has jq JSON-escape the changelog for us - it is markdown and may
+# contain quotes, backslashes and newlines, so hand-rolled escaping here
+# would be exactly the fragile thing to avoid.
+METADATA=$(jq -n \
+  --arg changelog "$CHANGELOG" \
+  --arg displayName "SetHomesTwo V$VERSION" \
+  --argjson gameVersions "$GAME_VERSIONS" \
+  '{
+    changelog: $changelog,
+    changelogType: "markdown",
+    displayName: $displayName,
+    releaseType: "release",
+    gameVersions: $gameVersions
+  }')
 
 RESPONSE=$(curl -sS -w '\n%{http_code}' -X POST "$API/projects/$PROJECT_ID/upload-file" \
   -H "X-Api-Token: $CURSEFORGE_TOKEN" \

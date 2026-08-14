@@ -29,8 +29,8 @@ jobs:
         run: mvn -B verify
 
       - name: Run the release script tests
-        run: python3 scripts/test_release.py
+        run: bash scripts/test-release.sh
 
       - name: Validate changesets
         run: |
-          python3 scripts/release.py plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]
+          bash scripts/release.sh plan --current-version 0.0.0 --changeset-dir .changeset || [ $? -eq 3 ]

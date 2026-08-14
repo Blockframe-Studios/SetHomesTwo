@@ -4,12 +4,12 @@ Every pull request that should change the released version adds one file here.
 
 Create it with:
 
-    python3 scripts/changeset.py
+    bash scripts/changeset.sh
 
 It asks for the kind of change and a one-line summary, then writes the file
 and stages it. Pass arguments to skip the prompts:
 
-    python3 scripts/changeset.py minor "Notify operators when a newer release is available"
+    bash scripts/changeset.sh minor "Notify operators when a newer release is available"
 
 A pull request with no changeset releases nothing, which is what you want for
 documentation, tests, CI and refactors. Holding a changeset back is also how

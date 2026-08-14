@@ -96,7 +96,6 @@ $RECYCLE.BIN/
 *.lnk
 
 target/
-scripts/__pycache__/
 
 pom.xml.tag
 pom.xml.releaseBackup
