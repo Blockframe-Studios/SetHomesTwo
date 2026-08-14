@@ -208,6 +208,22 @@ Please feel free to donate via the button below, any amount is greatly appreciat
 - **Q: How can I give players permission to set named homes?**
   **A:** You will need to install the permission plugin, [LuckPerms](https://luckperms.net/download) then configure the config.yml to allow for multiple groups (see above for example config).
 
+### Releasing
+
+Releases are automated. A pull request that should change the version adds a
+changeset:
+
+    python3 scripts/changeset.py
+
+It asks whether the change is a patch, minor or major and for a one-line
+summary, then writes a file under `.changeset/`.
+
+When a pull request carrying a changeset merges to `master`, the release
+workflow computes the next version from every changeset present, updates
+`pom.xml` and the changelog below, runs the full test suite, tags the commit,
+and publishes to GitHub Releases and BukkitDev. A pull request with no
+changeset releases nothing.
+
 ### Changelog
 
 #### 1.2.0 (2026-08-12)
