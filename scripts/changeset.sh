@@ -6,21 +6,9 @@
 
 BUMPS=(patch minor major)
 
-DESCRIPTIONS_patch="bug fix, no behaviour change for existing setups"
-DESCRIPTIONS_minor="new functionality, existing setups keep working"
-DESCRIPTIONS_major=$'breaking - a command, permission, config key or\n               runtime requirement changes for existing servers'
-
 ADJECTIVES=(brave calm clever eager gentle happy kind lucky proud quiet swift tidy warm wise)
 ANIMALS=(badgers cranes dolphins foxes herons lynxes otters pandas ravens seals tigers wolves)
 VERBS=(arrive dance gather listen return shine sing smile travel wander wave wonder)
-
-_description_for() {
-  case "$1" in
-    patch) printf '%s' "$DESCRIPTIONS_patch" ;;
-    minor) printf '%s' "$DESCRIPTIONS_minor" ;;
-    major) printf '%s' "$DESCRIPTIONS_major" ;;
-  esac
-}
 
 _is_valid_bump() {
   case "$1" in
@@ -48,7 +36,7 @@ prompt_bump() {
   printf '\n  What kind of change is this?\n\n'
   local i=1 b
   for b in "${BUMPS[@]}"; do
-    printf '    %d) %-7s %s\n' "$i" "$b" "$(_description_for "$b")"
+    printf '    %d) %-7s %s\n' "$i" "$b"
     i=$((i + 1))
   done
   printf '\n'
@@ -72,7 +60,7 @@ prompt_bump() {
 
 # Sets PROMPTED_SUMMARY.
 prompt_summary() {
-  printf '\n  Summary (one line, written for server owners):\n'
+  printf '\n  Summary:\n'
   local summary
   while true; do
     if ! read -r -p "  > " summary; then
