@@ -53,12 +53,29 @@ public class ServerUtil {
      * Whether homes are barred from a world. Blacklist rows hold lowercased
      * world names, so the world is compared directly rather than through an
      * environment mapping, which could only ever address the first three worlds.
+     *
+     * @param world The world to check
+     * @return true when the world is blacklisted
      */
     public static boolean isWorldBlacklisted(World world) {
+        Dao<String> blacklistDao = new BlacklistDao();
+        return isWorldBlacklisted(world, blacklistDao.getAll());
+    }
+
+    /**
+     * Same rule as {@link #isWorldBlacklisted(World)}, against an
+     * already-fetched blacklist so a caller checking many worlds does not
+     * query once per check.
+     *
+     * @param world             The world to check
+     * @param blacklistedWorlds Lowercased world names, as returned by
+     *                          {@code new BlacklistDao().getAll()}
+     * @return true when the world is blacklisted
+     */
+    public static boolean isWorldBlacklisted(World world, List<String> blacklistedWorlds) {
         if (world == null) return false;
 
-        Dao<String> blacklistDao = new BlacklistDao();
-        return blacklistDao.getAll().contains(world.getName().toLowerCase());
+        return blacklistedWorlds.contains(world.getName().toLowerCase());
     }
 
     /**

@@ -2,6 +2,7 @@ package com.samleighton.sethomestwo.dao;
 
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
+import com.samleighton.sethomestwo.utils.ServerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -69,7 +70,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.setPlayerName(rs.getString("player_name"));
 
                 World homeWorld = Bukkit.getWorld(UUID.fromString(home.getWorld()));
-                if (homeWorld != null && blacklistedWorlds.contains(homeWorld.getName().toLowerCase())) {
+                if (ServerUtil.isWorldBlacklisted(homeWorld, blacklistedWorlds)) {
                     if (!this.isAdmin) home.setDescription("Cannot teleport here: dimension blacklisted");
 
                     home.setCanTeleport(this.isAdmin);
