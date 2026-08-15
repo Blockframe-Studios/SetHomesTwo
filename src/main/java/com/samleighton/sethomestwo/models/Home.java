@@ -43,6 +43,7 @@ public class Home implements Serializable {
     private float pitch;
     private float yaw;
     private boolean canTeleport = true;
+    private String playerName;
 
     public Home(String playerUUID, String material, Location location, String name, String description, String dimension) {
         setUUIDBelongingTo(playerUUID);
@@ -182,6 +183,14 @@ public class Home implements Serializable {
 
     public void setCanTeleport(boolean canTeleport) {
         this.canTeleport = canTeleport;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 
     public void teleport(Player player) {

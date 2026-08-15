@@ -5,7 +5,9 @@ import com.samleighton.sethomestwo.utils.DatabaseUtil;
 import com.samleighton.sethomestwo.utils.ServerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                         rs.getString("dimension")
                 );
                 home.setId(rs.getInt("id"));
+                home.setPlayerName(rs.getString("player_name"));
 
                 String dimension = home.getDimension();
                 List<String> blacklistedDimensions = blacklistEntryDao.getAll();
@@ -124,6 +127,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                         rs.getString("dimension")
                 );
                 home.setId(rs.getInt("id"));
+                home.setPlayerName(rs.getString("player_name"));
             }
         } catch (SQLException e) {
             Bukkit.getLogger().severe("There was an issue reading a home for player " + playerUUID);
@@ -138,7 +142,14 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         if(!(object instanceof Home)) return false;
 
         Home home = (Home) object;
-        String sql = "insert into %s (player_uuid, world, material, name, description, x, y, z, pitch, yaw, dimension) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+        String playerName = home.getPlayerName();
+        if (playerName == null) {
+            Player owner = Bukkit.getPlayer(UUID.fromString(home.getUUIDBelongingTo()));
+            playerName = owner == null ? null : owner.getName();
+        }
+
+        String sql = "insert into %s (player_uuid, world, material, name, description, x, y, z, pitch, yaw, dimension, player_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         return DatabaseUtil.execute(
                 this.conn,
                 String.format(sql, TABLE_NAME),
@@ -152,7 +163,8 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.getZ(),
                 home.getPitch(),
                 home.getYaw(),
-                home.getDimension()
+                home.getDimension(),
+                playerName
         );
     }
 
@@ -182,7 +194,13 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
             return false;
         }
 
-        String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ? where id = ? and player_uuid = ?";
+        String playerName = home.getPlayerName();
+        if (playerName == null) {
+            Player owner = Bukkit.getPlayer(UUID.fromString(home.getUUIDBelongingTo()));
+            playerName = owner == null ? null : owner.getName();
+        }
+
+        String sql = "update %s set material = ?, world = ?, name = ?, description = ?, x = ?, y = ?, z = ?, pitch = ?, yaw = ?, dimension = ?, player_name = ? where id = ? and player_uuid = ?";
         return DatabaseUtil.executeUpdate(
                 this.conn,
                 String.format(sql, TABLE_NAME),
@@ -196,6 +214,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.getPitch(),
                 home.getYaw(),
                 home.getDimension(),
+                playerName,
                 home.getId(),
                 home.getUUIDBelongingTo()
         ) > 0;
@@ -234,6 +253,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                         rs.getString("dimension")
                 );
                 home.setId(rs.getInt("id"));
+                home.setPlayerName(rs.getString("player_name"));
                 return home;
             }
         } catch (SQLException e) {
@@ -277,5 +297,40 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         }
 
         return false;
+    }
+
+    /**
+     * The UUID of the player who owns homes stored under this name, or null.
+     */
+    public String uuidForName(String playerName) {
+        String sql = "select player_uuid from players_homes where player_name = ? limit 1;";
+
+        try (PreparedStatement statement = this.conn.prepareStatement(sql)) {
+            statement.setString(1, playerName);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() ? rs.getString("player_uuid") : null;
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("Could not resolve player name " + playerName);
+            return null;
+        }
+    }
+
+    /**
+     * Point every home this player owns at their current name.
+     */
+    public boolean refreshPlayerName(UUID playerUUID, String playerName) {
+        String sql = "update players_homes set player_name = ? where player_uuid = ?;";
+
+        try (PreparedStatement statement = this.conn.prepareStatement(sql)) {
+            statement.setString(1, playerName);
+            statement.setString(2, playerUUID.toString());
+            statement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("Could not refresh player name for " + playerUUID);
+            return false;
+        }
     }
 }
