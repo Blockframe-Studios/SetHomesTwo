@@ -4,9 +4,11 @@ import com.samleighton.sethomestwo.support.ServerTestBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.junit.jupiter.api.Test;
+import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PermissionBundlesTest extends ServerTestBase {
@@ -50,5 +52,36 @@ class PermissionBundlesTest extends ServerTestBase {
                 server.getPluginManager().getPermission("sh2.player").getDefault());
         assertEquals(PermissionDefault.OP,
                 server.getPluginManager().getPermission("sh2.admin").getDefault());
+    }
+
+    @Test
+    void stockDefaultsGiveOrdinaryPlayersTheirNodesAndNothingElse() {
+        PlayerMock player = addPlayer();
+
+        for (String node : new String[]{"sh2.create-home", "sh2.go-home", "sh2.list-homes",
+                "sh2.delete-home", "sh2.teleport", "sh2.give-homes-item", "sh2.manage-homes",
+                "sh2.move-home"}) {
+            assertTrue(player.hasPermission(node), node);
+        }
+
+        for (String node : new String[]{"sh2.import-homes", "sh2.get-player-homes",
+                "sh2.set-max-homes", "sh2.add-to-blacklist", "sh2.remove-from-blacklist",
+                "sh2.get-blacklisted-dimensions", "sh2.go-player-home", "sh2.delete-player-home",
+                "sh2.move-player-home", "sh2.bypass-max-homes", "sh2.bypass-blacklist",
+                "sh2.bypass-teleport-delay", "sh2.update-notify"}) {
+            assertFalse(player.hasPermission(node), node);
+        }
+    }
+
+    @Test
+    void stockDefaultsGiveOperatorsEverything() {
+        PlayerMock op = addPlayer();
+        op.setOp(true);
+
+        for (String node : new String[]{"sh2.create-home", "sh2.manage-homes", "sh2.import-homes",
+                "sh2.get-player-homes", "sh2.delete-player-home", "sh2.bypass-blacklist",
+                "sh2.bypass-max-homes", "sh2.bypass-teleport-delay"}) {
+            assertTrue(op.hasPermission(node), node);
+        }
     }
 }

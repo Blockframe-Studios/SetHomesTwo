@@ -73,67 +73,67 @@ commands:
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
-    default: true
+    default: false
   sh2.go-home:
     description: Allow player to teleport to homes by command.
-    default: true
+    default: false
   sh2.list-homes:
     description: Allow player to list and view their homes.
-    default: true
+    default: false
   sh2.delete-home:
     description: Allow player to delete their own homes.
-    default: true
+    default: false
   sh2.teleport:
     description: Allow player to teleport to created homes.
-    default: true
+    default: false
   sh2.give-homes-item:
     description: Allow player to get the homes viewing item.
-    default: true
+    default: false
   sh2.manage-homes:
     description: Allow player to rename, move, re-icon, and delete their homes from the GUI.
-    default: true
+    default: false
   sh2.move-home:
     description: Allow a player to move their own homes by command.
-    default: true
+    default: false
   sh2.add-to-blacklist:
     description: Add dimensions to the blacklist.
-    default: op
+    default: false
   sh2.remove-from-blacklist:
     description: Remove dimensions from the blacklist.
-    default: op
+    default: false
   sh2.get-blacklisted-dimensions:
     description: List blacklisted dimensions.
-    default: op
+    default: false
   sh2.get-player-homes:
     description: View another player's homes.
-    default: op
+    default: false
   sh2.set-max-homes:
     description: Set the max number of homes.
-    default: op
+    default: false
   sh2.import-homes:
     description: Import homes from other plugins.
-    default: op
+    default: false
   sh2.update-notify:
     description: Be told on join when a newer SetHomesTwo release is available.
-    default: op
+    default: false
   sh2.go-player-home:
     description: Teleport to another player's home.
-    default: op
+    default: false
   sh2.delete-player-home:
     description: Delete another player's home.
-    default: op
+    default: false
   sh2.move-player-home:
     description: Move another player's home.
-    default: op
+    default: false
   sh2.bypass-max-homes:
     description: Create homes beyond the configured maximum.
-    default: op
+    default: false
   sh2.bypass-blacklist:
     description: Create, move and teleport to homes in blacklisted worlds.
-    default: op
+    default: false
   sh2.bypass-teleport-delay:
     description: Teleport instantly, without the countdown or the cancel on move.
-    default: op
+    default: false
   sh2.player:
     description: Everything an ordinary player needs.
     default: true

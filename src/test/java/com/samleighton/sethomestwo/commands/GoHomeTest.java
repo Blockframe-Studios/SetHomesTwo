@@ -168,4 +168,18 @@ class GoHomeTest extends ServerTestBase {
         assertEquals(100, player.getLocation().getBlockZ());
         assertNull(new TeleportAttemptsDao().get(player));
     }
+
+    @Test
+    void withoutTheTeleportNodeNoRouteToAHomeWorks() {
+        TestPlayer player = addPlayer();
+        HomeFixtures.persist(HomeFixtures.home(player, "base", new Location(overworld, 60, 70, 60)));
+        player.addAttachment(plugin, "sh2.teleport", false);
+        player.teleport(new Location(overworld, 0, 70, 0));
+
+        server.execute("go-home", player, "base").assertSucceeded();
+        server.getScheduler().performTicks(100L);
+
+        assertTrue(player.nextMessage().contains("permission"));
+        assertEquals(0.0, player.getLocation().getX());
+    }
 }

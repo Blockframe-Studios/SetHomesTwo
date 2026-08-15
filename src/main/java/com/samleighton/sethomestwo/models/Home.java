@@ -194,6 +194,13 @@ public class Home implements Serializable {
     }
 
     public void teleport(Player player) {
+        // The single choke point for every teleport route: the go-home command,
+        // the admin command, and a click in the homes menu.
+        if (!player.hasPermission("sh2.teleport")) {
+            ChatUtils.invalidPermissions(player);
+            return;
+        }
+
         // Home is blacklisted guard
         if(!this.getCanTeleport()) {
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportToBlacklistedDimension", UserError.TELEPORT_IS_BLACKLISTED.getValue()));

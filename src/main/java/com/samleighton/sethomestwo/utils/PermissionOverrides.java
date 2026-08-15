@@ -43,6 +43,11 @@ public final class PermissionOverrides {
                 continue;
             }
 
+            // Detach before the no-op check below. A node whose default already
+            // matches still needs freeing from its bundle, or the bundle keeps
+            // granting the very thing the admin just asked to take away.
+            if (parsed != PermissionDefault.TRUE) detachFromBundles(pluginManager, node);
+
             PermissionDefault previous = permission.getDefault();
             if (previous == parsed) continue;
 
@@ -57,6 +62,26 @@ public final class PermissionOverrides {
                         "SetHomesTwo: sh2.import-homes is no longer operator only. "
                                 + "/import-homes <source> confirm writes homes for every player on the server.");
             }
+        }
+    }
+
+    /**
+     * Drop a node from every bundle that lists it as a child, so the node's own
+     * default governs again.
+     *
+     * Bukkit writes the children of a default-granted parent straight into a
+     * player's effective permission map, and hasPermission reads that map before
+     * falling back to the node's default. Lowering the default alone therefore
+     * denies nothing while a bundle still grants the node.
+     */
+    private static void detachFromBundles(PluginManager pluginManager, String node) {
+        for (Permission bundle : pluginManager.getPermissions()) {
+            if (bundle.getChildren().remove(node) == null) continue;
+
+            pluginManager.recalculatePermissionDefaults(bundle);
+            Bukkit.getLogger().info(String.format(
+                    "SetHomesTwo: removed %s from the %s bundle so the override applies.",
+                    node, bundle.getName()));
         }
     }
 }

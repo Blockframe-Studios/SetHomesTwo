@@ -189,6 +189,8 @@ Two bundles group those nodes so you can grant a whole role at once:
 | `sh2.player` | everyone | `sh2.create-home`, `sh2.go-home`, `sh2.list-homes`, `sh2.delete-home`, `sh2.teleport`, `sh2.give-homes-item`, `sh2.manage-homes`, `sh2.move-home` |
 | `sh2.admin` | OP | `sh2.player`, plus every OP node in the table above |
 
+The bundles are what actually grant these nodes. Each individual node is declared off in `plugin.yml`, and `sh2.player` or `sh2.admin` switches its whole set on, which is why denying a bundle takes that whole set away in one line. Granting or denying an individual node still works exactly as the table describes.
+
 Note that `sh2.move-home` sits in `sh2.player`, not behind `sh2.manage-homes`. If you took `sh2.manage-homes` away to stop players relocating their homes, deny `sh2.move-home` as well or `/uhome` gives the ability back.
 
 </details>

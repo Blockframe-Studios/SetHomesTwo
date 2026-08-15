@@ -44,14 +44,14 @@ class BypassNodesTest extends ServerTestBase {
     }
 
     @Test
-    void theNodesDefaultToOpAndSitInTheAdminBundle() {
+    void theNodesAreGrantedOnlyByTheAdminBundle() {
         Permission adminBundle = server.getPluginManager().getPermission("sh2.admin");
         assertNotNull(adminBundle);
 
         for (String node : NODES) {
             Permission permission = server.getPluginManager().getPermission(node);
             assertNotNull(permission, node);
-            assertEquals(PermissionDefault.OP, permission.getDefault(), node);
+            assertEquals(PermissionDefault.FALSE, permission.getDefault(), node);
             assertTrue(adminBundle.getChildren().containsKey(node), node);
         }
     }
