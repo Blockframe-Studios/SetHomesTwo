@@ -185,6 +185,38 @@ test_blank_lines_are_ignored() {
     "$(printf 'README.md\n\n' | bash "$REQUIRE_SH" > /dev/null 2>&1; printf '%s' "$?")"
 }
 
+# -- down-merge bypass --
+
+# Runs the script the way the workflow does for a pull request, with the base
+# branch and labels supplied.
+run_cli_pr() {
+  local base="$1" labels="$2"
+  shift 2
+  printf '%s
+' "$@" | PR_BASE="$base" PR_LABELS="$labels" bash "$REQUIRE_SH" > /dev/null 2>&1
+  printf '%s' "$?"
+}
+
+test_a_labelled_downmerge_into_dev_passes() {
+  assert_status "a downmerge-labelled pull request into dev needs no changeset" 0     "$(run_cli_pr dev downmerge "src/main/java/Foo.java" "pom.xml")"
+}
+
+test_the_label_is_found_among_others() {
+  assert_status "the label is found alongside other labels" 0     "$(run_cli_pr dev "bug,downmerge,java" "src/main/java/Foo.java")"
+}
+
+test_an_unlabelled_pull_request_into_dev_still_fails() {
+  assert_status "an unlabelled pull request into dev still needs a changeset" 1     "$(run_cli_pr dev "" "src/main/java/Foo.java")"
+}
+
+test_the_label_does_not_bypass_a_release() {
+  assert_status "the label does not bypass a pull request into master" 1     "$(run_cli_pr master downmerge "src/main/java/Foo.java")"
+}
+
+test_the_label_is_matched_whole() {
+  assert_status "a label merely containing the word does not bypass" 1     "$(run_cli_pr dev "not-downmerge" "src/main/java/Foo.java")"
+}
+
 test_plugin_source_requires_a_changeset
 test_the_pom_requires_a_changeset
 test_an_unrecognised_path_requires_a_changeset
@@ -208,6 +240,12 @@ test_the_failure_names_the_offending_files
 test_the_failure_explains_the_fix
 test_carriage_returns_are_tolerated
 test_blank_lines_are_ignored
+
+test_a_labelled_downmerge_into_dev_passes
+test_the_label_is_found_among_others
+test_an_unlabelled_pull_request_into_dev_still_fails
+test_the_label_does_not_bypass_a_release
+test_the_label_is_matched_whole
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 if [ "$FAIL" -gt 0 ]; then

@@ -3,7 +3,10 @@ name: Changeset
 # Its own workflow rather than a job in Tests: a job skipped by an `if:` still
 # reports a check run, so the push event would publish a second, skipped
 # "changeset" result for the same commit.
-on: pull_request
+on:
+  pull_request:
+    # labeled and unlabeled so applying the downmerge label re-runs the gate.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,6 +27,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
           set -euo pipefail
           # Written to a file rather than piped, so a failing gh call cannot be
