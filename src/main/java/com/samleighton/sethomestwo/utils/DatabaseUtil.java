@@ -56,7 +56,8 @@ public class DatabaseUtil {
      * SQLite has no ADD COLUMN IF NOT EXISTS, so the column list is read first.
      */
     private static boolean ensureColumn(Connection connection, String table, String column, String type) {
-        try (ResultSet rs = connection.createStatement().executeQuery("pragma table_info(" + table + ");")) {
+        try (Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery("pragma table_info(" + table + ");")) {
             while (rs.next()) {
                 if (column.equalsIgnoreCase(rs.getString("name"))) return true;
             }
