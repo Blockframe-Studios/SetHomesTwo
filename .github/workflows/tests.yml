@@ -34,6 +34,9 @@ jobs:
       - name: Run the changeset gate tests
         run: bash scripts/test-require-changeset.sh
 
+      - name: Run the BukkitDev publish tests
+        run: bash scripts/test-publish-bukkitdev.sh
+
       # Rehearses the release on every pull request. The changelog heading went
       # missing in a docs change, and nothing noticed until a release ran.
       - name: Check a release could be applied
