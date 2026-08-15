@@ -305,4 +305,38 @@ class CreateHomeTest extends ServerTestBase {
 
         assertEquals(Material.CHEST.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
     }
+
+    @Test
+    void anEmptyHomeNameIsRejected() {
+        PlayerMock player = addPlayer();
+
+        // A double space makes Bukkit hand over an empty first argument. Saved
+        // as-is it produces a home no command can name, so no command can
+        // delete it either.
+        server.dispatchCommand(player, "create-home  base");
+
+        assertTrue(player.nextMessage().contains("must not be blank"));
+        assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
+    }
+
+    @Test
+    void aHomeNameOverTheConfiguredLimitIsRejected() {
+        PlayerMock player = addPlayer();
+        plugin.getConfig().set("maxHomeNameLength", 8);
+
+        server.execute("create-home", player, "waaaaaaaaaaaytoolong").assertSucceeded();
+
+        assertTrue(player.nextMessage().contains("too long"));
+        assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
+    }
+
+    @Test
+    void aNameWithinTheConfiguredLimitIsAccepted() {
+        PlayerMock player = addPlayer();
+        plugin.getConfig().set("maxHomeNameLength", 8);
+
+        server.execute("create-home", player, "base").assertSucceeded();
+
+        assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
+    }
 }

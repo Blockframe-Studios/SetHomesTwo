@@ -7,6 +7,7 @@ import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.HomeNameValidator;
 import com.samleighton.sethomestwo.utils.HomesUtil;
 import com.samleighton.sethomestwo.utils.ServerUtil;
 import net.luckperms.api.LuckPerms;
@@ -62,7 +63,27 @@ public class CreateHome implements CommandExecutor {
 
         // Extract parameters from command arguments. A bare command is the v1
         // form, naming the home rather than erroring.
-        String homeName = args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0];
+        String homeName = HomeNameValidator.normalise(
+                args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0]);
+
+        // The same shape rules the GUI rename applies. A double space yields an
+        // empty first argument, and an empty name leaves a home that no command
+        // can address, so none can delete it either.
+        int maxNameLength = ConfigUtil.getConfig().getInt("maxHomeNameLength", 32);
+
+        switch (HomeNameValidator.validate(homeName, maxNameLength)) {
+            case EMPTY:
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString(
+                        "invalidHomeName", UserError.INVALID_HOME_NAME.getValue()));
+                return true;
+            case TOO_LONG:
+                String tooLong = ConfigUtil.getConfig().getString(
+                        "homeNameTooLong", UserError.HOME_NAME_TOO_LONG.getValue());
+                ChatUtils.sendError(player, String.format(tooLong, maxNameLength));
+                return true;
+            default:
+                break;
+        }
 
         Material mat = null;
         int descriptionStart = 1;
