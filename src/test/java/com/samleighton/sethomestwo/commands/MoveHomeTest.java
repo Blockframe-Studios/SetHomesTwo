@@ -71,4 +71,27 @@ class MoveHomeTest extends ServerTestBase {
 
         assertEquals(5.0, new HomesDao().getAll(player.getUniqueId()).get(0).getX());
     }
+
+    @Test
+    void movingAcrossWorldsRewritesTheWorldAndDimension() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "base");
+        player.teleport(new Location(nether, 8, 70, 8));
+
+        server.execute("move-home", player, "base").assertSucceeded();
+
+        Home moved = new HomesDao().getAll(player.getUniqueId()).get(0);
+        assertEquals(nether.getUID().toString(), moved.getWorld());
+        assertEquals("NETHER", moved.getDimension());
+    }
+
+    @Test
+    void theWrongNumberOfArgumentsShowsTheUsage() {
+        PlayerMock player = addPlayer();
+
+        server.execute("move-home", player).assertSucceeded();
+
+        assertTrue(player.nextMessage().contains("Incorrect number of arguments"));
+        assertTrue(player.nextMessage().contains("Usage: /move-home <name>"));
+    }
 }
