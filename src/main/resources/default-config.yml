@@ -120,3 +120,20 @@ checkForUpdates: true
 # repeat it. A release nobody has been told about is always announced straight
 # away, whatever this is set to. Use 0 to announce each release exactly once.
 updateReminderDays: 7
+
+# -- PERMISSIONS --
+# Override the built-in default for any sh2.* permission node, without
+# installing a permissions plugin. Accepted values: true | false | op | not-op
+#
+# This only changes the default. An explicit grant or deny in LuckPerms still
+# wins. Unknown node names are ignored with a warning in the server log, and
+# every applied override is logged at startup.
+#
+# There is no wildcard form. List each node you want to change.
+#
+# Take care with sh2.import-homes: /import-homes <source> confirm writes homes
+# for every player on the server, and the command has no second permission check.
+#
+# permissions:
+#   sh2.import-homes: op
+#   sh2.manage-homes: false

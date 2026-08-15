@@ -1,0 +1,62 @@
+package com.samleighton.sethomestwo.utils;
+
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
+
+/**
+ * Applies the config.yml permissions block over the defaults declared in
+ * plugin.yml. Only a node's default changes, so an explicit grant or deny in a
+ * permissions plugin still wins.
+ */
+public final class PermissionOverrides {
+
+    private PermissionOverrides() {
+    }
+
+    public static void apply() {
+        ConfigurationSection section = ConfigUtil.getConfig().getConfigurationSection("permissions");
+        if (section == null) return;
+
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
+        // Deep keys, because Bukkit splits a dotted key such as sh2.import-homes
+        // into nested sections. The intermediate sections are not nodes.
+        for (String node : section.getKeys(true)) {
+            if (section.isConfigurationSection(node)) continue;
+
+            Permission permission = pluginManager.getPermission(node);
+            if (permission == null) {
+                Bukkit.getLogger().warning(String.format(
+                        "SetHomesTwo: ignoring unknown permission node '%s' in config.yml.", node));
+                continue;
+            }
+
+            String raw = section.getString(node);
+            PermissionDefault parsed = raw == null ? null : PermissionDefault.getByName(raw);
+            if (parsed == null) {
+                Bukkit.getLogger().warning(String.format(
+                        "SetHomesTwo: ignoring permission '%s', value '%s' is not one of true, false, op, not-op.",
+                        node, raw));
+                continue;
+            }
+
+            PermissionDefault previous = permission.getDefault();
+            if (previous == parsed) continue;
+
+            permission.setDefault(parsed);
+            pluginManager.recalculatePermissionDefaults(permission);
+
+            Bukkit.getLogger().info(String.format(
+                    "SetHomesTwo: permission default changed, %s %s to %s", node, previous, parsed));
+
+            if ("sh2.import-homes".equals(node) && parsed != PermissionDefault.OP) {
+                Bukkit.getLogger().warning(
+                        "SetHomesTwo: sh2.import-homes is no longer operator only. "
+                                + "/import-homes <source> confirm writes homes for every player on the server.");
+            }
+        }
+    }
+}

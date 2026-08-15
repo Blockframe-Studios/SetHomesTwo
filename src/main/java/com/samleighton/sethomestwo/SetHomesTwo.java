@@ -19,6 +19,7 @@ import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.RemoveDimensionTabCompleter;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
+import com.samleighton.sethomestwo.utils.PermissionOverrides;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -54,6 +55,9 @@ public class SetHomesTwo extends JavaPlugin {
 
         // Create config
         initConfig();
+
+        // After the config exists, before commands are registered.
+        PermissionOverrides.apply();
 
         // Built before the listeners: the join listener is handed this instance.
         updateChecker = new UpdateChecker(
