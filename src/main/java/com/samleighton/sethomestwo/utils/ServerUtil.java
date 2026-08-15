@@ -80,11 +80,12 @@ public class ServerUtil {
 
     /**
      * Resolve a player name to a UUID, falling back to the names stored against
-     * saved homes so offline players can be addressed.
+     * saved homes so offline players can be addressed. The match ignores case,
+     * which is safe because Minecraft names are unique ignoring case.
      */
     public static String getPlayerUUID(String playerName) {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getName().equals(playerName)) {
+            if (player.getName().equalsIgnoreCase(playerName)) {
                 return player.getUniqueId().toString();
             }
         }

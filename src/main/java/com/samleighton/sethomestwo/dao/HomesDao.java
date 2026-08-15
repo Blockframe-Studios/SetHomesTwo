@@ -309,7 +309,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
      * guessing when more than one distinct UUID claims the name.
      */
     public String uuidForName(String playerName) {
-        String sql = "select distinct player_uuid from players_homes where player_name = ?;";
+        String sql = "select distinct player_uuid from players_homes where lower(player_name) = lower(?);";
 
         try (PreparedStatement statement = this.conn.prepareStatement(sql)) {
             statement.setString(1, playerName);
@@ -332,7 +332,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
      * make the name resolve ambiguously. The joining player takes precedence.
      */
     public boolean refreshPlayerName(UUID playerUUID, String playerName) {
-        String clearSql = "update players_homes set player_name = null where player_name = ? and player_uuid <> ?;";
+        String clearSql = "update players_homes set player_name = null where lower(player_name) = lower(?) and player_uuid <> ?;";
         String claimSql = "update players_homes set player_name = ? where player_uuid = ?;";
 
         try (PreparedStatement clear = this.conn.prepareStatement(clearSql);

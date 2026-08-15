@@ -29,6 +29,24 @@ class ServerUtilOfflineLookupTest extends ServerTestBase {
     }
 
     @Test
+    void anOnlinePlayerResolvesRegardlessOfCase() {
+        PlayerMock player = addPlayer("Steve");
+
+        assertEquals(player.getUniqueId().toString(), ServerUtil.getPlayerUUID("steve"));
+    }
+
+    @Test
+    void anOfflinePlayerResolvesRegardlessOfCase() {
+        PlayerMock player = addPlayer("Steve");
+        HomeFixtures.persist(player, "base");
+        String expected = player.getUniqueId().toString();
+
+        player.disconnect();
+
+        assertEquals(expected, ServerUtil.getPlayerUUID("sTeVe"));
+    }
+
+    @Test
     void aPlayerWithNoHomesAndNoSessionDoesNotResolve() {
         assertNull(ServerUtil.getPlayerUUID("Nobody"));
     }
