@@ -2,6 +2,7 @@ package com.samleighton.sethomestwo.utils;
 
 import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.Dao;
+import com.samleighton.sethomestwo.dao.HomesDao;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -61,14 +62,17 @@ public class ServerUtil {
         return blacklistedDimensions.contains(getDimensionsMap().get(dimension));
     }
 
-    public static String getPlayerUUID(String playerName){
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            String name = player.getDisplayName();
-            if(name.equals(playerName)) {
+    /**
+     * Resolve a player name to a UUID, falling back to the names stored against
+     * saved homes so offline players can be addressed.
+     */
+    public static String getPlayerUUID(String playerName) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getName().equals(playerName)) {
                 return player.getUniqueId().toString();
             }
         }
 
-        return null;
+        return new HomesDao().uuidForName(playerName);
     }
 }

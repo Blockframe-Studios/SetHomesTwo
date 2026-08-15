@@ -63,10 +63,10 @@ public class GetPlayerHomes implements CommandExecutor {
         Dao<Home> homesDao = new HomesDao(true);
         List<Home> playersHomes = homesDao.getAll(UUID.fromString(uuidString));
 
-        Player player = Bukkit.getPlayer(UUID.fromString(uuidString));
-        if (player == null) return true;
+        Player target = Bukkit.getPlayer(UUID.fromString(uuidString));
+        String targetName = target == null ? args[0] : target.getDisplayName();
 
-        HomesGui adminGui = new HomesGui(requester, "Homes of " + player.getDisplayName());
+        HomesGui adminGui = new HomesGui(requester, "Homes of " + targetName);
         adminGui.setHomes(playersHomes);
 
         GuiSession session = plugin.getGuiSessionMap().computeIfAbsent(requester.getUniqueId(), uuid -> new GuiSession(new HomesGui(requester)));
@@ -74,7 +74,7 @@ public class GetPlayerHomes implements CommandExecutor {
         adminGui.displayInventory(requester);
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
-            Bukkit.getLogger().info(String.format("%s is viewing homes of player %s", requester.getDisplayName(), player.getDisplayName()));
+            Bukkit.getLogger().info(String.format("%s is viewing homes of player %s", requester.getDisplayName(), targetName));
 
         return true;
     }
