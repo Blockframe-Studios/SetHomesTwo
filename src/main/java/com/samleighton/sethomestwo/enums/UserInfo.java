@@ -8,7 +8,10 @@ public enum UserInfo {
     NO_MAX_HOMES("There is no max number of homes."),
     NO_BLACKLISTED_DIMENSIONS("No dimensions are blacklisted"),
     MOVED_TO_SAFE_SPOT("Your home was not safe to stand in, so you were moved to the nearest safe spot."),
-    MOVE_HOME_USAGE("Usage: /move-home <name>");
+    MOVE_HOME_USAGE("Usage: /move-home <name>"),
+    GO_PLAYER_HOME_USAGE("Usage: /go-player-home <player> <home>"),
+    DELETE_PLAYER_HOME_USAGE("Usage: /delete-player-home <player> <home>"),
+    MOVE_PLAYER_HOME_USAGE("Usage: /move-player-home <player> <home>");
 
     private final String value;
 

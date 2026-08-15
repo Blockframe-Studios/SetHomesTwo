@@ -16,6 +16,7 @@ import com.samleighton.sethomestwo.updates.UpdateChecker;
 import com.samleighton.sethomestwo.tabcompleters.BlacklistTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.HomesTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.PlayerHomesTabCompleter;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
 import com.samleighton.sethomestwo.utils.PermissionOverrides;
@@ -192,6 +193,18 @@ public class SetHomesTwo extends JavaPlugin {
         PluginCommand moveHome = Objects.requireNonNull(this.getCommand("move-home"));
         moveHome.setExecutor(new MoveHome());
         moveHome.setTabCompleter(new HomesTabCompleter());
+
+        PluginCommand goPlayerHome = Objects.requireNonNull(this.getCommand("go-player-home"));
+        goPlayerHome.setExecutor(new GoPlayerHome());
+        goPlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand deletePlayerHome = Objects.requireNonNull(this.getCommand("delete-player-home"));
+        deletePlayerHome.setExecutor(new DeletePlayerHome());
+        deletePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand movePlayerHome = Objects.requireNonNull(this.getCommand("move-player-home"));
+        movePlayerHome.setExecutor(new MovePlayerHome());
+        movePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
     }
 
     /**

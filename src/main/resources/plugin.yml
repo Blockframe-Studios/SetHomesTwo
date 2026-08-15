@@ -55,6 +55,21 @@ commands:
     permission: sh2.move-home
     aliases:
       - uhome
+  go-player-home:
+    description: Teleport to another player's home.
+    permission: sh2.go-player-home
+    aliases:
+      - home-of
+  delete-player-home:
+    description: Delete another player's home.
+    permission: sh2.delete-player-home
+    aliases:
+      - delhome-of
+  move-player-home:
+    description: Move another player's home to your location.
+    permission: sh2.move-player-home
+    aliases:
+      - uhome-of
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
@@ -101,6 +116,15 @@ permissions:
   sh2.update-notify:
     description: Be told on join when a newer SetHomesTwo release is available.
     default: op
+  sh2.go-player-home:
+    description: Teleport to another player's home.
+    default: op
+  sh2.delete-player-home:
+    description: Delete another player's home.
+    default: op
+  sh2.move-player-home:
+    description: Move another player's home.
+    default: op
   sh2.player:
     description: Everything an ordinary player needs.
     default: true
@@ -125,3 +149,6 @@ permissions:
       sh2.set-max-homes: true
       sh2.import-homes: true
       sh2.update-notify: true
+      sh2.go-player-home: true
+      sh2.delete-player-home: true
+      sh2.move-player-home: true
