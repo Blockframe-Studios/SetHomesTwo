@@ -126,7 +126,7 @@ jobs:
           git add pom.xml README.md .changeset
           git commit -m "chore(release): $NEXT"
           git tag -a "v$NEXT" -m "Release $NEXT"
-          git push origin HEAD:master --follow-tags
+          git push --atomic origin HEAD:master --follow-tags
           git ls-remote --exit-code --tags origin "refs/tags/v$NEXT" > /dev/null \
             || { echo "Tag v$NEXT did not reach the remote"; exit 1; }
 
