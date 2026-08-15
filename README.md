@@ -65,6 +65,7 @@ Your players keep their homes. The old plugin does not even need to be running, 
 - Happy with the numbers? Run it again with `confirm` on the end.
 - Existing homes are never overwritten, so re-running it is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 - `/import-homes sethomes` also brings across the v1 world blacklist, added to your Set Homes Two blacklist alongside the homes. Re-running never adds a world twice.
+- Admin commands (`/get-player-homes`, `/home-of`, `/delhome-of`, `/uhome-of`) work on an imported player immediately, for any player this server has seen before - the importer resolves their name from the server's own player cache, no network lookup involved. A player the server has never seen imports with no name and is picked up automatically on their first join, same as any other offline lookup.
 
 Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
 

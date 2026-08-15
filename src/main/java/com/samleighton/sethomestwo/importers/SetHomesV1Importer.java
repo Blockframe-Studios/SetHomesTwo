@@ -88,15 +88,21 @@ public class SetHomesV1Importer implements HomesImporter {
                     (float) home.getDouble("pitch")
             );
 
+            String playerName = HomesImporter.resolveCachedName(UUID.fromString(playerUUID));
+            if (playerName != null) report.namesResolved++;
+
             if (!dryRun) {
-                boolean saved = homesDao.save(new Home(
+                Home importedHome = new Home(
                         playerUUID,
                         HomesImporter.defaultMaterial(),
                         location,
                         homeName,
                         home.getString("desc"),
                         world.getEnvironment().toString()
-                ));
+                );
+                importedHome.setPlayerName(playerName);
+
+                boolean saved = homesDao.save(importedHome);
                 if (!saved) {
                     report.failed++;
                     return;
