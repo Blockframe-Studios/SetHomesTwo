@@ -33,7 +33,7 @@ Open your homes with `/homes`, or right-click the homes item. Then:
 | --- | --- |
 | Left-click a home | Teleports you there |
 | Right-click a home | Opens the management menu below |
-| Rename | Opens an anvil prompt - type the new name |
+| Rename | Opens an anvil prompt for the new name |
 | Move home here | Repoints the home at where you are standing |
 | Set icon to held item | The home's icon becomes whatever you are holding |
 | Delete | Asks for confirmation first |
@@ -42,7 +42,7 @@ Open your homes with `/homes`, or right-click the homes item. Then:
 
 Home names are unique per player and ignore case, so `base` and `Base` are the same home. Management is controlled by `sh2.manage-homes`, which defaults to granted.
 
-Changing a home's icon works the same way - hold the item you want and click **Set icon to held item**:
+Changing a home's icon works the same way. Hold the item you want and click **Set icon to held item**:
 
 ![Changing a home's icon to the item being held](docs/img/change-icon.gif)
 
@@ -50,7 +50,7 @@ Changing a home's icon works the same way - hold the item you want and click **S
 
 ![The stand-still countdown before a teleport](docs/img/teleport-delay.gif)
 
-By default players wait three seconds before a teleport fires, and moving cancels it - so a home is not a free escape from a fight. Set `delay: 0` for instant teleports, or `cancelOnMove: false` to let players walk during the countdown.
+By default players wait three seconds before a teleport fires, and moving cancels it, so a home is not a free escape from a fight. Set `delay: 0` for instant teleports, or `cancelOnMove: false` to let players walk during the countdown.
 
 ![Instant teleport](docs/img/teleport-instant.gif)
 
@@ -58,7 +58,7 @@ Before it drops anyone anywhere, Set Homes Two checks the destination is safe to
 
 ## Coming from EssentialsX or Set Homes v1
 
-Your players keep their homes. The old plugin does not even need to be running - the importer reads its data files directly.
+Your players keep their homes. The old plugin does not even need to be running, because the importer reads its data files directly.
 
 - Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
 - Happy with the numbers? Run it again with `confirm` on the end.
@@ -116,7 +116,7 @@ Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `
 
 ## Configuration
 
-Settings live in **`plugins/SetHomesTwo/config.yml`** on your server, written the first time the plugin starts. Edit it in any text editor, save, then **restart the server** - there is no in-game reload command, so changes do not apply until the server comes back up.
+Settings live in **`plugins/SetHomesTwo/config.yml`** on your server, written the first time the plugin starts. Edit it in any text editor, save, then **restart the server**. There is no in-game reload command, so changes do not apply until the server comes back up.
 
 The file is commented throughout, and every message the plugin sends can be rewritten in it. These are the settings most servers actually change:
 
@@ -139,9 +139,9 @@ That table is only the common settings. For the complete list, see [`default-con
 <details>
 <summary>Upgrading? Your existing config.yml will not gain the new settings</summary>
 
-Set Homes Two never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks - but you cannot change a setting you cannot see.
+Set Homes Two never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
 
-To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart - a fresh one is written with everything in it, and you can copy your old values across.
+To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
 
 </details>
 
@@ -171,7 +171,7 @@ Install LuckPerms, set `maxHomeEnabled: true` and `maxHomesType: groups`, then r
 <details>
 <summary>Can I run it alongside EssentialsX?</summary>
 
-Not comfortably - both register `/sethome`, `/home` and `/delhome`, and whichever loads last wins. Import your homes, then remove EssentialsX.
+Not comfortably. Both register `/sethome`, `/home` and `/delhome`, and whichever loads last wins. Import your homes, then remove EssentialsX.
 
 </details>
 
@@ -190,7 +190,7 @@ In a SQLite database in `plugins/SetHomesTwo/`. Nothing external to install and 
 
 ## Support
 
-Found a bug or want a feature? Open an issue on [GitHub](https://github.com/Blockframe-Studios/SetHomesTwo/issues) - it gets seen faster than a comment on this page.
+Found a bug or want a feature? Open an issue on [GitHub](https://github.com/Blockframe-Studios/SetHomesTwo/issues). It gets seen faster than a comment on this page.
 
 [Source](https://github.com/Blockframe-Studios/SetHomesTwo) | [Report a bug](https://github.com/Blockframe-Studios/SetHomesTwo/issues) | [Donate](https://www.paypal.com/donate/?business=8LXCRFX27B37C&no_recurring=0&item_name=Thanks+for+your+support.+It+helps+keep+this+plugin+up+to+date+%3A%29&currency_code=USD)
 
