@@ -50,9 +50,11 @@ METADATA=$(jq -n \
     gameVersions: $gameVersions
   }')
 
+# -F drops everything after a ';' in a value; the changelog contains them.
+# The jar still needs -F, for '@'.
 RESPONSE=$(curl -sS -w '\n%{http_code}' -X POST "$API/projects/$PROJECT_ID/upload-file" \
   -H "X-Api-Token: $CURSEFORGE_TOKEN" \
-  -F "metadata=$METADATA" \
+  --form-string "metadata=$METADATA" \
   -F "file=@SetHomesTwo.V$VERSION.jar")
 
 BODY=$(echo "$RESPONSE" | head -n -1)
