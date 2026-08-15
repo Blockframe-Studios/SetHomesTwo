@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MoveHomeTest extends ServerTestBase {
@@ -32,7 +33,9 @@ class MoveHomeTest extends ServerTestBase {
 
         server.execute("move-home", player, "nope").assertSucceeded();
 
-        assertTrue(player.nextMessage().contains("no longer exists"));
+        String message = player.nextMessage();
+        assertTrue(message.contains("nope"), message);
+        assertFalse(message.contains("%s"), message);
     }
 
     @Test

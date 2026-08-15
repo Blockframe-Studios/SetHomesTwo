@@ -40,8 +40,8 @@ public class MoveHome implements CommandExecutor {
 
         switch (HomeActionsGui.applyMove(player, home)) {
             case GONE:
-                ChatUtils.sendError(player, ConfigUtil.getConfig().getString(
-                        "homeNoLongerExists", UserError.HOME_NO_LONGER_EXISTS.getValue()));
+                ChatUtils.sendError(player, String.format(ConfigUtil.getConfig().getString(
+                        "homeDoesNotExist", UserError.HOME_DOES_NOT_EXIST.getValue()), args[0]));
                 break;
             case BLACKLISTED:
                 ChatUtils.sendError(player, ConfigUtil.getConfig().getString(

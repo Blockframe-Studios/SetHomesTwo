@@ -208,13 +208,13 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         admin.addAttachment(plugin, "sh2.go-player-home", true);
 
         server.execute("delete-player-home", admin, "Steve", "nope").assertSucceeded();
-        assertTrue(admin.nextMessage().contains("no longer exists"));
+        assertUnknownHomeNamed(admin, "nope");
 
         server.execute("move-player-home", admin, "Steve", "nope").assertSucceeded();
-        assertTrue(admin.nextMessage().contains("no longer exists"));
+        assertUnknownHomeNamed(admin, "nope");
 
         server.execute("go-player-home", admin, "Steve", "nope").assertSucceeded();
-        assertTrue(admin.nextMessage().contains("no longer exists"));
+        assertUnknownHomeNamed(admin, "nope");
 
         assertEquals(1, new HomesDao(true).getAll(target.getUniqueId()).size());
     }
@@ -234,5 +234,15 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         String reply = admin.nextMessage();
         assertTrue(reply.contains("Steve"), reply);
         assertTrue(reply.contains("base"), reply);
+    }
+
+    /**
+     * Every command must name the home it looked for. "That home no longer
+     * exists" is the GUI's message, for a home that vanished mid-menu.
+     */
+    private static void assertUnknownHomeNamed(PlayerMock admin, String typed) {
+        String message = admin.nextMessage();
+        assertTrue(message.contains(typed), message);
+        assertFalse(message.contains("%s"), message);
     }
 }

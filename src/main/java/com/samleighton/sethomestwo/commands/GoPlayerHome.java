@@ -50,8 +50,8 @@ public class GoPlayerHome implements CommandExecutor {
         Home home = new HomesDao(true).get(UUID.fromString(uuid), args[1]);
 
         if (home == null) {
-            ChatUtils.sendError(admin, ConfigUtil.getConfig().getString(
-                    "homeNoLongerExists", UserError.HOME_NO_LONGER_EXISTS.getValue()));
+            ChatUtils.sendError(admin, String.format(ConfigUtil.getConfig().getString(
+                    "homeDoesNotExist", UserError.HOME_DOES_NOT_EXIST.getValue()), args[1]));
             return true;
         }
 
