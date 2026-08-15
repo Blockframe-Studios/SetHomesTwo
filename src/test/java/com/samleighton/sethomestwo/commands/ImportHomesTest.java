@@ -1,5 +1,6 @@
 package com.samleighton.sethomestwo.commands;
 
+import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,23 @@ class ImportHomesTest extends ServerTestBase {
         String summary = player.nextMessage();
         assertFalse(summary.contains("blacklist"));
         assertNull(player.nextMessage());
+    }
+
+    @Test
+    void dryRunHintIsNotShownWhenTheOnlyBlacklistActivityIsAlreadyPresent() throws IOException {
+        writeEmptyHomesFile();
+        new BlacklistDao().save("world_nether");
+        writeBlacklist("world_nether");
+        PlayerMock player = authorizedPlayer();
+
+        server.execute("import-homes", player, "sethomes").assertSucceeded();
+
+        boolean sawHint = false;
+        String message;
+        while ((message = player.nextMessage()) != null) {
+            if (message.contains("Dry run only")) sawHint = true;
+        }
+        assertFalse(sawHint);
     }
 
     @Test

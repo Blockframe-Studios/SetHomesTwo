@@ -21,7 +21,7 @@ public class ImportReport {
                 verb, imported, skippedExisting, skippedWorldMissing, failed
         );
         if (namesResolved > 0) {
-            base += String.format(" %d player name(s) resolved from the server's cache.", namesResolved);
+            base += String.format(" %d home(s) matched an owner name.", namesResolved);
         }
         return base;
     }

@@ -46,7 +46,7 @@ public class ImportHomes implements CommandExecutor {
         for (String note : report.configNotes) {
             commandSender.sendMessage("Config: " + note);
         }
-        if (dryRun && (report.imported > 0 || report.hasBlacklistActivity())) {
+        if (dryRun && (report.imported > 0 || report.blacklistImported > 0)) {
             commandSender.sendMessage(String.format("Dry run only. Run '/import-homes %s confirm' to apply.", importer.sourceName()));
         }
         return true;

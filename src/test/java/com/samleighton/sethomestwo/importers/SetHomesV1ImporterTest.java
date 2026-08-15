@@ -103,7 +103,7 @@ class SetHomesV1ImporterTest extends ServerTestBase {
 
         assertEquals(1, report.blacklistImported);
         assertTrue(new BlacklistDao().getAll().contains("world_the_void"));
-        assertTrue(report.warnings.stream().anyMatch(w -> w.contains("world_the_void")));
+        assertTrue(report.warnings.stream().anyMatch(w -> w.contains("world_the_void") && w.contains("/remove-from-blacklist")));
     }
 
     @Test

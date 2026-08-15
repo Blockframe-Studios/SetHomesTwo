@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public interface HomesImporter {
@@ -21,20 +23,20 @@ public interface HomesImporter {
     }
 
     /**
-     * The name this server has cached for a player, or null if it has never
-     * seen them. Deliberately scans {@link Bukkit#getOfflinePlayers()} rather
-     * than calling {@code Bukkit.getOfflinePlayer(UUID)} directly: the latter
-     * always returns a non-null object by contract (real Bukkit backs it with
-     * usercache.json and reports a null name on a genuine miss, but that
-     * distinction should not be relied on for null-safety), and never makes a
-     * network call either way, so an import can never block on Mojang.
+     * Every name this server has cached, snapshotted once so a bulk import
+     * doesn't re-scan {@link Bukkit#getOfflinePlayers()} per home - on a
+     * server with a large playerdata directory that call is expensive to
+     * repeat thousands of times in one command. Deliberately built from
+     * {@code getOfflinePlayers()} rather than calling
+     * {@code Bukkit.getOfflinePlayer(UUID)} per player: the latter always
+     * returns a non-null object by contract, and never makes a network call
+     * either way, so an import can never block on Mojang.
      */
-    static String resolveCachedName(UUID uuid) {
+    static Map<UUID, String> cachedNames() {
+        Map<UUID, String> names = new HashMap<>();
         for (OfflinePlayer candidate : Bukkit.getOfflinePlayers()) {
-            if (candidate.getUniqueId().equals(uuid)) {
-                return candidate.getName();
-            }
+            names.put(candidate.getUniqueId(), candidate.getName());
         }
-        return null;
+        return names;
     }
 }

@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class SetHomesV1Importer implements HomesImporter {
@@ -34,6 +35,10 @@ public class SetHomesV1Importer implements HomesImporter {
 
         YamlConfiguration source = YamlConfiguration.loadConfiguration(homesFile);
         HomesDao homesDao = new HomesDao();
+        // Snapshotted once, not per home - Bukkit.getOfflinePlayers() scans the
+        // server's playerdata directory, which is expensive to re-run for every
+        // imported home on a server with years of accumulated players.
+        Map<UUID, String> cachedNames = HomesImporter.cachedNames();
 
         // Named homes: allNamedHomes.<uuid>.<name>.{world,x,y,z,pitch,yaw,desc}
         ConfigurationSection allNamed = source.getConfigurationSection("allNamedHomes");
@@ -42,7 +47,7 @@ public class SetHomesV1Importer implements HomesImporter {
                 ConfigurationSection playerSection = allNamed.getConfigurationSection(uuid);
                 if (playerSection == null) continue;
                 for (String homeName : playerSection.getKeys(false)) {
-                    importOne(homesDao, report, playerSection.getConfigurationSection(homeName), uuid, homeName, dryRun);
+                    importOne(homesDao, report, playerSection.getConfigurationSection(homeName), uuid, homeName, cachedNames, dryRun);
                 }
             }
         }
@@ -51,7 +56,7 @@ public class SetHomesV1Importer implements HomesImporter {
         ConfigurationSection unknown = source.getConfigurationSection("unknownHomes");
         if (unknown != null) {
             for (String uuid : unknown.getKeys(false)) {
-                importOne(homesDao, report, unknown.getConfigurationSection(uuid), uuid, "default", dryRun);
+                importOne(homesDao, report, unknown.getConfigurationSection(uuid), uuid, "default", cachedNames, dryRun);
             }
         }
 
@@ -61,7 +66,7 @@ public class SetHomesV1Importer implements HomesImporter {
         return report;
     }
 
-    private void importOne(HomesDao homesDao, ImportReport report, ConfigurationSection home, String playerUUID, String homeName, boolean dryRun) {
+    private void importOne(HomesDao homesDao, ImportReport report, ConfigurationSection home, String playerUUID, String homeName, Map<UUID, String> cachedNames, boolean dryRun) {
         try {
             if (home == null) {
                 report.failed++;
@@ -89,7 +94,7 @@ public class SetHomesV1Importer implements HomesImporter {
                     (float) home.getDouble("pitch")
             );
 
-            String playerName = HomesImporter.resolveCachedName(UUID.fromString(playerUUID));
+            String playerName = cachedNames.get(UUID.fromString(playerUUID));
             if (playerName != null) report.namesResolved++;
 
             if (!dryRun) {
@@ -122,7 +127,10 @@ public class SetHomesV1Importer implements HomesImporter {
      * empty is normal (v1 shipped it empty by default), not an error. A world
      * absent from this server is still stored - it is harmless to block a world
      * that does not exist - but is called out with a warning in case the name
-     * was a typo.
+     * was a typo. That warning also flags that /remove-from-blacklist refuses
+     * any world name it cannot validate against this server's current worlds,
+     * so an absent one can only be removed once the world exists (or by editing
+     * the database directly).
      */
     private void importBlacklist(File pluginsDir, ImportReport report, boolean dryRun) {
         File blacklistFile = new File(pluginsDir, "SetHomes/world_blacklist.yml");
@@ -144,11 +152,17 @@ public class SetHomesV1Importer implements HomesImporter {
             }
 
             if (Bukkit.getWorld(lowered) == null) {
-                report.warnings.add(String.format("Blacklisted world '%s' does not exist on this server.", lowered));
+                report.warnings.add(String.format(
+                        "Blacklisted world '%s' does not exist on this server. It will still be stored, but /remove-from-blacklist will refuse it until that world exists.",
+                        lowered));
             }
 
             if (!dryRun) {
-                blacklistDao.save(lowered);
+                boolean saved = blacklistDao.save(lowered);
+                if (!saved) {
+                    report.warnings.add(String.format("Blacklisted world '%s' could not be saved.", lowered));
+                    continue;
+                }
             }
 
             // Tracked locally too, so a world repeated in the source file is
