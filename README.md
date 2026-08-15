@@ -132,14 +132,16 @@ The file is commented throughout, and every message the plugin sends can be rewr
 | `inventoryTitle` | `Your homes` | Title of the homes menu. |
 | `maxHomeNameLength` | `32` | Longest home name allowed. |
 
-Per-rank limits need [LuckPerms](https://luckperms.net/download) and `maxHomesType: groups`. The [full annotated config](https://github.com/Blockframe-Studios/SetHomesTwo#example-config) is on GitHub.
+Per-rank limits need [LuckPerms](https://luckperms.net/download) and `maxHomesType: groups`.
+
+That table is only the common settings. For the complete list - every setting the plugin has, each one commented in place - see [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from.
 
 <details>
 <summary>Upgrading? Your existing config.yml will not gain the new settings</summary>
 
 Set Homes Two never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks - but you cannot change a setting you cannot see.
 
-To pick one up, copy the key you want out of the [full config](https://github.com/Blockframe-Studios/SetHomesTwo#example-config) into your file and restart. To start clean, rename your `config.yml` and restart - a fresh one is written with everything in it, and you can copy your old values across.
+To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart - a fresh one is written with everything in it, and you can copy your old values across.
 
 </details>
 
@@ -208,7 +210,7 @@ Behaviour changes to be aware of before updating:
 - Added a home management menu: right-click a home in the homes GUI to rename it, move it to where you are standing, set its icon to the item you are holding, or delete it. Deleting asks for confirmation first, and renaming opens an anvil prompt for the new name.
 - Added a "Right click to edit home" hint to homes in the list, shown only to players who are able to manage them.
 - Added the `sh2.manage-homes` permission, which controls the management menu and defaults to granted.
-- Added config keys for the management menu: `manageHomeTitle`, `renamePromptTitle`, `manageHomeHint`, `maxHomeNameLength`, the button item and name pairs, and the new success and error messages. See the example config above.
+- Added config keys for the management menu: `manageHomeTitle`, `renamePromptTitle`, `manageHomeHint`, `maxHomeNameLength`, the button item and name pairs, and the new success and error messages. See `default-config.yml`.
 - Fixed home updates and deletes not being scoped to the owning player.
 - Fixed the homes list hiding a home behind the previous-page button once a player had 46 or more homes, and showing an empty second page to a player with exactly 45 homes.
 
