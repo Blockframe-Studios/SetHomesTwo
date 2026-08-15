@@ -196,6 +196,10 @@ Found a bug or want a feature? Open an issue on [GitHub](https://github.com/Bloc
 
 ## Changelog
 
+#### 1.2.2 (2026-08-15)
+
+- Fixed the update notice repeating on every join. An available release is now announced once and then held back for `updateReminderDays` (7 by default) before it is mentioned again; a newer release is still announced straight away. Set `updateReminderDays: 0` to announce each release exactly once.
+
 #### 1.2.1 (2026-08-14)
 
 - Added an update notice: the console at startup, and admins holding `sh2.update-notify` as they join, are told when a newer release is on GitHub. Set `checkForUpdates: false` to stop the plugin making the request at all.
