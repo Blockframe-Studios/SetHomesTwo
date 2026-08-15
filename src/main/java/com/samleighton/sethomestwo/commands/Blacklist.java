@@ -117,7 +117,9 @@ public class Blacklist implements CommandExecutor {
 
         for (String dimension : dimensions) {
             if (!ServerUtil.getValidDimensions().contains(dimension)) {
-                ChatUtils.sendError(player, String.format(UserError.INVALID_DIMENSION.getValue(), dimension));
+                ChatUtils.sendError(player, String.format(
+                        ConfigUtil.getConfig().getString("invalidWorld", UserError.INVALID_WORLD.getValue()),
+                        dimension, String.join(", ", ServerUtil.getValidDimensions())));
                 continue;
             }
 
@@ -131,7 +133,9 @@ public class Blacklist implements CommandExecutor {
                 Bukkit.getLogger().info(String.format("Failed to add dimension to blacklist. %s", dimension));
             }
 
-            ChatUtils.sendSuccess(player, String.format(UserSuccess.DIMENSION_ADDED_TO_BLACKLIST.getValue(), dimension));
+            ChatUtils.sendSuccess(player, String.format(
+                    ConfigUtil.getConfig().getString("dimensionAddedToBlacklist", UserSuccess.DIMENSION_ADDED_TO_BLACKLIST.getValue()),
+                    dimension));
         }
 
         return true;
@@ -154,7 +158,9 @@ public class Blacklist implements CommandExecutor {
 
         for (String dimension : dimensions) {
             if (!ServerUtil.getValidDimensions().contains(dimension)) {
-                ChatUtils.sendError(player, String.format(UserError.INVALID_DIMENSION.getValue(), dimension));
+                ChatUtils.sendError(player, String.format(
+                        ConfigUtil.getConfig().getString("invalidWorld", UserError.INVALID_WORLD.getValue()),
+                        dimension, String.join(", ", ServerUtil.getValidDimensions())));
                 continue;
             }
 

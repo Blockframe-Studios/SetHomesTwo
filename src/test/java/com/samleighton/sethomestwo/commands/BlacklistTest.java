@@ -98,7 +98,11 @@ class BlacklistTest extends ServerTestBase {
 
         server.execute("blacklist", player, "add", "not_a_world").assertSucceeded();
 
-        assertTrue(player.nextMessage().contains("not a valid"));
+        String message = player.nextMessage();
+        assertTrue(message.contains("not_a_world"), message);
+        // The old wording advertised nether, overworld and end, none of which
+        // the validator accepts. It must name the server's real worlds instead.
+        assertTrue(message.contains("world_nether"), message);
         assertTrue(new BlacklistDao().getAll().isEmpty());
     }
 
@@ -109,6 +113,17 @@ class BlacklistTest extends ServerTestBase {
     // command line, so these use server.dispatchCommand rather than
     // server.execute, which always reports the canonical command name as the
     // label regardless of which alias was used to look it up.
+
+    @Test
+    void theAddSuccessMessageIsOverridableInConfig() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+        plugin.getConfig().set("dimensionAddedToBlacklist", "Blocked %s.");
+
+        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+
+        assertTrue(player.nextMessage().contains("Blocked world_nether."));
+    }
 
     @Test
     void bareAddToBlacklistAliasWithNoSubcommandStillAdds() {
