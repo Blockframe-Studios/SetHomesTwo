@@ -7,6 +7,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+import java.time.Clock;
+import java.time.Duration;
+
 /**
  * Asks a {@link ReleaseSource} whether a newer release exists and, if so, tells
  * the console and every player holding {@link #NOTIFY_PERMISSION}.
@@ -20,17 +24,31 @@ public class UpdateChecker {
     /** Keeps the request off the boot path. */
     public static final long STARTUP_DELAY_TICKS = 100L;
 
+    /** Days before a still-pending update is mentioned again. 0 means never. */
+    public static final int DEFAULT_REMINDER_DAYS = 7;
+
     private final Plugin plugin;
     private final String currentVersion;
     private final ReleaseSource source;
+    private final UpdateNotificationLog log;
+    private final Clock clock;
 
     /** Written by the async check, read from the main thread. */
     private volatile String availableVersion;
 
     public UpdateChecker(Plugin plugin, String currentVersion, ReleaseSource source) {
+        this(plugin, currentVersion, source,
+                new UpdateNotificationLog(new File(plugin.getDataFolder(), "update-notifications.yml")),
+                Clock.systemUTC());
+    }
+
+    UpdateChecker(Plugin plugin, String currentVersion, ReleaseSource source,
+                  UpdateNotificationLog log, Clock clock) {
         this.plugin = plugin;
         this.currentVersion = currentVersion;
         this.source = source;
+        this.log = log;
+        this.clock = clock;
     }
 
     /**
@@ -94,8 +112,28 @@ public class UpdateChecker {
         String version = availableVersion;
         if (version == null) return;
         if (!player.hasPermission(NOTIFY_PERMISSION)) return;
+        if (!isDue(version)) return;
 
         ChatUtils.sendInfo(player, "SetHomesTwo " + version + " is available (you are on " + currentVersion + ")");
         ChatUtils.sendInfo(player, "Download: " + RELEASES_URL);
+
+        log.record(version, clock.millis());
+    }
+
+    /**
+     * Whether this release is owed an announcement. A release nobody has been
+     * told about is always due, so a newer version is never held back by a
+     * reminder window opened by the one before it.
+     */
+    private boolean isDue(String version) {
+        if (!version.equals(log.lastVersion())) return true;
+
+        long reminderDays = plugin.getConfig().getLong("updateReminderDays", DEFAULT_REMINDER_DAYS);
+        if (reminderDays <= 0) return false;
+
+        // Negative when the server clock has been corrected backwards; treat
+        // that as due rather than staying silent until it catches up again.
+        long elapsed = clock.millis() - log.lastNotifiedAt();
+        return elapsed < 0 || elapsed >= Duration.ofDays(reminderDays).toMillis();
     }
 }
