@@ -188,6 +188,10 @@ public class SetHomesTwo extends JavaPlugin {
 
         PluginCommand importHomes = Objects.requireNonNull(this.getCommand("import-homes"));
         importHomes.setExecutor(new ImportHomes());
+
+        PluginCommand moveHome = Objects.requireNonNull(this.getCommand("move-home"));
+        moveHome.setExecutor(new MoveHome());
+        moveHome.setTabCompleter(new HomesTabCompleter());
     }
 
     /**

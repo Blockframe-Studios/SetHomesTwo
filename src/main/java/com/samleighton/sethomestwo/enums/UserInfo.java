@@ -7,7 +7,8 @@ public enum UserInfo {
     NO_HOMES("You have not setup any homes yet, you can use the /create-home command to create one."),
     NO_MAX_HOMES("There is no max number of homes."),
     NO_BLACKLISTED_DIMENSIONS("No dimensions are blacklisted"),
-    MOVED_TO_SAFE_SPOT("Your home was not safe to stand in, so you were moved to the nearest safe spot.");
+    MOVED_TO_SAFE_SPOT("Your home was not safe to stand in, so you were moved to the nearest safe spot."),
+    MOVE_HOME_USAGE("Usage: /move-home <name>");
 
     private final String value;
 

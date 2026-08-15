@@ -63,6 +63,17 @@ public class HomeActionsGui implements GuiScreen {
         RENAMED
     }
 
+    /**
+     * Why a move ended the way it did. Public so the move-home command, which
+     * lives in a different package, can share the rule the GUI button applies.
+     */
+    public enum MoveOutcome {
+        GONE,
+        BLACKLISTED,
+        UPDATE_FAILED,
+        MOVED
+    }
+
     private final Inventory inv;
     private final int homeId;
     private boolean confirmingDelete = false;
@@ -162,33 +173,21 @@ public class HomeActionsGui implements GuiScreen {
             Home fresh = reloadHome(player, session);
             if (fresh == null) return;
 
-            Location destination = player.getLocation();
-            String destinationDimension = Objects.requireNonNull(destination.getWorld()).getEnvironment().toString();
-
-            // Blacklisted dimension guard, sharing the rule create-home applies.
-            if (ServerUtil.isWorldBlacklisted(destination.getWorld())) {
-                ChatUtils.sendError(player, ConfigUtil.getConfig().getString("cannotMoveToBlacklistedDimension", UserError.CANNOT_MOVE_TO_BLACKLISTED_DIMENSION.getValue()));
-                return;
+            switch (applyMove(player, fresh)) {
+                case BLACKLISTED:
+                    ChatUtils.sendError(player, ConfigUtil.getConfig().getString("cannotMoveToBlacklistedDimension", UserError.CANNOT_MOVE_TO_BLACKLISTED_DIMENSION.getValue()));
+                    return;
+                case UPDATE_FAILED:
+                    ChatUtils.pluginError(player);
+                    return;
+                case MOVED:
+                    String moved = ConfigUtil.getConfig().getString("homeMoved", UserSuccess.HOME_MOVED.getValue());
+                    ChatUtils.sendSuccess(player, String.format(moved, fresh.getName()));
+                    returnToRefreshedList(player, session);
+                    return;
+                default:
+                    return;
             }
-
-            fresh.setWorld(destination.getWorld().getUID().toString());
-            fresh.setX(destination.getX());
-            fresh.setY(destination.getY());
-            fresh.setZ(destination.getZ());
-            fresh.setPitch(destination.getPitch());
-            fresh.setYaw(destination.getYaw());
-            fresh.setDimension(destinationDimension);
-
-            HomesDao homesDao = new HomesDao();
-            if (!homesDao.update(fresh)) {
-                ChatUtils.pluginError(player);
-                return;
-            }
-
-            String moved = ConfigUtil.getConfig().getString("homeMoved", UserSuccess.HOME_MOVED.getValue());
-            ChatUtils.sendSuccess(player, String.format(moved, fresh.getName()));
-            returnToRefreshedList(player, session);
-            return;
         }
 
         if (ACTION_ICON.equals(action)) {
@@ -296,6 +295,27 @@ public class HomeActionsGui implements GuiScreen {
         String renamed = ConfigUtil.getConfig().getString("homeRenamed", UserSuccess.HOME_RENAMED.getValue());
         ChatUtils.sendSuccess(player, String.format(renamed, previousName, candidate));
         return RenameOutcome.RENAMED;
+    }
+
+    /**
+     * Moves a home to the player's current location, holding only the mutation:
+     * no messaging, no navigation. Those stay with each caller.
+     */
+    public static MoveOutcome applyMove(Player player, Home home) {
+        if (home == null) return MoveOutcome.GONE;
+
+        Location destination = player.getLocation();
+        if (ServerUtil.isWorldBlacklisted(destination.getWorld())) return MoveOutcome.BLACKLISTED;
+
+        home.setWorld(Objects.requireNonNull(destination.getWorld()).getUID().toString());
+        home.setX(destination.getX());
+        home.setY(destination.getY());
+        home.setZ(destination.getZ());
+        home.setPitch(destination.getPitch());
+        home.setYaw(destination.getYaw());
+        home.setDimension(destination.getWorld().getEnvironment().toString());
+
+        return new HomesDao().update(home) ? MoveOutcome.MOVED : MoveOutcome.UPDATE_FAILED;
     }
 
     /**

@@ -50,6 +50,11 @@ commands:
   import-homes:
     description: Import homes from another homes plugin (dry-run unless confirmed).
     permission: sh2.import-homes
+  move-home:
+    description: Move one of your homes to where you are standing.
+    permission: sh2.move-home
+    aliases:
+      - uhome
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
@@ -71,6 +76,9 @@ permissions:
     default: true
   sh2.manage-homes:
     description: Allow player to rename, move, re-icon, and delete their homes from the GUI.
+    default: true
+  sh2.move-home:
+    description: Allow a player to move their own homes by command.
     default: true
   sh2.add-to-blacklist:
     description: Add dimensions to the blacklist.
@@ -104,6 +112,7 @@ permissions:
       sh2.teleport: true
       sh2.give-homes-item: true
       sh2.manage-homes: true
+      sh2.move-home: true
   sh2.admin:
     description: Everything a server administrator needs, including the player nodes.
     default: op
