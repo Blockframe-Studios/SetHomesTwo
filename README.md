@@ -64,6 +64,7 @@ Your players keep their homes. The old plugin does not even need to be running, 
 - Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
 - Happy with the numbers? Run it again with `confirm` on the end.
 - Existing homes are never overwritten, so re-running it is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
+- `/import-homes sethomes` also brings across the v1 world blacklist, added to your Set Homes Two blacklist alongside the homes. Re-running never adds a world twice.
 
 Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
 
