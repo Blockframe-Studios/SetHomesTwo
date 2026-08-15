@@ -3,7 +3,6 @@ package com.samleighton.sethomestwo.commands;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
-import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
@@ -45,13 +44,6 @@ public class CreateHome implements CommandExecutor {
             return true;
         }
 
-        // Guard to ensure we have minimum number of args
-        if (args.length < 1) {
-            ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.CREATE_HOME_USAGE.getValue());
-            return true;
-        }
-
         // Guard to check if player has exceeded the max number of homes
         if (this.maxHomesReached(player, homesDao)){
             String errorMessage = ConfigUtil.getConfig().getString("maxHomesReached", UserError.MAX_HOMES.getValue());
@@ -68,8 +60,9 @@ public class CreateHome implements CommandExecutor {
             return true;
         }
 
-        // Extract parameters from command arguments
-        String homeName = args[0];
+        // Extract parameters from command arguments. A bare command is the v1
+        // form, naming the home rather than erroring.
+        String homeName = args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0];
 
         Material mat = null;
         int descriptionStart = 1;

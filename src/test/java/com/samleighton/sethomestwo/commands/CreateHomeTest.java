@@ -38,13 +38,49 @@ class CreateHomeTest extends ServerTestBase {
     }
 
     @Test
-    void missingNameIsRejected() {
+    void aBareCommandCreatesTheDefaultHome() {
         PlayerMock player = addPlayer();
+        player.teleport(new Location(overworld, 7, 65, 7));
 
         server.execute("create-home", player).assertSucceeded();
 
-        assertTrue(player.nextMessage().contains("Incorrect number of arguments"));
-        assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
+        List<Home> homes = new HomesDao().getAll(player.getUniqueId());
+        assertEquals(1, homes.size());
+        assertEquals("default", homes.get(0).getName());
+        assertEquals(7.0, homes.get(0).getX());
+        assertEquals(Material.WHITE_WOOL.name(), homes.get(0).getMaterial());
+        assertNull(homes.get(0).getDescription());
+    }
+
+    @Test
+    void theNameDefaultBehavesLikeTheBareCommand() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "default").assertSucceeded();
+        player.nextMessage();
+        server.execute("create-home", player).assertSucceeded();
+
+        assertTrue(player.nextMessage().contains("You already have a home called"));
+        List<Home> homes = new HomesDao().getAll(player.getUniqueId());
+        assertEquals(1, homes.size());
+        assertEquals("default", homes.get(0).getName());
+    }
+
+    /**
+     * Argument 2 'default' is the icon sentinel, not the default home name. The
+     * two meanings live in different argument positions and must not be merged.
+     */
+    @Test
+    void theIconSentinelNeverBecomesTheHomeName() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "base", "default").assertSucceeded();
+
+        List<Home> homes = new HomesDao().getAll(player.getUniqueId());
+        assertEquals(1, homes.size());
+        assertEquals("base", homes.get(0).getName());
+        assertEquals(Material.WHITE_WOOL.name(), homes.get(0).getMaterial());
+        assertNull(homes.get(0).getDescription());
     }
 
     @Test
