@@ -92,3 +92,26 @@ permissions:
   sh2.update-notify:
     description: Be told on join when a newer SetHomesTwo release is available.
     default: op
+  sh2.player:
+    description: Everything an ordinary player needs.
+    default: true
+    children:
+      sh2.create-home: true
+      sh2.go-home: true
+      sh2.list-homes: true
+      sh2.delete-home: true
+      sh2.teleport: true
+      sh2.give-homes-item: true
+      sh2.manage-homes: true
+  sh2.admin:
+    description: Everything a server administrator needs, including the player nodes.
+    default: op
+    children:
+      sh2.player: true
+      sh2.add-to-blacklist: true
+      sh2.remove-from-blacklist: true
+      sh2.get-blacklisted-dimensions: true
+      sh2.get-player-homes: true
+      sh2.set-max-homes: true
+      sh2.import-homes: true
+      sh2.update-notify: true
