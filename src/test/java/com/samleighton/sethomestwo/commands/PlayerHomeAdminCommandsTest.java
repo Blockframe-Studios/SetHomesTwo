@@ -169,4 +169,70 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
 
         assertEquals(List.of("base"), completions);
     }
+
+    @Test
+    void theInCodeGuardAlsoRefusesTheOtherTwoCommands() {
+        PlayerMock target = addPlayer("Steve");
+        HomeFixtures.persist(target, "base");
+        double beforeX = new HomesDao(true).getAll(target.getUniqueId()).get(0).getX();
+
+        PlayerMock admin = addPlayer("Admin");
+        admin.addAttachment(plugin, "sh2.go-player-home", false);
+        admin.addAttachment(plugin, "sh2.move-player-home", false);
+        admin.teleport(new Location(overworld, 900, 70, 900));
+        // So a regression that lets the teleport through fails on the assertion
+        // below rather than aborting on an unimplemented mock call.
+        plugin.getConfig().set("teleportSafety", false);
+
+        new GoPlayerHome().onCommand(admin,
+                Objects.requireNonNull(plugin.getCommand("go-player-home")),
+                "go-player-home", new String[]{"Steve", "base"});
+        assertTrue(admin.nextMessage().contains("permission"));
+        assertEquals(900.0, admin.getLocation().getX());
+
+        new MovePlayerHome().onCommand(admin,
+                Objects.requireNonNull(plugin.getCommand("move-player-home")),
+                "move-player-home", new String[]{"Steve", "base"});
+        assertTrue(admin.nextMessage().contains("permission"));
+        assertEquals(beforeX, new HomesDao(true).getAll(target.getUniqueId()).get(0).getX());
+    }
+
+    @Test
+    void anUnknownHomeIsReportedByEachCommand() {
+        PlayerMock target = addPlayer("Steve");
+        HomeFixtures.persist(target, "base");
+
+        PlayerMock admin = addPlayer("Admin");
+        admin.addAttachment(plugin, "sh2.delete-player-home", true);
+        admin.addAttachment(plugin, "sh2.move-player-home", true);
+        admin.addAttachment(plugin, "sh2.go-player-home", true);
+
+        server.execute("delete-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(admin.nextMessage().contains("no longer exists"));
+
+        server.execute("move-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(admin.nextMessage().contains("no longer exists"));
+
+        server.execute("go-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(admin.nextMessage().contains("no longer exists"));
+
+        assertEquals(1, new HomesDao(true).getAll(target.getUniqueId()).size());
+    }
+
+    @Test
+    void theSuccessMessageNamesTheOwnerAndHomeCanonically() {
+        PlayerMock target = addPlayer("Steve");
+        HomeFixtures.persist(target, "base");
+
+        PlayerMock admin = addPlayer("Admin");
+        admin.addAttachment(plugin, "sh2.delete-player-home", true);
+
+        // Both names typed in the wrong case. The reply must echo the stored
+        // spelling, not what was typed.
+        server.execute("delete-player-home", admin, "sTeVe", "BaSe").assertSucceeded();
+
+        String reply = admin.nextMessage();
+        assertTrue(reply.contains("Steve"), reply);
+        assertTrue(reply.contains("base"), reply);
+    }
 }

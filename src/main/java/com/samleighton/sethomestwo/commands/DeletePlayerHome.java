@@ -61,7 +61,16 @@ public class DeletePlayerHome implements CommandExecutor {
         }
 
         String deleted = ConfigUtil.getConfig().getString("playerHomeDeleted", UserSuccess.PLAYER_HOME_DELETED.getValue());
-        ChatUtils.sendSuccess(admin, String.format(deleted, args[0], home.getName()));
+        ChatUtils.sendSuccess(admin, String.format(deleted, ownerName(home, args[0]), home.getName()));
         return true;
+    }
+
+    /**
+     * The owner's name as stored against the home, which is canonically cased.
+     * Falls back to what the admin typed for a home saved before names were
+     * recorded.
+     */
+    private static String ownerName(Home home, String typed) {
+        return home.getPlayerName() == null ? typed : home.getPlayerName();
     }
 }

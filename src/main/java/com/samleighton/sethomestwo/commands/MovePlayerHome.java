@@ -63,10 +63,19 @@ public class MovePlayerHome implements CommandExecutor {
                 break;
             case MOVED:
                 String moved = ConfigUtil.getConfig().getString("playerHomeMoved", UserSuccess.PLAYER_HOME_MOVED.getValue());
-                ChatUtils.sendSuccess(admin, String.format(moved, args[0], home.getName()));
+                ChatUtils.sendSuccess(admin, String.format(moved, ownerName(home, args[0]), home.getName()));
                 break;
         }
 
         return true;
+    }
+
+    /**
+     * The owner's name as stored against the home, which is canonically cased.
+     * Falls back to what the admin typed for a home saved before names were
+     * recorded.
+     */
+    private static String ownerName(Home home, String typed) {
+        return home.getPlayerName() == null ? typed : home.getPlayerName();
     }
 }

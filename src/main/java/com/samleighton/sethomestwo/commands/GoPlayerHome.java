@@ -45,8 +45,8 @@ public class GoPlayerHome implements CommandExecutor {
             return true;
         }
 
-        // The admin dao leaves canTeleport set, so a blacklisted world does not
-        // bar an admin from reaching the home.
+        // Unlike getAll, get applies no blacklist rule, so canTeleport stays at
+        // its default and an admin reaches the home whatever world it is in.
         Home home = new HomesDao(true).get(UUID.fromString(uuid), args[1]);
 
         if (home == null) {
