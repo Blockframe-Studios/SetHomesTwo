@@ -305,7 +305,8 @@ public class HomeActionsGui implements GuiScreen {
         if (home == null) return MoveOutcome.GONE;
 
         Location destination = player.getLocation();
-        if (ServerUtil.isWorldBlacklisted(destination.getWorld())) return MoveOutcome.BLACKLISTED;
+        if (!player.hasPermission("sh2.bypass-blacklist") && ServerUtil.isWorldBlacklisted(destination.getWorld()))
+            return MoveOutcome.BLACKLISTED;
 
         home.setWorld(Objects.requireNonNull(destination.getWorld()).getUID().toString());
         home.setX(destination.getX());
@@ -388,7 +389,7 @@ public class HomeActionsGui implements GuiScreen {
      */
     private void returnToRefreshedList(Player player, GuiSession session) {
         player.closeInventory();
-        HomesDao homesDao = new HomesDao();
+        HomesDao homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         session.getHomesGui().setHomes(homesDao.getAll(player.getUniqueId()));
         session.openHomeList(player);
     }

@@ -55,7 +55,7 @@ public class CreateHome implements CommandExecutor {
         String playerDimension = player.getWorld().getEnvironment().toString();
 
         // Check if player is in a blacklisted dimension before creating home
-        if (ServerUtil.isWorldBlacklisted(player.getWorld())) {
+        if (!player.hasPermission("sh2.bypass-blacklist") && ServerUtil.isWorldBlacklisted(player.getWorld())) {
             String errorMessage = ConfigUtil.getConfig().getString("dimensionBlacklisted", UserError.DIMENSION_IS_BLACKLISTED.getValue());
             ChatUtils.sendError(player, errorMessage);
             return true;
@@ -144,6 +144,8 @@ public class CreateHome implements CommandExecutor {
     }
 
     private boolean maxHomesReached(Player player, Dao<Home> homesDao){
+        if (player.hasPermission("sh2.bypass-max-homes")) return false;
+
         boolean isMaxHomesEnabled = ConfigUtil.getConfig().getBoolean("maxHomeEnabled", false);
         if (!isMaxHomesEnabled) return false;
 

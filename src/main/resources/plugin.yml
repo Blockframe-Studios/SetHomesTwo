@@ -125,6 +125,15 @@ permissions:
   sh2.move-player-home:
     description: Move another player's home.
     default: op
+  sh2.bypass-max-homes:
+    description: Create homes beyond the configured maximum.
+    default: op
+  sh2.bypass-blacklist:
+    description: Create, move and teleport to homes in blacklisted worlds.
+    default: op
+  sh2.bypass-teleport-delay:
+    description: Teleport instantly, without the countdown or the cancel on move.
+    default: op
   sh2.player:
     description: Everything an ordinary player needs.
     default: true
@@ -152,3 +161,6 @@ permissions:
       sh2.go-player-home: true
       sh2.delete-player-home: true
       sh2.move-player-home: true
+      sh2.bypass-max-homes: true
+      sh2.bypass-blacklist: true
+      sh2.bypass-teleport-delay: true

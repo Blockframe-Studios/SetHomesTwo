@@ -222,8 +222,10 @@ public class Home implements Serializable {
             TeleportSafetyUtil.prefetchChunks(prefetchDestination, plugin);
         }
 
-        // Send player countdown title.
-        AtomicInteger seconds = new AtomicInteger(ConfigUtil.getConfig().getInt("delay"));
+        // Send player countdown title. A zero delay runs the existing loop straight
+        // through to the teleport on its first pass.
+        AtomicInteger seconds = new AtomicInteger(
+                player.hasPermission("sh2.bypass-teleport-delay") ? 0 : ConfigUtil.getConfig().getInt("delay"));
 
         // Schedule repeating task for every second
         plugin.getServer().getScheduler().runTaskTimer(plugin, bukkitTask -> {

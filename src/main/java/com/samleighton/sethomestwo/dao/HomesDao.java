@@ -17,14 +17,19 @@ import java.util.UUID;
 
 public class HomesDao extends SQLiteDao implements Dao<Home> {
     private final String TABLE_NAME = "players_homes";
-    private boolean isAdmin = false;
+    private boolean bypassBlacklist = false;
     public HomesDao(){
         super();
     }
 
-    public HomesDao(boolean isAdmin){
+    /**
+     * @param bypassBlacklist true to read homes without the blacklist marking them
+     *                        unreachable. Both the admin views of another player's
+     *                        homes and a holder of sh2.bypass-blacklist pass true.
+     */
+    public HomesDao(boolean bypassBlacklist){
         super();
-        this.isAdmin = isAdmin;
+        this.bypassBlacklist = bypassBlacklist;
     }
 
     @Override
@@ -71,9 +76,9 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
 
                 World homeWorld = Bukkit.getWorld(UUID.fromString(home.getWorld()));
                 if (ServerUtil.isWorldBlacklisted(homeWorld, blacklistedWorlds)) {
-                    if (!this.isAdmin) home.setDescription("Cannot teleport here: dimension blacklisted");
+                    if (!this.bypassBlacklist) home.setDescription("Cannot teleport here: dimension blacklisted");
 
-                    home.setCanTeleport(this.isAdmin);
+                    home.setCanTeleport(this.bypassBlacklist);
                 }
 
                 playerHomes.add(home);

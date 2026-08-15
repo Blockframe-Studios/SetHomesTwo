@@ -41,7 +41,7 @@ public class GoHome implements CommandExecutor {
 
         // Get players home dao instance
         String desiredHomeName = args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0];
-        Dao<Home> homesDao = new HomesDao();
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         ArrayList<Home> playerHomes = (ArrayList<Home>) homesDao.getAll(player.getUniqueId());
         Home homeToTeleportTo = null;
 
