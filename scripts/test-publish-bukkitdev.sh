@@ -38,7 +38,7 @@ trap 'rm -rf "$WORK"' EXIT
 
 # Characters the transport or the JSON encoding could eat.
 SEMICOLON_TEXT='held back for a week; a newer release is still announced'
-QUOTE_TEXT='the "display" name and a C:\\path'
+QUOTE_TEXT='the "display" name and a C:\path'
 
 mkdir -p "$WORK/run"
 cat > "$WORK/run/README.md" <<README
@@ -56,6 +56,11 @@ cat > "$WORK/run/README.md" <<README
 - An earlier release.
 README
 
+# One file per argument. jq pretty-prints, so the metadata argument spans
+# several lines and any line-based log would split it.
+CURL_ARGS_DIR="$WORK/args"
+export CURL_ARGS_DIR
+
 mkdir -p "$WORK/bin"
 cat > "$WORK/bin/curl" <<'STUB'
 #!/usr/bin/env bash
@@ -69,14 +74,16 @@ for arg in "$@"; do
       ;;
   esac
 done
-printf '%s\n' "$@" > "$CURL_ARGS"
+mkdir -p "$CURL_ARGS_DIR"
+i=0
+for arg in "$@"; do
+  printf '%s' "$arg" > "$CURL_ARGS_DIR/$i"
+  i=$((i + 1))
+done
 echo '{"id":4242}'
 echo 200
 STUB
 chmod +x "$WORK/bin/curl"
-
-CURL_ARGS="$WORK/args.txt"
-export CURL_ARGS
 
 OUTPUT=$(cd "$WORK/run" && PATH="$WORK/bin:$PATH" CURSEFORGE_TOKEN=test-token VERSION=9.9.9 \
   bash "$PUBLISH_SH" 2>&1)
@@ -88,29 +95,55 @@ else
   fail "publishes successfully against a stubbed API" "exit $STATUS: $OUTPUT"
 fi
 
-if [ ! -f "$CURL_ARGS" ]; then
+if [ ! -d "$CURL_ARGS_DIR" ]; then
   fail "calls curl to upload" "no upload call recorded"
   printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
   exit 1
 fi
 
-# The metadata argument, without its "metadata=" prefix.
-METADATA=$(grep -m1 '^metadata=' "$CURL_ARGS" | sed 's/^metadata=//')
+# Whether curl was passed this exact argument.
+has_arg() {
+  local want=$1 file
+  for file in "$CURL_ARGS_DIR"/*; do
+    [ -f "$file" ] || continue
+    if [ "$(cat "$file")" = "$want" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
 
-if grep -qx -- '--form-string' "$CURL_ARGS"; then
+args_summary() {
+  local file
+  for file in "$CURL_ARGS_DIR"/*; do
+    [ -f "$file" ] || continue
+    printf '[%s] ' "$(head -c 60 "$file" | tr '\n' ' ')"
+  done
+}
+
+METADATA=""
+for file in "$CURL_ARGS_DIR"/*; do
+  [ -f "$file" ] || continue
+  content=$(cat "$file")
+  case "$content" in
+    metadata=*) METADATA=${content#metadata=} ;;
+  esac
+done
+
+if has_arg '--form-string'; then
   pass "sends metadata with --form-string"
 else
   fail "sends metadata with --form-string" \
-    "-F truncates any value containing a semicolon; args were: $(tr '\n' ' ' < "$CURL_ARGS")"
+    "-F truncates any value containing a semicolon; args were: $(args_summary)"
 fi
 
-if [ -n "$METADATA" ] && echo "$METADATA" | jq -e . >/dev/null 2>&1; then
+if [ -n "$METADATA" ] && printf '%s' "$METADATA" | jq -e . >/dev/null 2>&1; then
   pass "metadata is valid JSON"
 else
   fail "metadata is valid JSON" "got: $METADATA"
 fi
 
-CHANGELOG=$(echo "$METADATA" | jq -r '.changelog // ""' 2>/dev/null)
+CHANGELOG=$(printf '%s' "$METADATA" | jq -r '.changelog // ""' 2>/dev/null)
 
 case "$CHANGELOG" in
   *"$SEMICOLON_TEXT"*) pass "changelog survives a semicolon intact" ;;
@@ -118,28 +151,28 @@ case "$CHANGELOG" in
 esac
 
 case "$CHANGELOG" in
-  *'the "display" name'*) pass "changelog survives double quotes" ;;
-  *) fail "changelog survives double quotes" "got: $CHANGELOG" ;;
+  *"$QUOTE_TEXT"*) pass "changelog survives quotes and backslashes" ;;
+  *) fail "changelog survives quotes and backslashes" "got: $CHANGELOG" ;;
 esac
 
-GAME_VERSIONS=$(echo "$METADATA" | jq -c '.gameVersions // []' 2>/dev/null)
+GAME_VERSIONS=$(printf '%s' "$METADATA" | jq -c '.gameVersions // []' 2>/dev/null)
 if [ "$GAME_VERSIONS" = "[16500,11515]" ]; then
   pass "publishes only the type 1 game versions"
 else
   fail "publishes only the type 1 game versions" "got: $GAME_VERSIONS"
 fi
 
-DISPLAY_NAME=$(echo "$METADATA" | jq -r '.displayName // ""' 2>/dev/null)
+DISPLAY_NAME=$(printf '%s' "$METADATA" | jq -r '.displayName // ""' 2>/dev/null)
 if [ "$DISPLAY_NAME" = "SetHomesTwo V9.9.9" ]; then
   pass "names the file after the version"
 else
   fail "names the file after the version" "got: $DISPLAY_NAME"
 fi
 
-if grep -qx -- "file=@SetHomesTwo.V9.9.9.jar" "$CURL_ARGS"; then
+if has_arg "file=@SetHomesTwo.V9.9.9.jar"; then
   pass "uploads the versioned jar"
 else
-  fail "uploads the versioned jar" "args were: $(tr '\n' ' ' < "$CURL_ARGS")"
+  fail "uploads the versioned jar" "args were: $(args_summary)"
 fi
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
