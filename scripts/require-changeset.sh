@@ -9,6 +9,9 @@
 
 CHANGESET_DIR=".changeset"
 
+# Label that marks a master to dev down-merge.
+DOWNMERGE_LABEL="downmerge"
+
 # Nothing under these prefixes ships to a user's server.
 EXEMPT_PREFIXES=(
   "$CHANGESET_DIR/"
@@ -66,6 +69,18 @@ main() {
   local line path has_changeset=1
   local shippable=()
 
+  # Everything on master has already been released, so a down-merge must not
+  # carry a changeset: the next promotion would consume it and bump the version
+  # a second time for the same work.
+  if [ "${PR_BASE:-}" = "dev" ]; then
+    case ",${PR_LABELS:-}," in
+      *,"$DOWNMERGE_LABEL",*)
+        printf 'Labelled %s into dev - no changeset needed.\n' "$DOWNMERGE_LABEL"
+        return 0
+        ;;
+    esac
+  fi
+
   while IFS= read -r line || [ -n "$line" ]; do
     # gh writes LF, but a hand-piped list on Windows may not.
     path="${line%$'\r'}"
@@ -94,6 +109,7 @@ main() {
     printf 'This pull request changes files that ship to users but adds no changeset:\n'
     printf '  %s\n' "${shippable[@]}"
     printf '\nAdd one with:  bash scripts/changeset.sh\n'
+    printf 'Down-merging master into dev? Label the pull request %s instead.\n' "$DOWNMERGE_LABEL"
   } >&2
   return 1
 }
