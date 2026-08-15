@@ -1,5 +1,6 @@
 package com.samleighton.sethomestwo.dao;
 
+import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
@@ -47,6 +48,40 @@ class HomesDaoPlayerNameTest extends ServerTestBase {
 
         assertEquals(player.getUniqueId().toString(), new HomesDao().uuidForName("Steven"));
         assertNull(new HomesDao().uuidForName("Steve"));
+    }
+
+    @Test
+    void aNameSharedByTwoDistinctOwnersResolvesToNull() {
+        PlayerMock playerA = addPlayer("PlayerA");
+        Home homeA = HomeFixtures.home(playerA, "base");
+        homeA.setPlayerName("Steve");
+        HomeFixtures.persist(homeA);
+
+        PlayerMock playerB = addPlayer("PlayerB");
+        Home homeB = HomeFixtures.home(playerB, "base");
+        homeB.setPlayerName("Steve");
+        HomeFixtures.persist(homeB);
+
+        assertNull(new HomesDao().uuidForName("Steve"));
+    }
+
+    @Test
+    void theMostRecentJoinerClaimsANameFromAStalePriorOwner() {
+        PlayerMock playerA = addPlayer("PlayerA");
+        Home homeA = HomeFixtures.home(playerA, "base");
+        homeA.setPlayerName("Steve");
+        HomeFixtures.persist(homeA);
+
+        PlayerMock playerB = addPlayer("PlayerB");
+        Home homeB = HomeFixtures.home(playerB, "base");
+        homeB.setPlayerName("Steve");
+        HomeFixtures.persist(homeB);
+
+        // PlayerB actually joins under the name "Steve", so it must win the
+        // name and PlayerA's stale rows must stop carrying it.
+        new HomesDao().refreshPlayerName(playerB.getUniqueId(), "Steve");
+
+        assertEquals(playerB.getUniqueId().toString(), new HomesDao().uuidForName("Steve"));
     }
 
     @Test

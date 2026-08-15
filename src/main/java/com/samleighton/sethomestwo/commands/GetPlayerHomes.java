@@ -54,7 +54,7 @@ public class GetPlayerHomes implements CommandExecutor {
 
         String uuidString = ServerUtil.getPlayerUUID(args[0]);
 
-        // Add a check for if player is online/exists
+        // null means the name matched no online player and no stored home owner
         if (uuidString == null) {
             ChatUtils.sendError(requester, UserError.PLAYER_NOT_ONLINE.getValue());
             return true;

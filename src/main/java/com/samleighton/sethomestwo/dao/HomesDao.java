@@ -301,15 +301,21 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
 
     /**
      * The UUID of the player who owns homes stored under this name, or null.
+     * A stale name can collide across two accounts (an old owner who renamed
+     * away and a new owner who took the name); returns null rather than
+     * guessing when more than one distinct UUID claims the name.
      */
     public String uuidForName(String playerName) {
-        String sql = "select player_uuid from players_homes where player_name = ? limit 1;";
+        String sql = "select distinct player_uuid from players_homes where player_name = ?;";
 
         try (PreparedStatement statement = this.conn.prepareStatement(sql)) {
             statement.setString(1, playerName);
 
             try (ResultSet rs = statement.executeQuery()) {
-                return rs.next() ? rs.getString("player_uuid") : null;
+                if (!rs.next()) return null;
+
+                String uuid = rs.getString("player_uuid");
+                return rs.next() ? null : uuid;
             }
         } catch (SQLException e) {
             Bukkit.getLogger().severe("Could not resolve player name " + playerName);
@@ -318,15 +324,23 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
     }
 
     /**
-     * Point every home this player owns at their current name.
+     * Point every home this player owns at their current name, first stripping
+     * that name from any other UUID's rows so a stale prior owner can never
+     * make the name resolve ambiguously. The joining player takes precedence.
      */
     public boolean refreshPlayerName(UUID playerUUID, String playerName) {
-        String sql = "update players_homes set player_name = ? where player_uuid = ?;";
+        String clearSql = "update players_homes set player_name = null where player_name = ? and player_uuid <> ?;";
+        String claimSql = "update players_homes set player_name = ? where player_uuid = ?;";
 
-        try (PreparedStatement statement = this.conn.prepareStatement(sql)) {
-            statement.setString(1, playerName);
-            statement.setString(2, playerUUID.toString());
-            statement.executeUpdate();
+        try (PreparedStatement clear = this.conn.prepareStatement(clearSql);
+             PreparedStatement claim = this.conn.prepareStatement(claimSql)) {
+            clear.setString(1, playerName);
+            clear.setString(2, playerUUID.toString());
+            clear.executeUpdate();
+
+            claim.setString(1, playerName);
+            claim.setString(2, playerUUID.toString());
+            claim.executeUpdate();
             return true;
         } catch (SQLException e) {
             Bukkit.getLogger().severe("Could not refresh player name for " + playerUUID);
