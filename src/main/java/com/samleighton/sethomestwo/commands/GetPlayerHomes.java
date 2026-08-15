@@ -61,7 +61,7 @@ public class GetPlayerHomes implements CommandExecutor {
             return true;
         }
 
-        Dao<Home> homesDao = new HomesDao(true);
+        Dao<Home> homesDao = new HomesDao(requester.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(UUID.fromString(uuidString));
 
         Player target = Bukkit.getPlayer(UUID.fromString(uuidString));

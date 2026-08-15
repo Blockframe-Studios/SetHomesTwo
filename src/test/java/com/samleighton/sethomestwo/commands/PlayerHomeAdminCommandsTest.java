@@ -3,8 +3,15 @@ package com.samleighton.sethomestwo.commands;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import com.samleighton.sethomestwo.support.TestPlayer;
 import com.samleighton.sethomestwo.tabcompleters.PlayerHomesTabCompleter;
 import org.bukkit.Location;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.ClickType;
+import com.samleighton.sethomestwo.gui.HomesGui;
+import com.samleighton.sethomestwo.gui.GuiSession;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
@@ -244,5 +251,105 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         String message = admin.nextMessage();
         assertTrue(message.contains(typed), message);
         assertFalse(message.contains("%s"), message);
+    }
+
+    @Test
+    void withoutTheBypassNodeAnAdminCannotReachAnotherPlayersBlacklistedHome() {
+        TestPlayer owner = addPlayer("Steve");
+        HomeFixtures.persist(HomeFixtures.home(owner, "hideout", new Location(nether, 33, 70, 33)));
+        HomeFixtures.blacklist("world_nether");
+        owner.disconnect();
+
+        TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
+        admin.addAttachment(plugin, "sh2.bypass-blacklist", false);
+
+        server.execute("go-player-home", admin, "Steve", "hideout").assertSucceeded();
+        server.getScheduler().performTicks(100L);
+
+        assertEquals("world", admin.getLocation().getWorld().getName());
+        assertTrue(admin.nextMessage().contains("blacklisted"));
+    }
+
+    @Test
+    void withTheBypassNodeAnAdminReachesAnotherPlayersBlacklistedHome() {
+        TestPlayer owner = addPlayer("Steve");
+        HomeFixtures.persist(HomeFixtures.home(owner, "hideout", new Location(nether, 33, 70, 33)));
+        HomeFixtures.blacklist("world_nether");
+        owner.disconnect();
+
+        TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
+        admin.addAttachment(plugin, "sh2.bypass-blacklist", true);
+
+        server.execute("go-player-home", admin, "Steve", "hideout").assertSucceeded();
+        server.getScheduler().performTicks(100L);
+
+        assertEquals("world_nether", admin.getLocation().getWorld().getName());
+        assertEquals(33.0, admin.getLocation().getX());
+    }
+
+    @Test
+    void withoutTheBypassNodeClickingABlacklistedHomeInTheAdminViewDoesNotTeleport() {
+        TestPlayer owner = addPlayer("Steve");
+        HomeFixtures.persist(HomeFixtures.home(owner, "hideout", new Location(nether, 33, 70, 33)));
+        HomeFixtures.blacklist("world_nether");
+
+        TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
+        admin.addAttachment(plugin, "sh2.get-player-homes", true);
+        admin.addAttachment(plugin, "sh2.bypass-blacklist", false);
+
+        server.execute("get-player-homes", admin, "Steve").assertSucceeded();
+        clickFirstHome(admin);
+        server.getScheduler().performTicks(100L);
+
+        assertEquals("world", admin.getLocation().getWorld().getName());
+    }
+
+    @Test
+    void withTheBypassNodeClickingABlacklistedHomeInTheAdminViewTeleports() {
+        TestPlayer owner = addPlayer("Steve");
+        HomeFixtures.persist(HomeFixtures.home(owner, "hideout", new Location(nether, 33, 70, 33)));
+        HomeFixtures.blacklist("world_nether");
+
+        TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
+        admin.addAttachment(plugin, "sh2.get-player-homes", true);
+        admin.addAttachment(plugin, "sh2.bypass-blacklist", true);
+
+        server.execute("get-player-homes", admin, "Steve").assertSucceeded();
+        clickFirstHome(admin);
+        server.getScheduler().performTicks(100L);
+
+        assertEquals("world_nether", admin.getLocation().getWorld().getName());
+    }
+
+    /**
+     * Left-click the first home of whatever list the player currently has open,
+     * routed through the live GuiSession the command created.
+     */
+    private void clickFirstHome(TestPlayer player) {
+        GuiSession session = plugin.getGuiSessionMap().get(player.getUniqueId());
+        HomesGui gui = (HomesGui) session.getActiveScreen();
+
+        gui.onClick(new InventoryClickEvent(
+                player.getOpenInventory(),
+                InventoryType.SlotType.CONTAINER,
+                0,
+                ClickType.LEFT,
+                InventoryAction.PICKUP_ALL
+        ), session);
+    }
+
+    /**
+     * An admin holding the two nodes every go-player-home test needs, standing
+     * where the caller says, with the teleport machinery set to resolve inside
+     * the ticks these tests advance.
+     */
+    private TestPlayer adminAt(Location where) {
+        TestPlayer admin = addPlayer("Admin");
+        admin.addAttachment(plugin, "sh2.go-player-home", true);
+        admin.addAttachment(plugin, "sh2.teleport", true);
+        admin.teleport(where);
+        plugin.getConfig().set("delay", 0);
+        plugin.getConfig().set("teleportSafety", false);
+        return admin;
     }
 }

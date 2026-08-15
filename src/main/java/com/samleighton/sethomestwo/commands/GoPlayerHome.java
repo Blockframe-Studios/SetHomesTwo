@@ -7,6 +7,7 @@ import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.ServerUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,14 +46,20 @@ public class GoPlayerHome implements CommandExecutor {
             return true;
         }
 
-        // Unlike getAll, get applies no blacklist rule, so canTeleport stays at
-        // its default and an admin reaches the home whatever world it is in.
         Home home = new HomesDao(true).get(UUID.fromString(uuid), args[1]);
 
         if (home == null) {
             ChatUtils.sendError(admin, String.format(ConfigUtil.getConfig().getString(
                     "homeDoesNotExist", UserError.HOME_DOES_NOT_EXIST.getValue()), args[1]));
             return true;
+        }
+
+        // get applies no blacklist rule of its own, unlike getAll, so the node
+        // has to be honoured here or it could not be taken away. Clearing the
+        // flag lets Home.teleport send the same refusal a player would see.
+        if (!admin.hasPermission("sh2.bypass-blacklist")
+                && ServerUtil.isWorldBlacklisted(Bukkit.getWorld(UUID.fromString(home.getWorld())))) {
+            home.setCanTeleport(false);
         }
 
         home.teleport(admin);
