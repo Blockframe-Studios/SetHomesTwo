@@ -70,7 +70,7 @@ public class Blacklist implements CommandExecutor {
             default:
                 if (args.length < 1) {
                     ChatUtils.incorrectNumArguments(player);
-                    ChatUtils.sendInfo(player, UserInfo.BLACKLIST_USAGE.getValue());
+                    ChatUtils.sendInfo(player, String.format(UserInfo.BLACKLIST_USAGE.getValue(), label));
                     return true;
                 }
                 subcommand = args[0].toLowerCase();
@@ -80,13 +80,13 @@ public class Blacklist implements CommandExecutor {
 
         switch (subcommand) {
             case "add":
-                return add(player, names);
+                return add(player, label, names);
             case "remove":
-                return remove(player, names);
+                return remove(player, label, names);
             case "list":
-                return list(player, names);
+                return list(player, label, names);
             default:
-                ChatUtils.sendInfo(player, UserInfo.BLACKLIST_USAGE.getValue());
+                ChatUtils.sendInfo(player, String.format(UserInfo.BLACKLIST_USAGE.getValue(), label));
                 return true;
         }
     }
@@ -100,7 +100,7 @@ public class Blacklist implements CommandExecutor {
         return args.length >= 1 && SUBCOMMANDS.contains(args[0].toLowerCase());
     }
 
-    private boolean add(Player player, String[] dimensions) {
+    private boolean add(Player player, String label, String[] dimensions) {
         if (!player.hasPermission("sh2.add-to-blacklist")) {
             ChatUtils.invalidPermissions(player);
             return true;
@@ -108,7 +108,7 @@ public class Blacklist implements CommandExecutor {
 
         if (dimensions.length < 1) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.BLACKLIST_USAGE.getValue());
+            ChatUtils.sendInfo(player, String.format(UserInfo.BLACKLIST_USAGE.getValue(), label));
             return true;
         }
 
@@ -141,7 +141,7 @@ public class Blacklist implements CommandExecutor {
         return true;
     }
 
-    private boolean remove(Player player, String[] dimensions) {
+    private boolean remove(Player player, String label, String[] dimensions) {
         if (!player.hasPermission("sh2.remove-from-blacklist")) {
             ChatUtils.invalidPermissions(player);
             return true;
@@ -149,7 +149,7 @@ public class Blacklist implements CommandExecutor {
 
         if (dimensions.length < 1) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.BLACKLIST_USAGE.getValue());
+            ChatUtils.sendInfo(player, String.format(UserInfo.BLACKLIST_USAGE.getValue(), label));
             return true;
         }
 
@@ -184,7 +184,7 @@ public class Blacklist implements CommandExecutor {
         return true;
     }
 
-    private boolean list(Player player, String[] extraArgs) {
+    private boolean list(Player player, String label, String[] extraArgs) {
         if (!player.hasPermission("sh2.get-blacklisted-dimensions")) {
             ChatUtils.invalidPermissions(player);
             return true;
@@ -192,7 +192,7 @@ public class Blacklist implements CommandExecutor {
 
         if (extraArgs.length > 0) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.BLACKLIST_USAGE.getValue());
+            ChatUtils.sendInfo(player, String.format(UserInfo.BLACKLIST_USAGE.getValue(), label));
             return true;
         }
 

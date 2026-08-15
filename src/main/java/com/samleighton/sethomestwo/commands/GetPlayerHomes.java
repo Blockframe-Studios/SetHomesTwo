@@ -48,7 +48,7 @@ public class GetPlayerHomes implements CommandExecutor {
         // Args length guard
         if (args.length != 1) {
             ChatUtils.incorrectNumArguments(requester);
-            ChatUtils.sendError(requester, UserInfo.GET_PLAYER_HOMES_USAGE.getValue());
+            ChatUtils.sendError(requester, String.format(UserInfo.GET_PLAYER_HOMES_USAGE.getValue(), s));
             return true;
         }
 

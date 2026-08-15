@@ -97,4 +97,14 @@ class MoveHomeTest extends ServerTestBase {
         assertTrue(player.nextMessage().contains("Incorrect number of arguments"));
         assertTrue(player.nextMessage().contains("Usage: /move-home <name>"));
     }
+
+    @Test
+    void theUsageNamesTheAliasThatWasTyped() {
+        PlayerMock player = addPlayer();
+
+        server.dispatchCommand(player, "uhome");
+
+        player.nextMessage();
+        assertTrue(player.nextMessage().contains("Usage: /uhome <name>"));
+    }
 }

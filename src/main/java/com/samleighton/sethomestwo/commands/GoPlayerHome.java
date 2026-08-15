@@ -34,7 +34,7 @@ public class GoPlayerHome implements CommandExecutor {
 
         if (args.length != 2) {
             ChatUtils.incorrectNumArguments(admin);
-            ChatUtils.sendInfo(admin, UserInfo.GO_PLAYER_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(admin, String.format(UserInfo.GO_PLAYER_HOME_USAGE.getValue(), label));
             return true;
         }
 

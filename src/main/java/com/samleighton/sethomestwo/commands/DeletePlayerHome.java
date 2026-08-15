@@ -34,7 +34,7 @@ public class DeletePlayerHome implements CommandExecutor {
 
         if (args.length != 2) {
             ChatUtils.incorrectNumArguments(admin);
-            ChatUtils.sendInfo(admin, UserInfo.DELETE_PLAYER_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(admin, String.format(UserInfo.DELETE_PLAYER_HOME_USAGE.getValue(), label));
             return true;
         }
 

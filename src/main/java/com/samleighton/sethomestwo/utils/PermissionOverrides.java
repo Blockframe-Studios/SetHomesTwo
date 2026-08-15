@@ -46,7 +46,7 @@ public final class PermissionOverrides {
             // Detach before the no-op check below. A node whose default already
             // matches still needs freeing from its bundle, or the bundle keeps
             // granting the very thing the admin just asked to take away.
-            if (parsed != PermissionDefault.TRUE) detachFromBundles(pluginManager, node);
+            if (parsed != PermissionDefault.TRUE) detachFromBundles(pluginManager, node, parsed);
 
             PermissionDefault previous = permission.getDefault();
             if (previous == parsed) continue;
@@ -74,14 +74,14 @@ public final class PermissionOverrides {
      * falling back to the node's default. Lowering the default alone therefore
      * denies nothing while a bundle still grants the node.
      */
-    private static void detachFromBundles(PluginManager pluginManager, String node) {
+    private static void detachFromBundles(PluginManager pluginManager, String node, PermissionDefault applied) {
         for (Permission bundle : pluginManager.getPermissions()) {
             if (bundle.getChildren().remove(node) == null) continue;
 
             pluginManager.recalculatePermissionDefaults(bundle);
             Bukkit.getLogger().info(String.format(
-                    "SetHomesTwo: removed %s from the %s bundle so the override applies.",
-                    node, bundle.getName()));
+                    "SetHomesTwo: %s is now %s, and was removed from the %s bundle so that applies.",
+                    node, applied, bundle.getName()));
         }
     }
 }

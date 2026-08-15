@@ -32,7 +32,7 @@ public class MoveHome implements CommandExecutor {
 
         if (args.length != 1) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.MOVE_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(player, String.format(UserInfo.MOVE_HOME_USAGE.getValue(), label));
             return true;
         }
 

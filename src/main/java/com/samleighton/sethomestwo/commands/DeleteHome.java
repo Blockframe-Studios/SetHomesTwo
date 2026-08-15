@@ -33,7 +33,7 @@ public class DeleteHome implements CommandExecutor {
         // Args length guard
         if (args.length != 1) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserError.DELETE_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(player, String.format(UserError.DELETE_HOME_USAGE.getValue(), s));
             return true;
         }
 

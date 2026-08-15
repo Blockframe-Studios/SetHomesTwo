@@ -28,7 +28,7 @@ public class ImportHomes implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] args) {
         // Console and players may both run this; permission handled by plugin.yml (default op)
         if (args.length < 1 || !SOURCES.containsKey(args[0].toLowerCase())) {
-            commandSender.sendMessage(String.format("Usage: /import-homes <%s> [confirm]", String.join("|", SOURCES.keySet())));
+            commandSender.sendMessage(String.format("Usage: /%s <%s> [confirm]", s, String.join("|", SOURCES.keySet())));
             return true;
         }
 

@@ -19,7 +19,7 @@ public enum UserError {
     /** Command Input Errors */
     DIMENSION_IS_NOT_BLACKLISTED("The %s dimension has not been blacklisted yet therefore you cannot remove it."),
     INVALID_WORLD("%s is not a valid world. This server's worlds are: %s"),
-    DELETE_HOME_USAGE("Usage: /delete-home [name]"),
+    DELETE_HOME_USAGE("Usage: /%s [name]"),
     INVALID_MATERIAL("The material you entered is not valid, please try a different one."),
     PLAYER_NOT_FOUND("No player by that name is online or has any saved homes."),
     NO_HOMES("You have not created any homes yet. Use /create-home."),
