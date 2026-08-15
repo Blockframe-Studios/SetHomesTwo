@@ -20,15 +20,16 @@ commands:
     permission: sh2.delete-home
     aliases:
       - delhome
-  add-to-blacklist:
-    description: Add dimensions to be blacklisted from setting homes.
-    permission: sh2.add-to-blacklist
-  remove-from-blacklist:
-    description: Remove dimensions from blacklist table.
-    permission: sh2.remove-from-blacklist
-  get-blacklisted-dimensions:
-    description: Retrieves a list of the blacklisted dimensions.
-    permission: sh2.get-blacklisted-dimensions
+  blacklist:
+    description: Manage the worlds in which homes are disallowed.
+    # Semicolon-separated permissions are OR'd by Bukkit's own Command.testPermission,
+    # so the command is reachable by a holder of any one of the three nodes; add and
+    # remove are still gated on their own node inside the executor.
+    permission: sh2.add-to-blacklist;sh2.remove-from-blacklist;sh2.get-blacklisted-dimensions
+    aliases:
+      - add-to-blacklist
+      - remove-from-blacklist
+      - get-blacklisted-dimensions
   get-player-homes:
     description: Retrieves a list of a given player's homes.
     permission: sh2.get-player-homes

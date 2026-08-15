@@ -84,9 +84,9 @@ Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `
 | --- | --- |
 | `/set-max-homes [group] <number>` | Sets the home limit, per LuckPerms group or server-wide. |
 | `/get-player-homes <player>` | Lists another player's homes. |
-| `/add-to-blacklist <dimension...>` | Stops homes being set in a dimension. |
-| `/remove-from-blacklist <dimension...>` | Lifts the restriction again. |
-| `/get-blacklisted-dimensions` | Shows which dimensions are blacklisted. |
+| `/blacklist add <dimension...>` (alias `/add-to-blacklist`) | Stops homes being set in a dimension. |
+| `/blacklist remove <dimension...>` (alias `/remove-from-blacklist`) | Lifts the restriction again. |
+| `/blacklist list` (alias `/get-blacklisted-dimensions`) | Shows which dimensions are blacklisted. |
 | `/import-homes <sethomes\|essentialsx> [confirm]` | Imports homes from another plugin. Dry-run unless `confirm` is given. |
 
 </details>

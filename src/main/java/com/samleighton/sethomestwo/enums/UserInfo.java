@@ -2,9 +2,7 @@ package com.samleighton.sethomestwo.enums;
 
 public enum UserInfo {
     GET_PLAYER_HOMES_USAGE("Usage: /get-player-homes [playerName]"),
-    GET_BLACKLIST_USAGE("Usage: /get-blacklisted-dimensions"),
-    REMOVE_FROM_BLACKLIST_USAGE("Usage: /remove-from-blacklist [dimension names]"),
-    ADD_TO_BLACKLIST_USAGE("Usage: /add-to-blacklist [dimension names]"),
+    BLACKLIST_USAGE("Usage: /blacklist <add|remove|list> [world]"),
     CREATE_HOME_USAGE("Usage: /create-home [name] [display_material | d | default] [description]"),
     NO_HOMES("You have not setup any homes yet, you can use the /create-home command to create one."),
     NO_MAX_HOMES("There is no max number of homes."),

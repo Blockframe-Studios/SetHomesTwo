@@ -13,10 +13,9 @@ import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
 import com.samleighton.sethomestwo.updates.GitHubReleaseSource;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
-import com.samleighton.sethomestwo.tabcompleters.DimensionTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.BlacklistTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.HomesTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
-import com.samleighton.sethomestwo.tabcompleters.RemoveDimensionTabCompleter;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
 import com.samleighton.sethomestwo.utils.PermissionOverrides;
@@ -177,16 +176,9 @@ public class SetHomesTwo extends JavaPlugin {
         deleteHome.setExecutor(new DeleteHome());
         deleteHome.setTabCompleter(new HomesTabCompleter());
 
-        PluginCommand addToBlacklist = Objects.requireNonNull(this.getCommand("add-to-blacklist"));
-        addToBlacklist.setExecutor(new AddDimensionToBlacklist());
-        addToBlacklist.setTabCompleter(new DimensionTabCompleter());
-
-        PluginCommand removeFromBlacklist = Objects.requireNonNull(this.getCommand("remove-from-blacklist"));
-        removeFromBlacklist.setExecutor(new RemoveDimensionFromBlacklist());
-        removeFromBlacklist.setTabCompleter(new RemoveDimensionTabCompleter());
-
-        PluginCommand getBlacklistedDimensions = Objects.requireNonNull(this.getCommand("get-blacklisted-dimensions"));
-        getBlacklistedDimensions.setExecutor(new GetBlacklistedDimensions());
+        PluginCommand blacklist = Objects.requireNonNull(this.getCommand("blacklist"));
+        blacklist.setExecutor(new Blacklist());
+        blacklist.setTabCompleter(new BlacklistTabCompleter());
 
         PluginCommand getPlayerHomes = Objects.requireNonNull(this.getCommand("get-player-homes"));
         getPlayerHomes.setExecutor(new GetPlayerHomes(this));
