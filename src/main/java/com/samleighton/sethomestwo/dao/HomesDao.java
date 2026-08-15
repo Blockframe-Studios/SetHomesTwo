@@ -86,6 +86,11 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         return playerHomes;
     }
 
+    /**
+     * Look a home up by owner and name. The name match ignores case, which is
+     * safe because {@link #nameExists} makes names unique per player ignoring
+     * case, so at most one home can ever match.
+     */
     @Override
     public Home get(Object... keys) {
         UUID playerUUID = null;
@@ -99,7 +104,7 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         // Key guard
         if(homeName == null || playerUUID == null) return null;
 
-        String sql = "select * from %s where player_uuid = ? and name = ?";
+        String sql = "select * from %s where player_uuid = ? and lower(name) = lower(?)";
         ResultSet rs = DatabaseUtil.fetch(this.conn, String.format(sql, TABLE_NAME), playerUUID.toString(), homeName);
 
         if(rs == null) return null;
