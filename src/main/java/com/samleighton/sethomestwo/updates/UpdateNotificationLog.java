@@ -11,7 +11,7 @@ import java.io.IOException;
  * a pending update is announced on a cadence instead of on every join.
  *
  * <p>State is server-wide rather than per player, and is deliberately kept out
- * of config.yml - server owners edit that file, and this is plugin bookkeeping.
+ * of config.yml, which server owners edit. This is plugin bookkeeping.
  */
 public class UpdateNotificationLog {
 

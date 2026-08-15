@@ -134,7 +134,7 @@ The file is commented throughout, and every message the plugin sends can be rewr
 
 Per-rank limits need [LuckPerms](https://luckperms.net/download) and `maxHomesType: groups`.
 
-That table is only the common settings. For the complete list - every setting the plugin has, each one commented in place - see [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from.
+That table is only the common settings. For the complete list, see [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from. Every setting the plugin has is in there, commented in place.
 
 <details>
 <summary>Upgrading? Your existing config.yml will not gain the new settings</summary>
