@@ -114,3 +114,9 @@ cannotMoveToBlacklistedDimension: "You cannot move a home into this dimension be
 # holding sh2.update-notify (operators by default). Set to false to stop the
 # plugin making any outbound request at all.
 checkForUpdates: true
+
+# How many days before a still-pending update is mentioned to an admin again.
+# The notice is sent once, then held back for this long, so joining does not
+# repeat it. A release nobody has been told about is always announced straight
+# away, whatever this is set to. Use 0 to announce each release exactly once.
+updateReminderDays: 7

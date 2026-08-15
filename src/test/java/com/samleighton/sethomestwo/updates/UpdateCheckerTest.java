@@ -6,7 +6,13 @@ import org.bukkit.Bukkit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -209,5 +215,189 @@ class UpdateCheckerTest extends ServerTestBase {
         server.getScheduler().performOneTick();
 
         assertTrue(onMainThread.get());
+    }
+
+    // -- Reminder interval --------------------------------------------------
+
+    /**
+     * A hand-wound clock, so the reminder interval can be crossed without
+     * sleeping.
+     */
+    private static final class TickingClock extends Clock {
+        private Instant now = Instant.parse("2026-01-01T00:00:00Z");
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
+
+        void advance(Duration amount) {
+            now = now.plus(amount);
+        }
+    }
+
+    private UpdateNotificationLog log() {
+        return new UpdateNotificationLog(new File(plugin.getDataFolder(), "update-notifications.yml"));
+    }
+
+    private UpdateChecker checkerFor(String latestTag, UpdateNotificationLog log, Clock clock) {
+        return new UpdateChecker(plugin, "1.2.0", () -> latestTag, log, clock);
+    }
+
+    @Test
+    void playerIsNotNotifiedTwiceForTheSameVersionWithinTheReminderInterval() {
+        UpdateChecker checker = checkerFor("v1.3.0", log(), new TickingClock());
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+        checker.notifyIfUpdateAvailable(player);
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void playerIsRemindedOnceTheReminderIntervalHasElapsed() {
+        TickingClock clock = new TickingClock();
+        UpdateChecker checker = checkerFor("v1.3.0", log(), clock);
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        clock.advance(Duration.ofDays(7));
+        checker.notifyIfUpdateAvailable(player);
+
+        assertTrue(player.nextMessage().contains("v1.3.0"));
+    }
+
+    @Test
+    void playerIsNotRemindedJustBeforeTheReminderIntervalElapses() {
+        TickingClock clock = new TickingClock();
+        UpdateChecker checker = checkerFor("v1.3.0", log(), clock);
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        clock.advance(Duration.ofDays(7).minusMinutes(1));
+        checker.notifyIfUpdateAvailable(player);
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void aNewerVersionIsAnnouncedImmediatelyEvenInsideTheReminderInterval() {
+        TickingClock clock = new TickingClock();
+        UpdateNotificationLog log = log();
+        TestPlayer player = playerAllowedToSeeNotices();
+        UpdateChecker first = checkerFor("v1.3.0", log, clock);
+        first.checkNow();
+        first.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        UpdateChecker second = checkerFor("v1.4.0", log, clock);
+        second.checkNow();
+        second.notifyIfUpdateAvailable(player);
+
+        assertTrue(player.nextMessage().contains("v1.4.0"));
+    }
+
+    @Test
+    void suppressionSurvivesAServerRestart() {
+        TickingClock clock = new TickingClock();
+        TestPlayer player = playerAllowedToSeeNotices();
+        UpdateChecker before = checkerFor("v1.3.0", log(), clock);
+        before.checkNow();
+        before.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        // A fresh log over the same file is what the next boot builds.
+        UpdateChecker after = checkerFor("v1.3.0", log(), clock);
+        after.checkNow();
+        after.notifyIfUpdateAvailable(player);
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void reminderIntervalOfZeroNeverRepeats() {
+        plugin.getConfig().set("updateReminderDays", 0);
+        TickingClock clock = new TickingClock();
+        UpdateChecker checker = checkerFor("v1.3.0", log(), clock);
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        clock.advance(Duration.ofDays(365));
+        checker.notifyIfUpdateAvailable(player);
+
+        assertNull(player.nextMessage());
+    }
+
+    @Test
+    void reminderIntervalIsConfigurable() {
+        plugin.getConfig().set("updateReminderDays", 1);
+        TickingClock clock = new TickingClock();
+        UpdateChecker checker = checkerFor("v1.3.0", log(), clock);
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        clock.advance(Duration.ofDays(1));
+        checker.notifyIfUpdateAvailable(player);
+
+        assertTrue(player.nextMessage().contains("v1.3.0"));
+    }
+
+    @Test
+    void suppressionIsServerWideSoASecondAdminIsAlsoQuieted() {
+        UpdateChecker checker = checkerFor("v1.3.0", log(), new TickingClock());
+        checker.checkNow();
+        TestPlayer first = playerAllowedToSeeNotices();
+        TestPlayer second = playerAllowedToSeeNotices();
+
+        checker.notifyIfUpdateAvailable(first);
+        first.nextMessage();
+        first.nextMessage();
+        checker.notifyIfUpdateAvailable(second);
+
+        assertNull(second.nextMessage());
+    }
+
+    @Test
+    void aServerClockCorrectedBackwardsDoesNotSuppressTheNoticeForever() {
+        TickingClock clock = new TickingClock();
+        UpdateChecker checker = checkerFor("v1.3.0", log(), clock);
+        checker.checkNow();
+        TestPlayer player = playerAllowedToSeeNotices();
+        checker.notifyIfUpdateAvailable(player);
+        player.nextMessage();
+        player.nextMessage();
+
+        clock.advance(Duration.ofDays(-30));
+        checker.notifyIfUpdateAvailable(player);
+
+        assertTrue(player.nextMessage().contains("v1.3.0"));
     }
 }
