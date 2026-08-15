@@ -56,6 +56,7 @@ public class SetHomesV1Importer implements HomesImporter {
         }
 
         importBlacklist(pluginsDir, report, dryRun);
+        reportConfig(pluginsDir, report);
 
         return report;
     }
@@ -154,6 +155,51 @@ public class SetHomesV1Importer implements HomesImporter {
             // only ever counted (and written) once per run.
             existing.add(lowered);
             report.blacklistImported++;
+        }
+    }
+
+    /**
+     * Never writes config.yml - issue #40 chose the report-only option over an
+     * automatic merge, because a real merge needs the config-merge behaviour
+     * from issue #35, which does not exist yet. This only tells the admin what
+     * to set and where.
+     */
+    private void reportConfig(File pluginsDir, ImportReport report) {
+        File configFile = new File(pluginsDir, "SetHomes/config.yml");
+        if (!configFile.exists()) return;
+
+        YamlConfiguration v1 = YamlConfiguration.loadConfiguration(configFile);
+
+        if (v1.isSet("tp-delay")) {
+            report.configNotes.add(String.format("v1 tp-delay: %s -> set delay: %s in config.yml", v1.get("tp-delay"), v1.get("tp-delay")));
+        }
+
+        if (v1.isSet("tp-cancelOnMove")) {
+            report.configNotes.add(String.format("v1 tp-cancelOnMove: %s -> set cancelOnMove: %s in config.yml", v1.get("tp-cancelOnMove"), v1.get("tp-cancelOnMove")));
+        }
+
+        if (v1.isSet("max-homes-msg")) {
+            report.configNotes.add(String.format("v1 max-homes-msg: '%s' -> set maxHomesReached: '%s' in config.yml", v1.getString("max-homes-msg"), v1.getString("max-homes-msg")));
+        }
+
+        if (v1.isSet("tp-cancelOnMove-msg")) {
+            report.configNotes.add(String.format("v1 tp-cancelOnMove-msg: '%s' -> set movedWhileTeleporting: '%s' in config.yml", v1.getString("tp-cancelOnMove-msg"), v1.getString("tp-cancelOnMove-msg")));
+        }
+
+        ConfigurationSection maxHomes = v1.getConfigurationSection("max-homes");
+        if (maxHomes != null && !maxHomes.getKeys(false).isEmpty()) {
+            report.configNotes.add("v1 max-homes -> set maxHomesType: groups and maxHomeEnabled: true in config.yml, then set maxHomes.<group> to:");
+            for (String group : maxHomes.getKeys(false)) {
+                int limit = maxHomes.getInt(group);
+                String value = limit == 0
+                        ? "unlimited (v1 treats 0 as unlimited; leave this group out of maxHomes rather than setting it to 0)"
+                        : String.valueOf(limit);
+                report.configNotes.add(String.format("  maxHomes.%s: %s (v1 max-homes.%s was %d)", group, value, group, limit));
+            }
+        }
+
+        if (v1.isSet("tp-cooldown")) {
+            report.configNotes.add(String.format("v1 tp-cooldown: %s has no Set Homes Two equivalent; teleport cooldown is not supported.", v1.get("tp-cooldown")));
         }
     }
 }

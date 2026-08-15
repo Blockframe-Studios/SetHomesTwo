@@ -178,4 +178,79 @@ class SetHomesV1ImporterTest extends ServerTestBase {
         yaml.set(path + "yaw", 0.0);
         yaml.save(new File(setHomesDir(), "homes.yml"));
     }
+
+    @Test
+    void directlyMappedSettingsAreReportedWithBothKeys() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> {
+            v1.set("tp-delay", 5);
+            v1.set("tp-cancelOnMove", true);
+        });
+
+        ImportReport report = importer.run(true);
+
+        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("tp-delay") && n.contains("delay")));
+        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("tp-cancelOnMove") && n.contains("cancelOnMove")));
+    }
+
+    @Test
+    void tpCooldownIsCalledOutAsHavingNoEquivalent() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("tp-cooldown", 30));
+
+        ImportReport report = importer.run(true);
+
+        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("tp-cooldown") && n.contains("no Set Homes Two equivalent")));
+    }
+
+    @Test
+    void aZeroMaxHomesGroupIsDescribedAsUnlimitedNotZero() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("max-homes.default", 0));
+
+        ImportReport report = importer.run(true);
+
+        String note = report.configNotes.stream()
+                .filter(n -> n.contains("default"))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(note.contains("unlimited"));
+        assertFalse(note.matches(".*\\bmaxHomes\\.default:\\s*0\\b.*"));
+    }
+
+    @Test
+    void aNonZeroMaxHomesGroupIsReportedWithItsNumber() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("max-homes.vip", 6));
+
+        ImportReport report = importer.run(true);
+
+        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("vip") && n.contains("6")));
+    }
+
+    @Test
+    void missingV1ConfigFileProducesNoNotes() throws IOException {
+        writeEmptyHomesFile();
+
+        ImportReport report = importer.run(true);
+
+        assertTrue(report.configNotes.isEmpty());
+    }
+
+    @Test
+    void theConfigReportNeverWritesToConfigYml() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("tp-delay", 5));
+        long before = new File(plugin.getDataFolder(), "config.yml").lastModified();
+
+        importer.run(false);
+
+        assertEquals(before, new File(plugin.getDataFolder(), "config.yml").lastModified());
+    }
+
+    private void writeV1Config(java.util.function.Consumer<YamlConfiguration> body) throws IOException {
+        YamlConfiguration yaml = new YamlConfiguration();
+        body.accept(yaml);
+        yaml.save(new File(setHomesDir(), "config.yml"));
+    }
 }

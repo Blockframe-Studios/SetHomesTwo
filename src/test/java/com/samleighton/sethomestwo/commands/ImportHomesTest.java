@@ -64,4 +64,24 @@ class ImportHomesTest extends ServerTestBase {
         assertFalse(summary.contains("blacklist"));
         assertNull(player.nextMessage());
     }
+
+    @Test
+    void configNotesArePrintedAsConfigLines() throws IOException {
+        writeEmptyHomesFile();
+        YamlConfiguration v1Config = new YamlConfiguration();
+        v1Config.set("tp-cooldown", 30);
+        v1Config.save(new File(setHomesDir(), "config.yml"));
+        PlayerMock player = authorizedPlayer();
+
+        server.execute("import-homes", player, "sethomes").assertSucceeded();
+
+        boolean sawConfigLine = false;
+        String message;
+        while ((message = player.nextMessage()) != null) {
+            if (message.startsWith("Config: ") && message.contains("tp-cooldown")) {
+                sawConfigLine = true;
+            }
+        }
+        assertTrue(sawConfigLine);
+    }
 }

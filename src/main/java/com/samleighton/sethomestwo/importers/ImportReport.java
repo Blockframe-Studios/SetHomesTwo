@@ -12,6 +12,7 @@ public class ImportReport {
     public int blacklistSkippedExisting = 0;
     public int namesResolved = 0;
     public final List<String> warnings = new ArrayList<>();
+    public final List<String> configNotes = new ArrayList<>();
 
     public String summary(boolean dryRun) {
         String verb = dryRun ? "Would import" : "Imported";

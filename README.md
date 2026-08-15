@@ -65,6 +65,7 @@ Your players keep their homes. The old plugin does not even need to be running, 
 - Happy with the numbers? Run it again with `confirm` on the end.
 - Existing homes are never overwritten, so re-running it is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 - `/import-homes sethomes` also brings across the v1 world blacklist, added to your Set Homes Two blacklist alongside the homes. Re-running never adds a world twice.
+- `/import-homes sethomes` also lists any v1 `config.yml` settings that carry over, and the Set Homes Two key to put each one under. Nothing is written to `config.yml` automatically - the table below has the same mapping for pasting in by hand.
 - Admin commands (`/get-player-homes`, `/home-of`, `/delhome-of`, `/uhome-of`) work on an imported player immediately, for any player this server has seen before - the importer resolves their name from the server's own player cache, no network lookup involved. A player the server has never seen imports with no name and is picked up automatically on their first join, same as any other offline lookup.
 
 Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
@@ -113,6 +114,21 @@ Worth knowing before you copy a permissions file across:
 - **`/setmax` is not an alias either.** The command is `/set-max-homes`.
 - **`/strike` was removed on purpose.** It was a lightning wand, not a homes feature.
 - **`/homes` means something different.** In v1 it printed a chat list. In Set Homes Two it opens the homes menu, and `/list-homes` prints the chat list.
+
+</details>
+
+<details>
+<summary>Set Homes v1: config.yml settings and their Set Homes Two equivalent</summary>
+
+| v1 `config.yml` | Set Homes Two `config.yml` | Note |
+| --- | --- | --- |
+| `tp-delay` | `delay` | direct |
+| `tp-cancelOnMove` | `cancelOnMove` | direct |
+| `max-homes.<group>` | `maxHomes.<group>` | also set `maxHomesType: groups` and `maxHomeEnabled: true`. A v1 value of `0` means unlimited; leave that group out of `maxHomes` in Set Homes Two rather than setting it to `0`, which would cap it at zero homes instead. |
+| `max-homes-msg` | `maxHomesReached` | direct - v1's `§` colour codes paste in unchanged |
+| `tp-cancelOnMove-msg` | `movedWhileTeleporting` | direct - v1's `§` colour codes paste in unchanged |
+| `tp-cooldown` | none | Set Homes Two has no cooldown feature |
+| `tp-cooldown-msg` | none | follows the above |
 
 </details>
 
