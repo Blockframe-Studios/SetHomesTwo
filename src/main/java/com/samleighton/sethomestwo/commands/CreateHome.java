@@ -71,41 +71,33 @@ public class CreateHome implements CommandExecutor {
         // Extract parameters from command arguments
         String homeName = args[0];
 
-        String material = "";
-        if (args.length > 1)
-            material = args[1];
+        Material mat = null;
+        int descriptionStart = 1;
 
-        // Guard to ensure material entered is a valid material
-        boolean isMaterialBlankOrDefault = material.equalsIgnoreCase("d") || material.equalsIgnoreCase("default") || material.equalsIgnoreCase("");
-        Material mat = isMaterialBlankOrDefault ? Material.WHITE_WOOL : Material.matchMaterial(material);
-        if (mat == null) {
-            String errorMessage = ConfigUtil.getConfig().getString("invalidHomeItem", UserError.INVALID_MATERIAL.getValue());
-            ChatUtils.sendError(player, errorMessage);
-            return true;
-        }
-        if (!mat.isItem()) {
-            String errorMessage = ConfigUtil.getConfig().getString("invalidHomeItem", UserError.INVALID_MATERIAL.getValue());
-            ChatUtils.sendError(player, errorMessage);
-            return true;
-        }
+        if (args.length > 1) {
+            String candidate = args[1];
 
-        material = mat.name();
-        String description = null;
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // Build description from leftover arguments
-        if (args.length > 2) {
-            String[] remainingArgs = Arrays.copyOfRange(args, 2, args.length);
-            for (int i = 0; i < remainingArgs.length; i++) {
-                String arg = remainingArgs[i];
-                if (i == remainingArgs.length - 1) {
-                    stringBuilder.append(arg);
-                } else {
-                    stringBuilder.append(arg).append(" ");
+            if (candidate.isEmpty() || candidate.equalsIgnoreCase("d") || candidate.equalsIgnoreCase("default")) {
+                mat = Material.WHITE_WOOL;
+                descriptionStart = 2;
+            } else {
+                Material matched = Material.matchMaterial(candidate);
+                if (matched != null && matched.isItem()) {
+                    mat = matched;
+                    descriptionStart = 2;
                 }
             }
+        }
 
-            description = stringBuilder.toString();
+        // An argument 2 that names no item is description text, not an error, so
+        // that the v1 form "/sethome base my main base" still works.
+        if (mat == null) mat = Material.WHITE_WOOL;
+
+        String material = mat.name();
+
+        String description = null;
+        if (args.length > descriptionStart) {
+            description = String.join(" ", Arrays.copyOfRange(args, descriptionStart, args.length));
         }
 
         // Duplicate name guard
@@ -133,7 +125,7 @@ public class CreateHome implements CommandExecutor {
         }
 
         String message = ConfigUtil.getConfig().getString("homeCreated", UserSuccess.HOME_CREATED.getValue());
-        ChatUtils.sendSuccess(player, String.format(message, homeName));
+        ChatUtils.sendSuccess(player, String.format(message, homeName, material));
         return true;
     }
 

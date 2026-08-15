@@ -42,7 +42,11 @@ delay: 3 # (seconds) 0 is no delay.
 teleportSafety: true # Relocate to the nearest safe spot (or cancel) when a home would teleport you into blocks, lava, or a fall.
 
 # -- MESSAGES --
-homeCreated: "%s has been created successfully." # You can use %s here as a placeholder for the players home name.
+# The first %s is the home name, the second is the icon material. The icon is
+# named so that a description starting with a material word, for example
+# "/create-home base stone house", makes clear which word was taken as the icon.
+# Dropping the second %s is allowed and simply omits the icon.
+homeCreated: "%s has been created successfully. Icon: %s"
 homeDeleted: "%s has been deleted successfully." # You can use %s here as a placeholder for the players home name.
 dimensionAddedToBlacklist: "%s has been added to the blacklist." # You can use %s here as a placeholder for the dimension names.
 

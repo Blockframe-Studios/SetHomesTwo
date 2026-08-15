@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.commands;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
+import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import org.bukkit.Bukkit;
@@ -56,13 +57,46 @@ class CreateHomeTest extends ServerTestBase {
     }
 
     @Test
-    void anInvalidMaterialIsRejected() {
+    void aNonMaterialSecondArgumentBecomesTheDescription() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "not_a_material").assertSucceeded();
+        server.execute("create-home", player, "base", "my", "main", "base").assertSucceeded();
 
-        assertTrue(player.nextMessage().contains("not valid"));
-        assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
+        var homes = new HomesDao().getAll(player.getUniqueId());
+        assertEquals(1, homes.size());
+        assertEquals("my main base", homes.get(0).getDescription());
+        assertEquals(Material.WHITE_WOOL.name(), homes.get(0).getMaterial());
+    }
+
+    @Test
+    void aMaterialSecondArgumentStillSetsTheIcon() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "base", "diamond_block", "my", "base").assertSucceeded();
+
+        var homes = new HomesDao().getAll(player.getUniqueId());
+        assertEquals(Material.DIAMOND_BLOCK.name(), homes.get(0).getMaterial());
+        assertEquals("my base", homes.get(0).getDescription());
+    }
+
+    @Test
+    void theChosenIconIsNamedInTheSuccessMessage() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "base", "diamond_block").assertSucceeded();
+
+        assertTrue(player.nextMessage().contains("DIAMOND_BLOCK"));
+    }
+
+    @Test
+    void aDescriptionBeginningWithAMaterialWordLosesThatWordToTheIcon() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "base", "stone", "house").assertSucceeded();
+
+        Home home = new HomesDao().getAll(player.getUniqueId()).get(0);
+        assertEquals(Material.STONE.name(), home.getMaterial());
+        assertEquals("house", home.getDescription());
     }
 
     @Test
