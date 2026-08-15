@@ -78,7 +78,7 @@ public class CreateHome implements CommandExecutor {
             String candidate = args[1];
 
             if (candidate.isEmpty() || candidate.equalsIgnoreCase("d") || candidate.equalsIgnoreCase("default")) {
-                mat = Material.WHITE_WOOL;
+                mat = defaultHomeItem();
                 descriptionStart = 2;
             } else {
                 Material matched = Material.matchMaterial(candidate);
@@ -91,7 +91,7 @@ public class CreateHome implements CommandExecutor {
 
         // An argument 2 that names no item is description text, not an error, so
         // that the v1 form "/sethome base my main base" still works.
-        if (mat == null) mat = Material.WHITE_WOOL;
+        if (mat == null) mat = defaultHomeItem();
 
         String material = mat.name();
 
@@ -167,5 +167,17 @@ public class CreateHome implements CommandExecutor {
 
         int playersHomeCount = HomesUtil.getPlayerHomesCount(homesDao, player.getUniqueId());
         return playersHomeCount >= maxHomesAllowed;
+    }
+
+    /**
+     * The icon a home takes when none is given. A configured value that names no
+     * item falls back to white wool, because a non-item material stored as an
+     * icon makes HomesGui throw when it builds the ItemStack.
+     */
+    private static Material defaultHomeItem() {
+        Material configured = Material.matchMaterial(
+                ConfigUtil.getConfig().getString("defaultHomeItem", "white_wool"));
+
+        return configured != null && configured.isItem() ? configured : Material.WHITE_WOOL;
     }
 }

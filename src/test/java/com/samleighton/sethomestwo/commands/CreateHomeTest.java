@@ -17,7 +17,9 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CreateHomeTest extends ServerTestBase {
@@ -88,6 +90,11 @@ class CreateHomeTest extends ServerTestBase {
         assertTrue(player.nextMessage().contains("DIAMOND_BLOCK"));
     }
 
+    /**
+     * Pins the trade-off the forgiving parsing introduces, so it stays a
+     * documented behaviour rather than a surprise. Looks like a duplicate of
+     * aMaterialSecondArgumentStillSetsTheIcon; it is not, keep both.
+     */
     @Test
     void aDescriptionBeginningWithAMaterialWordLosesThatWordToTheIcon() {
         PlayerMock player = addPlayer();
@@ -188,5 +195,78 @@ class CreateHomeTest extends ServerTestBase {
     private boolean loggedWarning(List<LogRecord> records, String message) {
         return records.stream().anyMatch(
                 record -> record.getLevel() == Level.WARNING && message.equals(record.getMessage()));
+    }
+
+    @Test
+    void aValidButNonItemMaterialWordIsDescriptionText() {
+        PlayerMock player = addPlayer();
+
+        // water names a real Material but not an item. Storing it as the icon
+        // would make HomesGui throw on new ItemStack and the menu stop opening.
+        server.execute("create-home", player, "base", "water", "front").assertSucceeded();
+
+        Home home = new HomesDao().getAll(player.getUniqueId()).get(0);
+        assertEquals(Material.WHITE_WOOL.name(), home.getMaterial());
+        assertEquals("water front", home.getDescription());
+    }
+
+    @Test
+    void theHomesMenuStillOpensAfterAHomeNamedAfterANonItem() {
+        PlayerMock player = addPlayer();
+        server.execute("create-home", player, "base", "water", "front").assertSucceeded();
+
+        assertDoesNotThrow(() -> server.execute("homes", player).assertSucceeded());
+    }
+
+    /**
+     * Reachable by typing a double space, which Bukkit turns into an empty
+     * argument rather than dropping it.
+     */
+    @Test
+    void anEmptySecondArgumentDoesNotLeakIntoTheDescription() {
+        PlayerMock player = addPlayer();
+
+        server.dispatchCommand(player, "create-home base  hi");
+
+        Home home = new HomesDao().getAll(player.getUniqueId()).get(0);
+        assertEquals(Material.WHITE_WOOL.name(), home.getMaterial());
+        assertEquals("hi", home.getDescription());
+    }
+
+    @Test
+    void theDefaultIconSentinelIsNotDescriptionText() {
+        PlayerMock player = addPlayer();
+
+        server.execute("create-home", player, "base", "d").assertSucceeded();
+        server.execute("create-home", player, "camp", "default", "my", "spot").assertSucceeded();
+
+        List<Home> homes = new HomesDao().getAll(player.getUniqueId());
+        Home base = homes.stream().filter(h -> h.getName().equals("base")).findFirst().orElseThrow();
+        Home camp = homes.stream().filter(h -> h.getName().equals("camp")).findFirst().orElseThrow();
+
+        assertEquals(Material.WHITE_WOOL.name(), base.getMaterial());
+        assertNull(base.getDescription());
+        assertEquals(Material.WHITE_WOOL.name(), camp.getMaterial());
+        assertEquals("my spot", camp.getDescription());
+    }
+
+    @Test
+    void aDefaultIconThatNamesNoItemFallsBackToWhiteWool() {
+        PlayerMock player = addPlayer();
+        plugin.getConfig().set("defaultHomeItem", "water");
+
+        server.execute("create-home", player, "base").assertSucceeded();
+
+        assertEquals(Material.WHITE_WOOL.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
+    }
+
+    @Test
+    void theConfiguredDefaultIconIsUsedWhenNoneIsGiven() {
+        PlayerMock player = addPlayer();
+        plugin.getConfig().set("defaultHomeItem", "chest");
+
+        server.execute("create-home", player, "base").assertSucceeded();
+
+        assertEquals(Material.CHEST.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
     }
 }

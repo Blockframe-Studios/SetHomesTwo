@@ -45,7 +45,8 @@ teleportSafety: true # Relocate to the nearest safe spot (or cancel) when a home
 # The first %s is the home name, the second is the icon material. The icon is
 # named so that a description starting with a material word, for example
 # "/create-home base stone house", makes clear which word was taken as the icon.
-# Dropping the second %s is allowed and simply omits the icon.
+# Dropping the second %s is allowed and simply omits the icon. Adding a third
+# is not: the command will fail with a formatting error every time.
 homeCreated: "%s has been created successfully. Icon: %s"
 homeDeleted: "%s has been deleted successfully." # You can use %s here as a placeholder for the players home name.
 dimensionAddedToBlacklist: "%s has been added to the blacklist." # You can use %s here as a placeholder for the dimension names.
