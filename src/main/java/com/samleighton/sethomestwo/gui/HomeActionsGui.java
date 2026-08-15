@@ -166,7 +166,7 @@ public class HomeActionsGui implements GuiScreen {
             String destinationDimension = Objects.requireNonNull(destination.getWorld()).getEnvironment().toString();
 
             // Blacklisted dimension guard, sharing the rule create-home applies.
-            if (ServerUtil.isDimensionBlacklisted(destinationDimension)) {
+            if (ServerUtil.isWorldBlacklisted(destination.getWorld())) {
                 ChatUtils.sendError(player, ConfigUtil.getConfig().getString("cannotMoveToBlacklistedDimension", UserError.CANNOT_MOVE_TO_BLACKLISTED_DIMENSION.getValue()));
                 return;
             }

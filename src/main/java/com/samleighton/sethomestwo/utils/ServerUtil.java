@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -49,17 +50,15 @@ public class ServerUtil {
     }
 
     /**
-     * Whether homes are barred from a dimension.
-     *
-     * @param dimension The environment name, as produced by
-     *                  world.getEnvironment().toString()
-     * @return true when the dimension is blacklisted
+     * Whether homes are barred from a world. Blacklist rows hold lowercased
+     * world names, so the world is compared directly rather than through an
+     * environment mapping, which could only ever address the first three worlds.
      */
-    public static boolean isDimensionBlacklisted(String dimension) {
-        Dao<String> blacklistDao = new BlacklistDao();
-        List<String> blacklistedDimensions = blacklistDao.getAll();
+    public static boolean isWorldBlacklisted(World world) {
+        if (world == null) return false;
 
-        return blacklistedDimensions.contains(getDimensionsMap().get(dimension));
+        Dao<String> blacklistDao = new BlacklistDao();
+        return blacklistDao.getAll().contains(world.getName().toLowerCase());
     }
 
     /**

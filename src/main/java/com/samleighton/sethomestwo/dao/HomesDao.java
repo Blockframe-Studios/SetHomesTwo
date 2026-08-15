@@ -2,9 +2,9 @@ package com.samleighton.sethomestwo.dao;
 
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
-import com.samleighton.sethomestwo.utils.ServerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class HomesDao extends SQLiteDao implements Dao<Home> {
@@ -45,7 +44,8 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
         if (rs == null) return new ArrayList<>();
 
         // Build list of homes
-        Dao<String> blacklistEntryDao = new BlacklistDao();
+        // Read once, not once per row.
+        List<String> blacklistedWorlds = new BlacklistDao().getAll();
         List<Home> playerHomes = new ArrayList<>();
         try {
             while (rs.next()) {
@@ -68,12 +68,9 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
                 home.setId(rs.getInt("id"));
                 home.setPlayerName(rs.getString("player_name"));
 
-                String dimension = home.getDimension();
-                List<String> blacklistedDimensions = blacklistEntryDao.getAll();
-                Map<String, String> blacklistedMap = ServerUtil.getDimensionsMap();
-
-                if (blacklistedDimensions.contains(blacklistedMap.get(dimension))) {
-                    if(!this.isAdmin) home.setDescription("Cannot teleport here: dimension blacklisted");
+                World homeWorld = Bukkit.getWorld(UUID.fromString(home.getWorld()));
+                if (homeWorld != null && blacklistedWorlds.contains(homeWorld.getName().toLowerCase())) {
+                    if (!this.isAdmin) home.setDescription("Cannot teleport here: dimension blacklisted");
 
                     home.setCanTeleport(this.isAdmin);
                 }

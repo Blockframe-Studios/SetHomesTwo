@@ -62,7 +62,7 @@ public class CreateHome implements CommandExecutor {
         String playerDimension = player.getWorld().getEnvironment().toString();
 
         // Check if player is in a blacklisted dimension before creating home
-        if (ServerUtil.isDimensionBlacklisted(playerDimension)) {
+        if (ServerUtil.isWorldBlacklisted(player.getWorld())) {
             String errorMessage = ConfigUtil.getConfig().getString("dimensionBlacklisted", UserError.DIMENSION_IS_BLACKLISTED.getValue());
             ChatUtils.sendError(player, errorMessage);
             return true;

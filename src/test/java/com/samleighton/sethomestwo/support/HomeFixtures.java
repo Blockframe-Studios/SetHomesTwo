@@ -68,8 +68,7 @@ public final class HomeFixtures {
     }
 
     /**
-     * Blacklist a world. ServerUtil maps an environment onto the lowercased
-     * world name, which is what the blacklist table stores.
+     * Blacklist a world. The blacklist table stores lowercased world names.
      */
     public static void blacklist(String worldName) {
         new BlacklistDao().save(worldName.toLowerCase());
