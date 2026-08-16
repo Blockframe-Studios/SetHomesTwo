@@ -122,9 +122,7 @@ class HomesGuiClickTest extends ServerTestBase {
         HomesGui gui = openOwnList(player);
         click(gui, new GuiSession(gui), player, 0, ClickType.LEFT);
 
-        UsageCounters counters = plugin.getUsageCounters();
-        assertEquals(1, counters.snapshot(UsageCounters.Family.GUI_ACTION).get(UsageCounters.GUI_TELEPORT));
-        assertEquals(1, counters.snapshot(UsageCounters.Family.TELEPORT_SOURCE).get(UsageCounters.SOURCE_GUI));
+        assertEquals(1, plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).get(UsageCounters.GUI_TELEPORT));
     }
 
     @Test

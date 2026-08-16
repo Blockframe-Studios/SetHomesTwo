@@ -144,6 +144,7 @@ class MetricsReporterTest extends ServerTestBase {
         }
         assertEquals(14, plugin.getDescription().getCommands().size());
     }
+
     @Test
     void theDeveloperPropertyTurnsReportingOff(@TempDir File pluginsDir) {
         // No bStats config in this folder, so only the property can say no.
@@ -166,5 +167,23 @@ class MetricsReporterTest extends ServerTestBase {
         Files.writeString(new File(bStatsDir, "config.yml").toPath(), "enabled: false\n");
 
         assertFalse(MetricsReporter.shouldReport(pluginsDir));
+    }
+
+    @Test
+    void aliasChartIdsAreStableAndUnderscored() {
+        assertEquals("alias_sethome", MetricsReporter.aliasChartId("sethome"));
+        assertEquals("alias_home_of", MetricsReporter.aliasChartId("home-of"));
+        assertEquals("alias_get_blacklisted_dimensions", MetricsReporter.aliasChartId("Get-Blacklisted-Dimensions"));
+    }
+
+    @Test
+    void everyDeclaredAliasGetsAChartId() {
+        java.util.List<String> aliases = MetricsReporter.declaredAliases(plugin);
+        assertEquals(11, aliases.size(), aliases.toString());
+        assertTrue(aliases.contains("sethome"));
+        assertTrue(aliases.contains("get-blacklisted-dimensions"));
+        for (String alias : aliases) {
+            assertTrue(MetricsReporter.aliasChartId(alias).matches("alias_[a-z_]+"), alias);
+        }
     }
 }

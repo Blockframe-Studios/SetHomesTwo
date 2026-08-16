@@ -223,23 +223,6 @@ To pick one up, copy the key you want out of [`default-config.yml`](https://gith
 
 </details>
 
-### Anonymous usage statistics
-
-Set Homes Two reports anonymous usage counts to [bStats](https://bstats.org/plugin/bukkit/SetHomesTwo/33420), the same service most Bukkit plugins use. It tells the maintainers which commands and menu buttons are actually used, so the plugin can be trimmed and improved based on real use rather than guesswork.
-
-Every 30 minutes the plugin sends totals for that window, and nothing else:
-
-- how many times each command was run, and which spelling was typed (for example `/home` versus `/go-home`)
-- how many times each button in the homes menu and the management menu was clicked
-- how many teleports started from the menu versus a command, and how each ended (completed, cancelled by moving, refused because a teleport was already counting down, blocked by the blacklist, moved to a safe spot, cancelled as unsafe)
-- which settings are on: home limits and their type, cancel on move, teleport safety, the delay as a range, whether the compass and default icon items are still the defaults, and whether LuckPerms is installed
-- the number of homes on the server and the average per player, both as ranges (for example 51 to 500)
-- how many times the plugin hit a database or item-data error, by kind only (a count of failed writes, never the message or the data)
-
-bStats itself adds the things it collects for every plugin: server software and Minecraft version, Java version, player count range, online mode, and country. No player names, UUIDs, coordinates, home names or server address are ever sent, and the aggregated charts are public.
-
-There is no per-plugin switch. To turn bStats off, set `enabled: false` in `plugins/bStats/config.yml` and restart; that file is shared by every plugin on the server that uses bStats, and Set Homes Two honours it before sending anything.
-
 ## Coming from EssentialsX or Set Homes v1
 
 Your players keep their homes. The old plugin does not even need to be running, because the importer reads its data files directly.

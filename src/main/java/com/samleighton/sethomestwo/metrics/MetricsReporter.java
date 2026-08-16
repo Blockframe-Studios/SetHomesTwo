@@ -14,7 +14,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
@@ -124,6 +127,31 @@ public class MetricsReporter {
     }
 
     /**
+     * bStats chart id for one alias's line chart, `alias_` plus the alias with
+     * hyphens as underscores. Each id has to be registered on the plugin's
+     * bStats page.
+     */
+    static String aliasChartId(String alias) {
+        return "alias_" + alias.toLowerCase(Locale.ROOT).replace('-', '_');
+    }
+
+    /**
+     * Every alias declared in plugin.yml, lower-cased, in declaration order.
+     */
+    static List<String> declaredAliases(SetHomesTwo plugin) {
+        List<String> aliases = new ArrayList<>();
+        for (Map<String, Object> command : plugin.getDescription().getCommands().values()) {
+            Object declared = command.get("aliases");
+            if (declared instanceof String) {
+                aliases.add(((String) declared).toLowerCase(Locale.ROOT));
+            } else if (declared instanceof Iterable<?>) {
+                for (Object alias : (Iterable<?>) declared) aliases.add(String.valueOf(alias).toLowerCase(Locale.ROOT));
+            }
+        }
+        return aliases;
+    }
+
+    /**
      * The real bStats wiring. Constructed only on a live server; the relocation
      * check inside Metrics throws under an unshaded classpath.
      */
@@ -140,14 +168,16 @@ public class MetricsReporter {
             // bStats calls them in, so nothing is read twice.
             WindowShare share = new WindowShare(counters);
 
-            metrics.addCustomChart(new AdvancedBarChart("command_usage", () -> share.bars(UsageCounters.Family.COMMAND)));
             for (String command : plugin.getDescription().getCommands().keySet()) {
                 metrics.addCustomChart(new SingleLineChart(commandChartId(command),
                         () -> share.count(UsageCounters.Family.COMMAND, command)));
             }
             metrics.addCustomChart(new SingleLineChart("commands_total", () -> share.total(UsageCounters.Family.COMMAND)));
 
-            metrics.addCustomChart(new AdvancedBarChart("command_alias_usage", () -> share.bars(UsageCounters.Family.ALIAS)));
+            for (String alias : declaredAliases(plugin)) {
+                metrics.addCustomChart(new SingleLineChart(aliasChartId(alias),
+                        () -> share.count(UsageCounters.Family.ALIAS, alias)));
+            }
 
             metrics.addCustomChart(new AdvancedBarChart("gui_action_usage", () -> share.bars(UsageCounters.Family.GUI_ACTION)));
             metrics.addCustomChart(new SingleLineChart("gui_actions_total", () -> share.total(UsageCounters.Family.GUI_ACTION)));
@@ -155,8 +185,6 @@ public class MetricsReporter {
             metrics.addCustomChart(new AdvancedBarChart("errors", () -> share.bars(UsageCounters.Family.ERROR)));
             metrics.addCustomChart(new SingleLineChart("errors_total", () -> share.total(UsageCounters.Family.ERROR)));
 
-            metrics.addCustomChart(new AdvancedBarChart("teleport_source", () -> share.bars(UsageCounters.Family.TELEPORT_SOURCE)));
-            metrics.addCustomChart(new SingleLineChart("teleports_total", () -> share.total(UsageCounters.Family.TELEPORT_SOURCE)));
 
             metrics.addCustomChart(new AdvancedPie("teleport_outcome", () -> counters.snapshotAndReset(UsageCounters.Family.TELEPORT_OUTCOME)));
 

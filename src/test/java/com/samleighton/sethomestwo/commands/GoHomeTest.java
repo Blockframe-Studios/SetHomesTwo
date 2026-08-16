@@ -191,7 +191,7 @@ class GoHomeTest extends ServerTestBase {
     }
 
     @Test
-    void aCompletedCommandTeleportCountsSourceAndOutcome() {
+    void aCompletedCommandTeleportCountsTheOutcome() {
         TestPlayer player = addTestPlayer("traveller");
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.persist(HomeFixtures.home(player, "base", new Location(overworld, 44, 70, 44)));
@@ -200,7 +200,6 @@ class GoHomeTest extends ServerTestBase {
         assertTrue(server.execute("go-home", player, "base").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
-        assertEquals(1, plugin.getUsageCounters().snapshot(UsageCounters.Family.TELEPORT_SOURCE).get(UsageCounters.SOURCE_COMMAND));
         assertEquals(1, outcomes().get(UsageCounters.OUTCOME_COMPLETED));
         assertEquals(1, outcomes().size());
     }
@@ -233,6 +232,5 @@ class GoHomeTest extends ServerTestBase {
         assertTrue(server.execute("go-home", player, "base").hasSucceeded());
 
         assertEquals(1, outcomes().get(UsageCounters.OUTCOME_ALREADY_TELEPORTING));
-        assertEquals(2, plugin.getUsageCounters().snapshot(UsageCounters.Family.TELEPORT_SOURCE).get(UsageCounters.SOURCE_COMMAND));
     }
 }

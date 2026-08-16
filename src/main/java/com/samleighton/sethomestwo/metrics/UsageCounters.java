@@ -12,10 +12,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class UsageCounters {
 
-    public enum Family { COMMAND, ALIAS, GUI_ACTION, TELEPORT_SOURCE, TELEPORT_OUTCOME, ERROR }
-
-    public static final String SOURCE_GUI = "gui";
-    public static final String SOURCE_COMMAND = "command";
+    public enum Family { COMMAND, ALIAS, GUI_ACTION, TELEPORT_OUTCOME, ERROR }
 
     public static final String OUTCOME_BLACKLISTED = "blacklisted";
     public static final String OUTCOME_ALREADY_TELEPORTING = "already-teleporting";

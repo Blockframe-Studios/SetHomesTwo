@@ -284,9 +284,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         assertTrue(server.execute("go-player-home", admin, "Steve", "hideout").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
-        UsageCounters counters = plugin.getUsageCounters();
-        assertEquals(1, counters.snapshot(UsageCounters.Family.TELEPORT_OUTCOME).get(UsageCounters.OUTCOME_BLACKLISTED));
-        assertEquals(1, counters.snapshot(UsageCounters.Family.TELEPORT_SOURCE).get(UsageCounters.SOURCE_COMMAND));
+        assertEquals(1, plugin.getUsageCounters().snapshot(UsageCounters.Family.TELEPORT_OUTCOME).get(UsageCounters.OUTCOME_BLACKLISTED));
     }
 
     @Test

@@ -250,9 +250,7 @@ public class HomesGui implements GuiScreen {
 
         player.closeInventory();
 
-        UsageCounters counters = SetHomesTwo.instance().getUsageCounters();
-        counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_TELEPORT);
-        counters.increment(UsageCounters.Family.TELEPORT_SOURCE, UsageCounters.SOURCE_GUI);
+        SetHomesTwo.instance().getUsageCounters().increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_TELEPORT);
 
         // Teleport player to home
         home.teleport(player);
