@@ -31,7 +31,7 @@ class GetPlayerHomesTest extends ServerTestBase {
 
         server.execute("get-player-homes", admin, "nobody").assertSucceeded();
 
-        assertTrue(admin.nextMessage().contains("not online"));
+        assertTrue(admin.nextMessage().contains("No player by that name"));
     }
 
     @Test

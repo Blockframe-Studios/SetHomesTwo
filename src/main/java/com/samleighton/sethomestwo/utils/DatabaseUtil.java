@@ -29,6 +29,8 @@ public class DatabaseUtil {
                 ");";
         boolean createPlayersHomes = execute(connection, String.format(createPlayersHomesSQL, "players_homes"));
 
+        boolean playerNameColumn = ensureColumn(connection, "players_homes", "player_name", "TEXT");
+
         // Create blacklist table
         String createBlacklistSQL = "create table if not exists %s (\n" +
                 "id integer PRIMARY KEY, \n" +
@@ -47,7 +49,24 @@ public class DatabaseUtil {
                 ");";
         boolean createPlayerTeleportAttempts = execute(connection, String.format(createSQL, "player_teleport_attempts"));
 
-        return createPlayerTeleportAttempts && createBlacklist && createPlayersHomes;
+        return createPlayerTeleportAttempts && createBlacklist && createPlayersHomes && playerNameColumn;
+    }
+
+    /**
+     * SQLite has no ADD COLUMN IF NOT EXISTS, so the column list is read first.
+     */
+    private static boolean ensureColumn(Connection connection, String table, String column, String type) {
+        try (Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery("pragma table_info(" + table + ");")) {
+            while (rs.next()) {
+                if (column.equalsIgnoreCase(rs.getString("name"))) return true;
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("Could not read columns for " + table + ": " + e.getMessage());
+            return false;
+        }
+
+        return execute(connection, String.format("alter table %s add column %s %s;", table, column, type));
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.samleighton.sethomestwo.enums;
 
 public enum UserSuccess {
-    HOME_CREATED("%s has been created successfully."),
+    HOME_CREATED("%s has been created successfully. Icon: %s"),
     HOME_DELETED("%s has been deleted successfully."),
     HOME_MOVED("%s has been moved to your current location."),
     HOME_ICON_CHANGED("The icon for %s is now %s."),
@@ -9,7 +9,9 @@ public enum UserSuccess {
     TELEPORTED("Teleported to %s"),
     DIMENSION_ADDED_TO_BLACKLIST("%s has been added to the blacklist"),
     DIMENSION_REMOVED_FROM_BLACKLIST("%s has been removed from the blacklist"),
-    MAX_HOMES_UPDATED_SUCCESSFULLY("Max homes updated successfully.");
+    MAX_HOMES_UPDATED_SUCCESSFULLY("Max homes updated successfully."),
+    PLAYER_HOME_DELETED("%s's home '%s' has been deleted."),
+    PLAYER_HOME_MOVED("%s's home '%s' has been moved to your location.");
 
     private final String value;
 

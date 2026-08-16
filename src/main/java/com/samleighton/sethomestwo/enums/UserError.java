@@ -5,8 +5,8 @@ public enum UserError {
     INVALID_HOME_ITEM("This home item does not belong to you."),
 
     /** Max Home restriction */
-    SET_MAX_HOMES_SINGULAR("Max Homes Type is singular. Usage: /set-max-homes [max number of homes]"),
-    SET_MAX_HOMES_GROUPS("Max Homes Type is groups. Usage: /set-max-homes [group name] [max number of homes]"),
+    SET_MAX_HOMES_SINGULAR("Max Homes Type is singular. Usage: /%s [max number of homes]"),
+    SET_MAX_HOMES_GROUPS("Max Homes Type is groups. Usage: /%s [group name] [max number of homes]"),
     MAX_HOMES("You have reached the maximum number of homes allowed."),
 
     /** Teleport restriction */
@@ -18,10 +18,10 @@ public enum UserError {
 
     /** Command Input Errors */
     DIMENSION_IS_NOT_BLACKLISTED("The %s dimension has not been blacklisted yet therefore you cannot remove it."),
-    INVALID_DIMENSION("%s is not a valid dimension. Valid dimensions are (nether, overworld, end)."),
-    DELETE_HOME_USAGE("Usage: /delete-home [name]"),
+    INVALID_WORLD("%s is not a valid world. This server's worlds are: %s"),
+    DELETE_HOME_USAGE("Usage: /%s [name]"),
     INVALID_MATERIAL("The material you entered is not valid, please try a different one."),
-    PLAYER_NOT_ONLINE("The player supplied is either not online or does not exist."),
+    PLAYER_NOT_FOUND("No player by that name is online or has any saved homes."),
     NO_HOMES("You have not created any homes yet. Use /create-home."),
     PLAYERS_ONLY("Only players may execute this command."),
     DIMENSION_ALREADY_BLACKLISTED("The %s dimension has already been blacklisted. You cannot add it again."),

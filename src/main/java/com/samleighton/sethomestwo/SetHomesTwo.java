@@ -13,12 +13,14 @@ import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
 import com.samleighton.sethomestwo.updates.GitHubReleaseSource;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
-import com.samleighton.sethomestwo.tabcompleters.DimensionTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.BlacklistTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.HomesTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.ImportSourcesTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
-import com.samleighton.sethomestwo.tabcompleters.RemoveDimensionTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.PlayerHomesTabCompleter;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
+import com.samleighton.sethomestwo.utils.PermissionOverrides;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -54,6 +56,9 @@ public class SetHomesTwo extends JavaPlugin {
 
         // Create config
         initConfig();
+
+        // Needs the config on disk, so it cannot move above initConfig.
+        PermissionOverrides.apply();
 
         // Built before the listeners: the join listener is handed this instance.
         updateChecker = new UpdateChecker(
@@ -173,16 +178,9 @@ public class SetHomesTwo extends JavaPlugin {
         deleteHome.setExecutor(new DeleteHome());
         deleteHome.setTabCompleter(new HomesTabCompleter());
 
-        PluginCommand addToBlacklist = Objects.requireNonNull(this.getCommand("add-to-blacklist"));
-        addToBlacklist.setExecutor(new AddDimensionToBlacklist());
-        addToBlacklist.setTabCompleter(new DimensionTabCompleter());
-
-        PluginCommand removeFromBlacklist = Objects.requireNonNull(this.getCommand("remove-from-blacklist"));
-        removeFromBlacklist.setExecutor(new RemoveDimensionFromBlacklist());
-        removeFromBlacklist.setTabCompleter(new RemoveDimensionTabCompleter());
-
-        PluginCommand getBlacklistedDimensions = Objects.requireNonNull(this.getCommand("get-blacklisted-dimensions"));
-        getBlacklistedDimensions.setExecutor(new GetBlacklistedDimensions());
+        PluginCommand blacklist = Objects.requireNonNull(this.getCommand("blacklist"));
+        blacklist.setExecutor(new Blacklist());
+        blacklist.setTabCompleter(new BlacklistTabCompleter());
 
         PluginCommand getPlayerHomes = Objects.requireNonNull(this.getCommand("get-player-homes"));
         getPlayerHomes.setExecutor(new GetPlayerHomes(this));
@@ -192,6 +190,23 @@ public class SetHomesTwo extends JavaPlugin {
 
         PluginCommand importHomes = Objects.requireNonNull(this.getCommand("import-homes"));
         importHomes.setExecutor(new ImportHomes());
+        importHomes.setTabCompleter(new ImportSourcesTabCompleter());
+
+        PluginCommand moveHome = Objects.requireNonNull(this.getCommand("move-home"));
+        moveHome.setExecutor(new MoveHome());
+        moveHome.setTabCompleter(new HomesTabCompleter());
+
+        PluginCommand goPlayerHome = Objects.requireNonNull(this.getCommand("go-player-home"));
+        goPlayerHome.setExecutor(new GoPlayerHome());
+        goPlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand deletePlayerHome = Objects.requireNonNull(this.getCommand("delete-player-home"));
+        deletePlayerHome.setExecutor(new DeletePlayerHome());
+        deletePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand movePlayerHome = Objects.requireNonNull(this.getCommand("move-player-home"));
+        movePlayerHome.setExecutor(new MovePlayerHome());
+        movePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
     }
 
     /**

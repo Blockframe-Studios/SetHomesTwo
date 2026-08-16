@@ -48,25 +48,26 @@ public class GetPlayerHomes implements CommandExecutor {
         // Args length guard
         if (args.length != 1) {
             ChatUtils.incorrectNumArguments(requester);
-            ChatUtils.sendError(requester, UserInfo.GET_PLAYER_HOMES_USAGE.getValue());
+            ChatUtils.sendError(requester, String.format(UserInfo.GET_PLAYER_HOMES_USAGE.getValue(), s));
             return true;
         }
 
         String uuidString = ServerUtil.getPlayerUUID(args[0]);
 
-        // Add a check for if player is online/exists
+        // null means the name matched no online player and no stored home owner
         if (uuidString == null) {
-            ChatUtils.sendError(requester, UserError.PLAYER_NOT_ONLINE.getValue());
+            ChatUtils.sendError(requester, ConfigUtil.getConfig().getString(
+                    "playerNotFound", UserError.PLAYER_NOT_FOUND.getValue()));
             return true;
         }
 
-        Dao<Home> homesDao = new HomesDao(true);
+        Dao<Home> homesDao = new HomesDao(requester.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(UUID.fromString(uuidString));
 
-        Player player = Bukkit.getPlayer(UUID.fromString(uuidString));
-        if (player == null) return true;
+        Player target = Bukkit.getPlayer(UUID.fromString(uuidString));
+        String targetName = target == null ? args[0] : target.getDisplayName();
 
-        HomesGui adminGui = new HomesGui(requester, "Homes of " + player.getDisplayName());
+        HomesGui adminGui = new HomesGui(requester, "Homes of " + targetName);
         adminGui.setHomes(playersHomes);
 
         GuiSession session = plugin.getGuiSessionMap().computeIfAbsent(requester.getUniqueId(), uuid -> new GuiSession(new HomesGui(requester)));
@@ -74,7 +75,7 @@ public class GetPlayerHomes implements CommandExecutor {
         adminGui.displayInventory(requester);
 
         if (ConfigUtil.getDebugLevel().equals(DebugLevel.INFO))
-            Bukkit.getLogger().info(String.format("%s is viewing homes of player %s", requester.getDisplayName(), player.getDisplayName()));
+            Bukkit.getLogger().info(String.format("%s is viewing homes of player %s", requester.getDisplayName(), targetName));
 
         return true;
     }

@@ -37,6 +37,17 @@ class HomesDaoTest extends ServerTestBase {
     }
 
     @Test
+    void getIsCaseInsensitive() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "base");
+
+        Home found = new HomesDao().get(player.getUniqueId(), "BaSe");
+
+        assertNotNull(found);
+        assertEquals("base", found.getName());
+    }
+
+    @Test
     void getReturnsNullForUnknownName() {
         PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");

@@ -20,21 +20,24 @@ commands:
     permission: sh2.delete-home
     aliases:
       - delhome
-  add-to-blacklist:
-    description: Add dimensions to be blacklisted from setting homes.
-    permission: sh2.add-to-blacklist
-  remove-from-blacklist:
-    description: Remove dimensions from blacklist table.
-    permission: sh2.remove-from-blacklist
-  get-blacklisted-dimensions:
-    description: Retrieves a list of the blacklisted dimensions.
-    permission: sh2.get-blacklisted-dimensions
+  blacklist:
+    description: Manage the worlds in which homes are disallowed.
+    # Semicolon-separated permissions are OR'd by Bukkit's own Command.testPermission,
+    # so the command is reachable by a holder of any one of the three nodes; add and
+    # remove are still gated on their own node inside the executor.
+    permission: sh2.add-to-blacklist;sh2.remove-from-blacklist;sh2.get-blacklisted-dimensions
+    aliases:
+      - add-to-blacklist
+      - remove-from-blacklist
+      - get-blacklisted-dimensions
   get-player-homes:
     description: Retrieves a list of a given player's homes.
     permission: sh2.get-player-homes
   set-max-homes:
     description: Sets the max number of homes all players, or individual groups, can have.
     permission: sh2.set-max-homes
+    aliases:
+      - setmax
   go-home:
     description: Allows a player to use commands to teleport to homes.
     permission: sh2.go-home
@@ -49,46 +52,117 @@ commands:
   import-homes:
     description: Import homes from another homes plugin (dry-run unless confirmed).
     permission: sh2.import-homes
+  move-home:
+    description: Move one of your homes to where you are standing.
+    permission: sh2.move-home
+    aliases:
+      - uhome
+  go-player-home:
+    description: Teleport to another player's home.
+    permission: sh2.go-player-home
+    aliases:
+      - home-of
+  delete-player-home:
+    description: Delete another player's home.
+    permission: sh2.delete-player-home
+    aliases:
+      - delhome-of
+  move-player-home:
+    description: Move another player's home to your location.
+    permission: sh2.move-player-home
+    aliases:
+      - uhome-of
 permissions:
   sh2.create-home:
     description: Allow player to create homes.
-    default: true
+    default: false
   sh2.go-home:
     description: Allow player to teleport to homes by command.
-    default: true
+    default: false
   sh2.list-homes:
     description: Allow player to list and view their homes.
-    default: true
+    default: false
   sh2.delete-home:
     description: Allow player to delete their own homes.
-    default: true
+    default: false
   sh2.teleport:
     description: Allow player to teleport to created homes.
-    default: true
+    default: false
   sh2.give-homes-item:
     description: Allow player to get the homes viewing item.
-    default: true
+    default: false
   sh2.manage-homes:
     description: Allow player to rename, move, re-icon, and delete their homes from the GUI.
-    default: true
+    default: false
+  sh2.move-home:
+    description: Allow a player to move their own homes by command.
+    default: false
   sh2.add-to-blacklist:
     description: Add dimensions to the blacklist.
-    default: op
+    default: false
   sh2.remove-from-blacklist:
     description: Remove dimensions from the blacklist.
-    default: op
+    default: false
   sh2.get-blacklisted-dimensions:
     description: List blacklisted dimensions.
-    default: op
+    default: false
   sh2.get-player-homes:
     description: View another player's homes.
-    default: op
+    default: false
   sh2.set-max-homes:
     description: Set the max number of homes.
-    default: op
+    default: false
   sh2.import-homes:
     description: Import homes from other plugins.
-    default: op
+    default: false
   sh2.update-notify:
     description: Be told on join when a newer SetHomesTwo release is available.
+    default: false
+  sh2.go-player-home:
+    description: Teleport to another player's home.
+    default: false
+  sh2.delete-player-home:
+    description: Delete another player's home.
+    default: false
+  sh2.move-player-home:
+    description: Move another player's home.
+    default: false
+  sh2.bypass-max-homes:
+    description: Create homes beyond the configured maximum.
+    default: false
+  sh2.bypass-blacklist:
+    description: Create, move and teleport to homes in blacklisted worlds.
+    default: false
+  sh2.bypass-teleport-delay:
+    description: Teleport instantly, without the countdown or the cancel on move.
+    default: false
+  sh2.player:
+    description: Everything an ordinary player needs.
+    default: true
+    children:
+      sh2.create-home: true
+      sh2.go-home: true
+      sh2.list-homes: true
+      sh2.delete-home: true
+      sh2.teleport: true
+      sh2.give-homes-item: true
+      sh2.manage-homes: true
+      sh2.move-home: true
+  sh2.admin:
+    description: Everything a server administrator needs, including the player nodes.
     default: op
+    children:
+      sh2.player: true
+      sh2.add-to-blacklist: true
+      sh2.remove-from-blacklist: true
+      sh2.get-blacklisted-dimensions: true
+      sh2.get-player-homes: true
+      sh2.set-max-homes: true
+      sh2.import-homes: true
+      sh2.update-notify: true
+      sh2.go-player-home: true
+      sh2.delete-player-home: true
+      sh2.move-player-home: true
+      sh2.bypass-max-homes: true
+      sh2.bypass-blacklist: true
+      sh2.bypass-teleport-delay: true

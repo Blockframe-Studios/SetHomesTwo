@@ -26,9 +26,10 @@ public class ImportHomes implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] args) {
-        // Console and players may both run this; permission handled by plugin.yml (default op)
+        // Console and players may both run this; the permission is enforced by
+        // plugin.yml before onCommand is reached.
         if (args.length < 1 || !SOURCES.containsKey(args[0].toLowerCase())) {
-            commandSender.sendMessage(String.format("Usage: /import-homes <%s> [confirm]", String.join("|", SOURCES.keySet())));
+            commandSender.sendMessage(String.format("Usage: /%s <%s> [confirm]", s, String.join("|", SOURCES.keySet())));
             return true;
         }
 
@@ -37,10 +38,16 @@ public class ImportHomes implements CommandExecutor {
 
         ImportReport report = importer.run(dryRun);
         commandSender.sendMessage(report.summary(dryRun));
+        if (report.hasBlacklistActivity()) {
+            commandSender.sendMessage(report.blacklistSummary(dryRun));
+        }
         for (String warning : report.warnings) {
             commandSender.sendMessage("Warning: " + warning);
         }
-        if (dryRun && report.imported > 0) {
+        for (String note : report.configNotes) {
+            commandSender.sendMessage("Config: " + note);
+        }
+        if (dryRun && (report.imported > 0 || report.blacklistImported > 0)) {
             commandSender.sendMessage(String.format("Dry run only. Run '/import-homes %s confirm' to apply.", importer.sourceName()));
         }
         return true;

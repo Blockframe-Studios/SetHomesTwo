@@ -97,6 +97,7 @@ public class TeleportAttemptsDao extends SQLiteDao implements Dao<TeleportAttemp
 
             // Skip cancel on move check
             if (!ConfigUtil.getConfig().getBoolean("cancelOnMove", true)) return ta;
+            if (player.hasPermission("sh2.bypass-teleport-delay")) return ta;
 
             // Check if player has moved
             if (teleportStart.getX() != currLocation.getX() || teleportStart.getY() != currLocation.getY() || teleportStart.getZ() != currLocation.getZ())

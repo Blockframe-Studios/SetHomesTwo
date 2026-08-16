@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.events;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
@@ -23,6 +24,8 @@ public class PlayerJoin implements Listener {
         // Get the player from the event
         Player player = event.getPlayer();
         plugin.getGuiSessionMap().put(player.getUniqueId(), new GuiSession(new HomesGui(player)));
+
+        new HomesDao().refreshPlayerName(player.getUniqueId(), player.getName());
 
         updateChecker.notifyIfUpdateAvailable(player);
     }

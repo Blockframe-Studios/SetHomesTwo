@@ -1,11 +1,14 @@
 package com.samleighton.sethomestwo.gui;
 
+import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
+import com.samleighton.sethomestwo.datatypes.PersistentHome;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -39,6 +43,22 @@ class HomeActionsGuiTest extends ServerTestBase {
                 InventoryAction.PICKUP_ALL
         );
         gui.onClick(event, session);
+    }
+
+    /**
+     * The home carried by the item in the given slot of the session's homes list.
+     * Its canTeleport flag is what gates {@link Home#teleport}.
+     */
+    private Home listedHome(GuiSession session, int slot) {
+        ItemStack item = session.getHomesGui().getInventory().getItem(slot);
+        assertNotNull(item);
+        assertNotNull(item.getItemMeta());
+
+        Home listed = item.getItemMeta().getPersistentDataContainer()
+                .get(new NamespacedKey(SetHomesTwo.instance(), "home"), new PersistentHome());
+        assertNotNull(listed);
+
+        return listed;
     }
 
     private HomeActionsGui openSubmenu(PlayerMock player, Home home, GuiSession session) {
@@ -139,6 +159,41 @@ class HomeActionsGuiTest extends ServerTestBase {
         assertEquals(200.0, reloaded.getX());
         assertEquals(70.0, reloaded.getY());
         assertEquals(-150.0, reloaded.getZ());
+    }
+
+    @Test
+    void theRefreshedListKeepsABlacklistBypassHoldersHomeTeleportable() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.bypass-blacklist", true);
+        Home home = HomeFixtures.persist(player, "base");
+        HomeFixtures.blacklist(overworld.getName());
+
+        HomesGui homesGui = new HomesGui(player);
+        homesGui.setHomes(new HomesDao(true).getAll(player.getUniqueId()));
+        GuiSession session = new GuiSession(homesGui);
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+        player.getInventory().setItemInMainHand(new ItemStack(Material.DIAMOND));
+        click(gui, session, player, SLOT_ICON);
+
+        assertTrue(listedHome(session, 0).getCanTeleport());
+    }
+
+    @Test
+    void theRefreshedListMarksABlacklistedHomeUnreachableWithoutTheNode() {
+        PlayerMock player = addPlayer();
+        Home home = HomeFixtures.persist(player, "base");
+        HomeFixtures.blacklist(overworld.getName());
+
+        HomesGui homesGui = new HomesGui(player);
+        homesGui.setHomes(new HomesDao().getAll(player.getUniqueId()));
+        GuiSession session = new GuiSession(homesGui);
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+        player.getInventory().setItemInMainHand(new ItemStack(Material.DIAMOND));
+        click(gui, session, player, SLOT_ICON);
+
+        assertFalse(listedHome(session, 0).getCanTeleport());
     }
 
     @Test

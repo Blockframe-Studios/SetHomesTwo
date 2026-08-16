@@ -43,6 +43,7 @@ public class Home implements Serializable {
     private float pitch;
     private float yaw;
     private boolean canTeleport = true;
+    private String playerName;
 
     public Home(String playerUUID, String material, Location location, String name, String description, String dimension) {
         setUUIDBelongingTo(playerUUID);
@@ -184,7 +185,22 @@ public class Home implements Serializable {
         this.canTeleport = canTeleport;
     }
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
     public void teleport(Player player) {
+        // The single choke point for every teleport route: the go-home command,
+        // the admin command, and a click in the homes menu.
+        if (!player.hasPermission("sh2.teleport")) {
+            ChatUtils.invalidPermissions(player);
+            return;
+        }
+
         // Home is blacklisted guard
         if(!this.getCanTeleport()) {
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportToBlacklistedDimension", UserError.TELEPORT_IS_BLACKLISTED.getValue()));
@@ -213,8 +229,10 @@ public class Home implements Serializable {
             TeleportSafetyUtil.prefetchChunks(prefetchDestination, plugin);
         }
 
-        // Send player countdown title.
-        AtomicInteger seconds = new AtomicInteger(ConfigUtil.getConfig().getInt("delay"));
+        // Send player countdown title. A zero delay runs the existing loop straight
+        // through to the teleport on its first pass.
+        AtomicInteger seconds = new AtomicInteger(
+                player.hasPermission("sh2.bypass-teleport-delay") ? 0 : ConfigUtil.getConfig().getInt("delay"));
 
         // Schedule repeating task for every second
         plugin.getServer().getScheduler().runTaskTimer(plugin, bukkitTask -> {

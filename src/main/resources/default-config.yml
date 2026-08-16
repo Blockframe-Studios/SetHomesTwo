@@ -3,9 +3,12 @@
 # right-clicking to open the homes list.
 openHomeItem: "compass"
 
-# The default item when create-home command
-# is only given a home name, or is only
-# provided with the default material name.
+# The icon a home gets when the create-home command
+# names no icon, or is given "d" or "default" in the
+# icon position. This covers a bare /sethome, a
+# /sethome with only a name, and a /sethome whose
+# second word is description text rather than an item.
+# A value naming no item falls back to white wool.
 defaultHomeItem: "white_wool"
 
 # The item to use for moving to the next page
@@ -42,11 +45,40 @@ delay: 3 # (seconds) 0 is no delay.
 teleportSafety: true # Relocate to the nearest safe spot (or cancel) when a home would teleport you into blocks, lava, or a fall.
 
 # -- MESSAGES --
-homeCreated: "%s has been created successfully." # You can use %s here as a placeholder for the players home name.
+# The first %s is the home name, the second is the icon material. The icon is
+# named so that a description starting with a material word, for example
+# "/create-home base stone house", makes clear which word was taken as the icon.
+# Dropping the second %s is allowed and simply omits the icon. Adding a third
+# is not: the command will fail with a formatting error every time.
+homeCreated: "%s has been created successfully. Icon: %s"
 homeDeleted: "%s has been deleted successfully." # You can use %s here as a placeholder for the players home name.
-dimensionAddedToBlacklist: "%s has been added to the blacklist." # You can use %s here as a placeholder for the dimension names.
+dimensionAddedToBlacklist: "%s has been added to the blacklist." # %s is the world name.
+dimensionRemovedFromBlacklist: "%s has been removed from the blacklist." # %s is the world name.
+
+# Shown when a world name given to /blacklist is not a world on this server.
+# Takes TWO placeholders, in this order: what was typed, then the list of
+# this server's world names. A bare percent sign anywhere in an override
+# throws a formatting error, so write %% if you need a literal one.
+invalidWorld: "%s is not a valid world. This server's worlds are: %s"
+
+# The compass item handed out by /give-homes-item.
+# homeItemName takes one placeholder, the player's name.
+homeItemName: "Home's of %s"
+homeItemLore: "Right click this item to open your home's list."
+
+# Replies to the admin commands that act on another player's home.
+# Both take TWO placeholders, in this order: the player name first, then
+# the home name. Swapping them swaps the two words in the message, and
+# adding a third %s makes the command fail with a formatting error.
+playerHomeDeleted: "%s's home '%s' has been deleted."
+playerHomeMoved: "%s's home '%s' has been moved to your location."
 
 # -- ERROR MESSAGES --
+
+# Vestigial. No code path reaches this message any more: create-home treats a
+# word that names no item as description text, and the management menu can only
+# be handed an item you are already holding. Kept so an existing config.yml that
+# overrides it is not suddenly rejected.
 invalidHomeItem: "The material you entered is not valid, please try a different one."
 falseHomeItem: "This home item does not belong to you."
 teleportedWhileTeleporting: "You cannot teleport while already teleporting."
@@ -55,6 +87,14 @@ noHomes: "You have not created any homes yet. Use /create-home to make your firs
 teleportToBlacklistedDimension: "You cannot teleport to this home because the dimension it is in has been blacklisted."
 maxHomesReached: "You have reached the maximum number of homes allowed."
 dimensionBlacklisted: "You cannot set a home in this dimension because it has been blacklisted."
+# Shown by /go-home, /move-home and the three admin commands that take a home
+# name. The single %s is the home name that was looked for; a bare /go-home
+# looks for 'default'. Keep exactly one %s. A bare percent sign anywhere in an
+# override throws a formatting error every time the message is sent.
+homeDoesNotExist: "The home '%s' does not exist."
+
+# Shown when a player name matches nobody online and nobody with saved homes.
+playerNotFound: "No player by that name is online or has any saved homes."
 unsafeHome: "Teleport cancelled: this home is not safe to stand in and no safe spot was found nearby."
 movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the nearest safe spot."
 
@@ -120,3 +160,25 @@ checkForUpdates: true
 # repeat it. A release nobody has been told about is always announced straight
 # away, whatever this is set to. Use 0 to announce each release exactly once.
 updateReminderDays: 7
+
+# -- PERMISSIONS --
+# Override the built-in default for any sh2.* permission node, without
+# installing a permissions plugin. Accepted values: true | false | op | not-op
+#
+# This only changes the default. An explicit grant or deny in LuckPerms still
+# wins. Unknown node names are ignored with a warning in the server log, and
+# every applied override is logged at startup.
+#
+# There is no wildcard form. List each node you want to change. The two
+# bundles, sh2.player and sh2.admin, are nodes in their own right, so you can
+# name either of them here to move a whole set at once.
+#
+# Values are read by Bukkit, which also accepts case variants such as OP and
+# True, plus its own spellings such as notop. Stick to the four above.
+#
+# Take care with sh2.import-homes: /import-homes <source> confirm writes homes
+# for every player on the server, and the command has no second permission check.
+#
+# permissions:
+#   sh2.import-homes: op
+#   sh2.manage-homes: false

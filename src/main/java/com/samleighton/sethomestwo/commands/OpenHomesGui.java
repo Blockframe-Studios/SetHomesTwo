@@ -41,7 +41,7 @@ public class OpenHomesGui implements CommandExecutor {
             return true;
         }
 
-        Dao<Home> homesDao = new HomesDao();
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
         // Guard for no homes yet

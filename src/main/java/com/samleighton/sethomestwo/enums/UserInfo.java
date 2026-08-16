@@ -1,15 +1,17 @@
 package com.samleighton.sethomestwo.enums;
 
 public enum UserInfo {
-    GET_PLAYER_HOMES_USAGE("Usage: /get-player-homes [playerName]"),
-    GET_BLACKLIST_USAGE("Usage: /get-blacklisted-dimensions"),
-    REMOVE_FROM_BLACKLIST_USAGE("Usage: /remove-from-blacklist [dimension names]"),
-    ADD_TO_BLACKLIST_USAGE("Usage: /add-to-blacklist [dimension names]"),
-    CREATE_HOME_USAGE("Usage: /create-home [name] [display_material | d | default] [description]"),
+    GET_PLAYER_HOMES_USAGE("Usage: /%s [playerName]"),
+    BLACKLIST_USAGE("Usage: /%s <add|remove|list> [world]"),
+    CREATE_HOME_USAGE("Usage: /create-home [name] [icon material, or d for the default icon] [description]. Omit the name and the home is called 'default'."),
     NO_HOMES("You have not setup any homes yet, you can use the /create-home command to create one."),
     NO_MAX_HOMES("There is no max number of homes."),
     NO_BLACKLISTED_DIMENSIONS("No dimensions are blacklisted"),
-    MOVED_TO_SAFE_SPOT("Your home was not safe to stand in, so you were moved to the nearest safe spot.");
+    MOVED_TO_SAFE_SPOT("Your home was not safe to stand in, so you were moved to the nearest safe spot."),
+    MOVE_HOME_USAGE("Usage: /%s <name>"),
+    GO_PLAYER_HOME_USAGE("Usage: /%s <player> <home>"),
+    DELETE_PLAYER_HOME_USAGE("Usage: /%s <player> <home>"),
+    MOVE_PLAYER_HOME_USAGE("Usage: /%s <player> <home>");
 
     private final String value;
 
