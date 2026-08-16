@@ -1,8 +1,10 @@
 package com.samleighton.sethomestwo.commands;
 
+import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
@@ -62,6 +64,7 @@ public class GoPlayerHome implements CommandExecutor {
             home.setCanTeleport(false);
         }
 
+        SetHomesTwo.instance().getUsageCounters().increment(UsageCounters.Family.TELEPORT_SOURCE, UsageCounters.SOURCE_COMMAND);
         home.teleport(admin);
         return true;
     }

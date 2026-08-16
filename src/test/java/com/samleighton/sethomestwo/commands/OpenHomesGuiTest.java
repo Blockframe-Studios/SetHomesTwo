@@ -14,7 +14,7 @@ class OpenHomesGuiTest extends ServerTestBase {
 
     @Test
     void consoleIsTurnedAway() {
-        server.executeConsole("homes").assertSucceeded();
+        assertTrue(server.executeConsole("homes").hasSucceeded());
         // The command reports back rather than doing anything.
         assertTrue(server.getConsoleSender().nextMessage().contains("Only players"));
     }
@@ -23,7 +23,7 @@ class OpenHomesGuiTest extends ServerTestBase {
     void aPlayerWithNoHomesIsTold() {
         PlayerMock player = addPlayer();
 
-        server.execute("homes", player).assertSucceeded();
+        assertTrue(server.execute("homes", player).hasSucceeded());
 
         assertTrue(player.nextMessage().contains("You have not created any homes yet."));
     }
@@ -33,7 +33,7 @@ class OpenHomesGuiTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
-        server.execute("homes", player).assertSucceeded();
+        assertTrue(server.execute("homes", player).hasSucceeded());
 
         GuiSession session = plugin.getGuiSessionMap().get(player.getUniqueId());
         assertNotNull(session);
@@ -49,7 +49,7 @@ class OpenHomesGuiTest extends ServerTestBase {
         // first call to populate it, so assertSame actually proves reuse.
         plugin.getGuiSessionMap().clear();
 
-        server.execute("homes", player).assertSucceeded();
+        assertTrue(server.execute("homes", player).hasSucceeded());
         GuiSession first = plugin.getGuiSessionMap().get(player.getUniqueId());
         assertNotNull(first);
         // activeScreen starts null and is only set by openHomeList, so this
@@ -57,7 +57,7 @@ class OpenHomesGuiTest extends ServerTestBase {
         // some session object happens to exist.
         assertNotNull(first.getActiveScreen());
 
-        server.execute("homes", player).assertSucceeded();
+        assertTrue(server.execute("homes", player).hasSucceeded());
         GuiSession second = plugin.getGuiSessionMap().get(player.getUniqueId());
 
         assertSame(first, second);

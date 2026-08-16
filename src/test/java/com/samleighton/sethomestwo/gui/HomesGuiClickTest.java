@@ -1,9 +1,11 @@
 package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import com.samleighton.sethomestwo.support.TestPlayer;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,6 +13,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -108,6 +111,31 @@ class HomesGuiClickTest extends ServerTestBase {
         // the home lookup would have succeeded: isOwnList is what stops it.
         assertInstanceOf(HomesGui.class, session.getActiveScreen());
         assertFalse(session.getActiveScreen() instanceof HomeActionsGui);
+    }
+
+    @Test
+    void leftClickCountsAGuiTeleport() {
+        TestPlayer player = addTestPlayer("traveller");
+        HomeFixtures.persist(player, "base");
+        plugin.getConfig().set("teleportSafety", false);
+
+        HomesGui gui = openOwnList(player);
+        click(gui, new GuiSession(gui), player, 0, ClickType.LEFT);
+
+        UsageCounters counters = plugin.getUsageCounters();
+        assertEquals(1, counters.snapshot(UsageCounters.Family.GUI_ACTION).get(UsageCounters.GUI_TELEPORT));
+        assertEquals(1, counters.snapshot(UsageCounters.Family.TELEPORT_SOURCE).get(UsageCounters.SOURCE_GUI));
+    }
+
+    @Test
+    void rightClickIntoManagementCountsNoTeleport() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "base");
+
+        HomesGui gui = openOwnList(player);
+        click(gui, new GuiSession(gui), player, 0, ClickType.RIGHT);
+
+        assertTrue(plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).isEmpty());
     }
 
     @Test

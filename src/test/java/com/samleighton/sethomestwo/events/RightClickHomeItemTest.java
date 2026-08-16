@@ -8,6 +8,9 @@ import com.samleighton.sethomestwo.items.HomeItem;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
+import java.util.HashMap;
+import java.util.Map;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.block.Action;
@@ -20,9 +23,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -99,7 +99,7 @@ class RightClickHomeItemTest extends ServerTestBase {
         // Proves the click was dropped silently by the tag-presence guard,
         // not merely stopped by a different, noisier guard further down
         // (e.g. the ownership check, which also leaves activeScreen null).
-        player.assertNoMoreSaid();
+        assertNull(player.nextMessage());
     }
 
     @Test
@@ -113,7 +113,7 @@ class RightClickHomeItemTest extends ServerTestBase {
         interact(player, Action.RIGHT_CLICK_AIR, taggedItem(Material.DIAMOND, player));
 
         assertNull(sessionFor(player).getActiveScreen());
-        player.assertNoMoreSaid();
+        assertNull(player.nextMessage());
     }
 
     @Test
@@ -171,7 +171,7 @@ class RightClickHomeItemTest extends ServerTestBase {
         TestPlayer player = addTestPlayer("owner");
         plugin.getGuiSessionMap().clear();
 
-        player.openInventory(org.bukkit.Bukkit.createInventory(player, 9, "unrelated"));
+        player.openInventory(org.bukkit.Bukkit.createInventory(player, 9, Component.text("unrelated")));
         InventoryClickEvent event = new InventoryClickEvent(
                 player.getOpenInventory(),
                 InventoryType.SlotType.CONTAINER,
@@ -204,7 +204,7 @@ class RightClickHomeItemTest extends ServerTestBase {
         TestPlayer player = addTestPlayer("owner");
         plugin.getGuiSessionMap().clear();
 
-        player.openInventory(org.bukkit.Bukkit.createInventory(player, 9, "unrelated"));
+        player.openInventory(org.bukkit.Bukkit.createInventory(player, 9, Component.text("unrelated")));
         InventoryDragEvent event = dragOn(player);
         server.getPluginManager().callEvent(event);
 

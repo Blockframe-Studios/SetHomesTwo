@@ -199,6 +199,23 @@ class HomesDaoTest extends ServerTestBase {
         assertTrue(home.getCanTeleport());
     }
 
+    @Test
+    void countsCoverEveryPlayer() {
+        PlayerMock steve = addPlayer("Steve");
+        PlayerMock alex = addPlayer("Alex");
+        HomesDao dao = new HomesDao();
+
+        assertEquals(0, dao.countAll());
+        assertEquals(0, dao.countPlayersWithHomes());
+
+        HomeFixtures.persist(steve, "a");
+        HomeFixtures.persist(steve, "b");
+        HomeFixtures.persist(alex, "c");
+
+        assertEquals(3, dao.countAll());
+        assertEquals(2, dao.countPlayersWithHomes());
+    }
+
     /**
      * Captures what gets logged during {@code action}. The handler is always
      * removed afterward so it cannot leak into other tests.

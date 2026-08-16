@@ -20,7 +20,7 @@ class MoveHomeTest extends ServerTestBase {
         HomeFixtures.persist(player, "base");
         player.teleport(new Location(overworld, 100, 70, -40));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         Home moved = new HomesDao().getAll(player.getUniqueId()).get(0);
         assertEquals(100.0, moved.getX());
@@ -31,7 +31,7 @@ class MoveHomeTest extends ServerTestBase {
     void anUnknownHomeIsReported() {
         PlayerMock player = addPlayer();
 
-        server.execute("move-home", player, "nope").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "nope").hasSucceeded());
 
         String message = player.nextMessage();
         assertTrue(message.contains("nope"), message);
@@ -46,7 +46,7 @@ class MoveHomeTest extends ServerTestBase {
         Location before = player.getLocation();
         player.teleport(new Location(overworld, 100, 70, -40));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("permission"));
         assertEquals(before.getX(), new HomesDao().getAll(player.getUniqueId()).get(0).getX());
@@ -59,7 +59,7 @@ class MoveHomeTest extends ServerTestBase {
         HomeFixtures.blacklist("world_nether");
         player.teleport(new Location(nether, 10, 70, 10));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("blacklisted"));
     }
@@ -70,7 +70,7 @@ class MoveHomeTest extends ServerTestBase {
         HomeFixtures.persist(player, "base");
         player.teleport(new Location(overworld, 5, 70, 5));
 
-        server.execute("uhome", player, "base").assertSucceeded();
+        assertTrue(server.execute("uhome", player, "base").hasSucceeded());
 
         assertEquals(5.0, new HomesDao().getAll(player.getUniqueId()).get(0).getX());
     }
@@ -81,7 +81,7 @@ class MoveHomeTest extends ServerTestBase {
         HomeFixtures.persist(player, "base");
         player.teleport(new Location(nether, 8, 70, 8));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         Home moved = new HomesDao().getAll(player.getUniqueId()).get(0);
         assertEquals(nether.getUID().toString(), moved.getWorld());
@@ -92,7 +92,7 @@ class MoveHomeTest extends ServerTestBase {
     void theWrongNumberOfArgumentsShowsTheUsage() {
         PlayerMock player = addPlayer();
 
-        server.execute("move-home", player).assertSucceeded();
+        assertTrue(server.execute("move-home", player).hasSucceeded());
 
         assertTrue(player.nextMessage().contains("Incorrect number of arguments"));
         assertTrue(player.nextMessage().contains("Usage: /move-home <name>"));

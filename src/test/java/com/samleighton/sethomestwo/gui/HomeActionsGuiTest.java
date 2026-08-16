@@ -3,6 +3,8 @@ package com.samleighton.sethomestwo.gui;
 import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
+import com.samleighton.sethomestwo.datatypes.PersistentString;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
@@ -14,6 +16,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
@@ -245,6 +248,72 @@ class HomeActionsGuiTest extends ServerTestBase {
         click(gui, session, player, SLOT_ICON);
 
         assertEquals(Material.DIAMOND.name(), new HomesDao().getById(player.getUniqueId(), home.getId()).getMaterial());
+    }
+
+    @Test
+    void everyManagementActionIsCounted() {
+        PlayerMock player = addPlayer();
+        Home home = HomeFixtures.persist(player, "base");
+        GuiSession session = new GuiSession(new HomesGui(player));
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+        click(gui, session, player, SLOT_DELETE);
+        click(gui, session, player, SLOT_CANCEL);
+        click(gui, session, player, SLOT_DELETE);
+        click(gui, session, player, SLOT_CONFIRM);
+
+        var actions = plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION);
+        assertEquals(2, actions.get(HomeActionsGui.ACTION_DELETE));
+        assertEquals(1, actions.get(HomeActionsGui.ACTION_CANCEL_DELETE));
+        assertEquals(1, actions.get(HomeActionsGui.ACTION_CONFIRM_DELETE));
+    }
+
+    @Test
+    void backAndMoveAreCounted() {
+        PlayerMock player = addPlayer();
+        Home home = HomeFixtures.persist(player, "base");
+        GuiSession session = new GuiSession(new HomesGui(player));
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+        click(gui, session, player, SLOT_MOVE);
+        gui = openSubmenu(player, home, session);
+        click(gui, session, player, SLOT_BACK);
+
+        var actions = plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION);
+        assertEquals(1, actions.get(HomeActionsGui.ACTION_MOVE));
+        assertEquals(1, actions.get(HomeActionsGui.ACTION_BACK));
+    }
+
+    @Test
+    void anEmptySlotClickCountsNothing() {
+        PlayerMock player = addPlayer();
+        Home home = HomeFixtures.persist(player, "base");
+        GuiSession session = new GuiSession(new HomesGui(player));
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+        click(gui, session, player, 3);
+
+        assertTrue(plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).isEmpty());
+    }
+
+    @Test
+    void anUnknownActionTagCountsNothing() {
+        PlayerMock player = addPlayer();
+        Home home = HomeFixtures.persist(player, "base");
+        GuiSession session = new GuiSession(new HomesGui(player));
+
+        HomeActionsGui gui = openSubmenu(player, home, session);
+
+        ItemStack item = new ItemStack(Material.PAPER);
+        ItemMeta meta = item.getItemMeta();
+        assertNotNull(meta);
+        meta.getPersistentDataContainer().set(new NamespacedKey(SetHomesTwo.instance(), HomeActionsGui.ACTION_KEY_NAME), new PersistentString(), "bogus");
+        item.setItemMeta(meta);
+        gui.getInventory().setItem(3, item);
+
+        click(gui, session, player, 3);
+
+        assertTrue(plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).isEmpty());
     }
 
     @Test

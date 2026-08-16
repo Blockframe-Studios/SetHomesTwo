@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
@@ -201,11 +202,19 @@ public class HomesGui implements GuiScreen {
             if (!(clickedItem.getType().equals(backPageMaterial) || clickedItem.getType().equals(nextPageMaterial)))
                 return;
 
+            UsageCounters counters = SetHomesTwo.instance().getUsageCounters();
+
             // Move to prev page
-            if (clickedItem.getType().equals(backPageMaterial)) currentPage--;
+            if (clickedItem.getType().equals(backPageMaterial)) {
+                currentPage--;
+                counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_PAGE_PREVIOUS);
+            }
 
             // Move to next page
-            if (clickedItem.getType().equals(nextPageMaterial)) currentPage++;
+            if (clickedItem.getType().equals(nextPageMaterial)) {
+                currentPage++;
+                counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_PAGE_NEXT);
+            }
 
             // Display new inv state to player
             this.displayInventory(player);
@@ -240,6 +249,10 @@ public class HomesGui implements GuiScreen {
         }
 
         player.closeInventory();
+
+        UsageCounters counters = SetHomesTwo.instance().getUsageCounters();
+        counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_TELEPORT);
+        counters.increment(UsageCounters.Family.TELEPORT_SOURCE, UsageCounters.SOURCE_GUI);
 
         // Teleport player to home
         home.teleport(player);

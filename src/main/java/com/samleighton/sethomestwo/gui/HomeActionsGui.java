@@ -5,6 +5,7 @@ import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentString;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserSuccess;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
@@ -25,6 +26,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The management submenu for a single home. Addressed by home id so a rename
@@ -41,6 +43,8 @@ public class HomeActionsGui implements GuiScreen {
     public static final String ACTION_CONFIRM_DELETE = "confirm-delete";
     public static final String ACTION_CANCEL_DELETE = "cancel-delete";
     public static final String ACTION_BACK = "back";
+
+    private static final Set<String> KNOWN_ACTIONS = Set.of(ACTION_RENAME, ACTION_MOVE, ACTION_ICON, ACTION_DELETE, ACTION_CONFIRM_DELETE, ACTION_CANCEL_DELETE, ACTION_BACK);
 
     private static final int SLOT_RENAME = 0;
     private static final int SLOT_MOVE = 1;
@@ -163,6 +167,8 @@ public class HomeActionsGui implements GuiScreen {
         String action = actionOf(event.getCurrentItem());
 
         if (action == null) return;
+
+        if (KNOWN_ACTIONS.contains(action)) SetHomesTwo.instance().getUsageCounters().increment(UsageCounters.Family.GUI_ACTION, action);
 
         if (ACTION_BACK.equals(action)) {
             session.openHomeList(player);

@@ -45,7 +45,7 @@ class ImportHomesTest extends ServerTestBase {
         writeBlacklist("world_nether");
         PlayerMock player = authorizedPlayer();
 
-        server.execute("import-homes", player, "sethomes").assertSucceeded();
+        assertTrue(server.execute("import-homes", player, "sethomes").hasSucceeded());
 
         player.nextMessage(); // homes summary line
         assertTrue(player.nextMessage().contains("blacklist"));
@@ -56,7 +56,7 @@ class ImportHomesTest extends ServerTestBase {
         writeEmptyHomesFile();
         PlayerMock player = authorizedPlayer();
 
-        server.execute("import-homes", player, "sethomes").assertSucceeded();
+        assertTrue(server.execute("import-homes", player, "sethomes").hasSucceeded());
 
         // 0 homes and 0 blacklist activity: only the summary line is sent. The
         // dry-run hint is gated on (imported > 0 || blacklistImported > 0), so
@@ -73,7 +73,7 @@ class ImportHomesTest extends ServerTestBase {
         writeBlacklist("world_nether");
         PlayerMock player = authorizedPlayer();
 
-        server.execute("import-homes", player, "sethomes").assertSucceeded();
+        assertTrue(server.execute("import-homes", player, "sethomes").hasSucceeded());
 
         boolean sawHint = false;
         String message;
@@ -91,7 +91,7 @@ class ImportHomesTest extends ServerTestBase {
         v1Config.save(new File(setHomesDir(), "config.yml"));
         PlayerMock player = authorizedPlayer();
 
-        server.execute("import-homes", player, "sethomes").assertSucceeded();
+        assertTrue(server.execute("import-homes", player, "sethomes").hasSucceeded());
 
         boolean sawConfigLine = false;
         String message;

@@ -9,6 +9,9 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.world.WorldMock;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
 
 /**
@@ -46,6 +49,21 @@ public abstract class ServerTestBase {
         // Turned off before anything drains the scheduler, so the check
         // scheduled during onEnable can never reach the GitHub API.
         plugin.getConfig().set("checkForUpdates", false);
+
+        // Same reason: the reporter reads bStats' global switch when its delayed
+        // task fires, so no test can ever construct bStats or make a network request.
+        disableBStatsGlobally();
+    }
+
+    private void disableBStatsGlobally() {
+        File bStatsDir = new File(plugin.getDataFolder().getParentFile(), "bStats");
+        if (!bStatsDir.isDirectory() && !bStatsDir.mkdirs())
+            throw new IllegalStateException("could not create " + bStatsDir);
+        try {
+            Files.writeString(new File(bStatsDir, "config.yml").toPath(), "enabled: false\n");
+        } catch (IOException e) {
+            throw new IllegalStateException("could not write the bStats opt-out", e);
+        }
     }
 
     @AfterEach
