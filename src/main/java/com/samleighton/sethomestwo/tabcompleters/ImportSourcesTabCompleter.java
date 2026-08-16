@@ -1,10 +1,10 @@
 package com.samleighton.sethomestwo.tabcompleters;
 
 import com.samleighton.sethomestwo.commands.ImportHomes;
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,11 +24,11 @@ public class ImportSourcesTabCompleter implements TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], ImportHomes.SOURCES.keySet(), completions);
+            completions.addAll(TabCompletions.matching(args[0], ImportHomes.SOURCES.keySet()));
         }
 
         if (args.length == 2) {
-            StringUtil.copyPartialMatches(args[1], List.of("confirm"), completions);
+            completions.addAll(TabCompletions.matching(args[1], List.of("confirm")));
         }
 
         return completions;

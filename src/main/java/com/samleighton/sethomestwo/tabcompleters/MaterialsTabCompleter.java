@@ -1,10 +1,10 @@
 package com.samleighton.sethomestwo.tabcompleters;
 
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +32,7 @@ public class MaterialsTabCompleter implements TabCompleter {
             validMaterials.add(mat.getKey().toString().toLowerCase());
         }
 
-        StringUtil.copyPartialMatches(args[1], validMaterials, completions);
+        completions.addAll(TabCompletions.matching(args[1], validMaterials));
         return completions;
     }
 }
