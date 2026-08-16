@@ -30,6 +30,13 @@ public class MetricsReporter {
     /** Keeps bStats off the boot path, same as the update check. */
     public static final long STARTUP_DELAY_TICKS = 100L;
 
+    /**
+     * Developer switch: start the server with -Dsethomestwo.metrics.disabled=true
+     * and nothing is reported. For test and end-to-end servers, so their traffic
+     * never reaches the public dashboard. Deliberately not a config.yml key.
+     */
+    public static final String DISABLE_PROPERTY = "sethomestwo.metrics.disabled";
+
     private final SetHomesTwo plugin;
     private final int pluginId;
     private final BooleanSupplier enabled;
@@ -40,14 +47,27 @@ public class MetricsReporter {
     public MetricsReporter(SetHomesTwo plugin) {
         this(plugin,
                 PLUGIN_ID,
-                () -> bStatsEnabledGlobally(plugin.getDataFolder().getParentFile()),
+                () -> shouldReport(plugin.getDataFolder().getParentFile()),
                 counters -> new BStatsHandle(plugin, counters));
     }
 
     /**
+     * Whether a live server should report: not switched off by the developer
+     * property, and not disabled through bStats' own server-wide config.
+     */
+    static boolean shouldReport(File pluginsDir) {
+        if (Boolean.getBoolean(DISABLE_PROPERTY)) {
+            Bukkit.getLogger().info("SetHomesTwo metrics are off: " + DISABLE_PROPERTY + " is set.");
+            return false;
+        }
+        return bStatsEnabledGlobally(pluginsDir);
+    }
+
+    /**
      * bStats' server-wide switch, plugins/bStats/config.yml. Metrics has no
-     * per-plugin toggle, so this is the one opt-out and it is honoured before
-     * bStats is built at all. A missing file means enabled, as bStats itself treats it.
+     * per-plugin toggle, so this is the one owner-facing opt-out and it is
+     * honoured before bStats is built at all. A missing file means enabled, as
+     * bStats itself treats it.
      */
     static boolean bStatsEnabledGlobally(File pluginsDir) {
         File config = new File(new File(pluginsDir, "bStats"), "config.yml");

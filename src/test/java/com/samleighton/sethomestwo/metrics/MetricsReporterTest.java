@@ -144,4 +144,27 @@ class MetricsReporterTest extends ServerTestBase {
         }
         assertEquals(14, plugin.getDescription().getCommands().size());
     }
+    @Test
+    void theDeveloperPropertyTurnsReportingOff(@TempDir File pluginsDir) {
+        // No bStats config in this folder, so only the property can say no.
+        assertTrue(MetricsReporter.shouldReport(pluginsDir));
+
+        System.setProperty(MetricsReporter.DISABLE_PROPERTY, "true");
+        try {
+            assertFalse(MetricsReporter.shouldReport(pluginsDir));
+        } finally {
+            System.clearProperty(MetricsReporter.DISABLE_PROPERTY);
+        }
+
+        assertTrue(MetricsReporter.shouldReport(pluginsDir));
+    }
+
+    @Test
+    void theGlobalSwitchStillWinsWithoutTheProperty(@TempDir File pluginsDir) throws IOException {
+        File bStatsDir = new File(pluginsDir, "bStats");
+        assertTrue(bStatsDir.mkdirs());
+        Files.writeString(new File(bStatsDir, "config.yml").toPath(), "enabled: false\n");
+
+        assertFalse(MetricsReporter.shouldReport(pluginsDir));
+    }
 }
