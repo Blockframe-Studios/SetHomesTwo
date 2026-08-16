@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BlacklistTest extends ServerTestBase {
@@ -106,14 +107,6 @@ class BlacklistTest extends ServerTestBase {
         assertTrue(new BlacklistDao().getAll().isEmpty());
     }
 
-    // The old command names arrive at onCommand with no subcommand token at
-    // all (e.g. "/add-to-blacklist world_nether"), unlike the new "blacklist"
-    // name, which always expects one. Bukkit hands onCommand the exact label
-    // the player typed only when the command is dispatched through the real
-    // command line, so these use server.dispatchCommand rather than
-    // server.execute, which always reports the canonical command name as the
-    // label regardless of which alias was used to look it up.
-
     @Test
     void theAddSuccessMessageIsOverridableInConfig() {
         PlayerMock player = addPlayer();
@@ -124,6 +117,43 @@ class BlacklistTest extends ServerTestBase {
 
         assertTrue(player.nextMessage().contains("Blocked world_nether."));
     }
+
+    @Test
+    void aFailedAddIsReportedInsteadOfClaimingSuccess() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+        HomeFixtures.breakBlacklistWrites();
+
+        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+
+        String message = player.nextMessage();
+        assertTrue(message.contains("issue adding dimension"), message);
+        assertNull(player.nextMessage(), "a failed write must not also send the success message");
+        assertFalse(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void aFailedRemoveIsReportedInsteadOfClaimingSuccess() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
+        HomeFixtures.breakBlacklistWrites();
+
+        server.execute("blacklist", player, "remove", "world_nether").assertSucceeded();
+
+        String message = player.nextMessage();
+        assertTrue(message.contains("issue removing dimension"), message);
+        assertNull(player.nextMessage(), "a failed write must not also send the success message");
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    // The old command names arrive at onCommand with no subcommand token at
+    // all (e.g. "/add-to-blacklist world_nether"), unlike the new "blacklist"
+    // name, which always expects one. Bukkit hands onCommand the exact label
+    // the player typed only when the command is dispatched through the real
+    // command line, so these use server.dispatchCommand rather than
+    // server.execute, which always reports the canonical command name as the
+    // label regardless of which alias was used to look it up.
 
     @Test
     void bareAddToBlacklistAliasWithNoSubcommandStillAdds() {

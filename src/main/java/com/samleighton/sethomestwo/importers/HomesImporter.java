@@ -23,14 +23,9 @@ public interface HomesImporter {
     }
 
     /**
-     * Every name this server has cached, snapshotted once so a bulk import
-     * doesn't re-scan {@link Bukkit#getOfflinePlayers()} per home - on a
-     * server with a large playerdata directory that call is expensive to
-     * repeat thousands of times in one command. Deliberately built from
-     * {@code getOfflinePlayers()} rather than calling
-     * {@code Bukkit.getOfflinePlayer(UUID)} per player: the latter always
-     * returns a non-null object by contract, and never makes a network call
-     * either way, so an import can never block on Mojang.
+     * Every name this server has cached, keyed by UUID. Snapshotted once per
+     * import because {@link Bukkit#getOfflinePlayers()} scans the playerdata
+     * directory on every call.
      */
     static Map<UUID, String> cachedNames() {
         Map<UUID, String> names = new HashMap<>();

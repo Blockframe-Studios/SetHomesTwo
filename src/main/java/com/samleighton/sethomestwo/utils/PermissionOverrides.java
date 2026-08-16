@@ -6,6 +6,8 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 
+import java.util.Locale;
+
 /**
  * Applies the config.yml permissions block over the defaults declared in
  * plugin.yml. Only a node's default changes, so an explicit grant or deny in a
@@ -24,22 +26,27 @@ public final class PermissionOverrides {
 
         // Deep keys, because Bukkit splits a dotted key such as sh2.import-homes
         // into nested sections. The intermediate sections are not nodes.
-        for (String node : section.getKeys(true)) {
-            if (section.isConfigurationSection(node)) continue;
+        for (String key : section.getKeys(true)) {
+            if (section.isConfigurationSection(key)) continue;
+
+            // Bukkit lowercases a node name when looking it up but not when
+            // storing it as a bundle child, so detachFromBundles only matches
+            // the canonical spelling. The config value still reads by raw key.
+            String node = key.toLowerCase(Locale.ROOT);
 
             Permission permission = pluginManager.getPermission(node);
             if (permission == null) {
                 Bukkit.getLogger().warning(String.format(
-                        "SetHomesTwo: ignoring unknown permission node '%s' in config.yml.", node));
+                        "SetHomesTwo: ignoring unknown permission node '%s' in config.yml.", key));
                 continue;
             }
 
-            String raw = section.getString(node);
+            String raw = section.getString(key);
             PermissionDefault parsed = raw == null ? null : PermissionDefault.getByName(raw);
             if (parsed == null) {
                 Bukkit.getLogger().warning(String.format(
                         "SetHomesTwo: ignoring permission '%s', value '%s' is not one of true, false, op, not-op.",
-                        node, raw));
+                        key, raw));
                 continue;
             }
 

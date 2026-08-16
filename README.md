@@ -225,6 +225,8 @@ Accepted values are `true` (everyone), `false` (nobody), `op` (operators only) a
 
 The two bundles are nodes in their own right, so `sh2.player: false` moves the whole player set at once and `sh2.admin: true` hands every admin command to everybody. That last one is rarely what you want.
 
+**Denying a node takes it away from operators too.** `sh2.admin` contains `sh2.player`, so `sh2.player: false` stops operators creating homes as well, and `sh2.manage-homes: false` applies to them just the same. This is what makes a deny a real deny rather than something operators quietly keep. Every node the config detaches from a bundle is named in the server log at startup, so you can see exactly what moved. If you want a node gone for everyone except operators, set it to `op` instead of `false`.
+
 **This only changes a default.** If you run LuckPerms or similar, an explicit grant or deny there still wins. The config block decides what happens to a player the permissions plugin says nothing about.
 
 Take care with `sh2.import-homes`. `/import-homes <source> confirm` writes homes for every player on the server and there is no second check inside the command, so granting it to everyone is a real risk. The plugin logs a warning if you move it off `op`.

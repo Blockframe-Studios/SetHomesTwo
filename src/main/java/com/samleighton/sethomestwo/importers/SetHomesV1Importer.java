@@ -35,9 +35,6 @@ public class SetHomesV1Importer implements HomesImporter {
 
         YamlConfiguration source = YamlConfiguration.loadConfiguration(homesFile);
         HomesDao homesDao = new HomesDao();
-        // Snapshotted once, not per home - Bukkit.getOfflinePlayers() scans the
-        // server's playerdata directory, which is expensive to re-run for every
-        // imported home on a server with years of accumulated players.
         Map<UUID, String> cachedNames = HomesImporter.cachedNames();
 
         // Named homes: allNamedHomes.<uuid>.<name>.{world,x,y,z,pitch,yaw,desc}
@@ -124,13 +121,10 @@ public class SetHomesV1Importer implements HomesImporter {
 
     /**
      * v1's world_blacklist.yml holds a flat blacklisted_worlds list. Missing or
-     * empty is normal (v1 shipped it empty by default), not an error. A world
-     * absent from this server is still stored - it is harmless to block a world
-     * that does not exist - but is called out with a warning in case the name
-     * was a typo. That warning also flags that /remove-from-blacklist refuses
-     * any world name it cannot validate against this server's current worlds,
-     * so an absent one can only be removed once the world exists (or by editing
-     * the database directly).
+     * empty is normal, not an error. A world absent from this server is still
+     * stored, but warned about: /blacklist remove validates against the
+     * server's current worlds, so an absent one cannot be removed by command
+     * until that world exists.
      */
     private void importBlacklist(File pluginsDir, ImportReport report, boolean dryRun) {
         File blacklistFile = new File(pluginsDir, "SetHomes/world_blacklist.yml");
@@ -173,10 +167,8 @@ public class SetHomesV1Importer implements HomesImporter {
     }
 
     /**
-     * Never writes config.yml - issue #40 chose the report-only option over an
-     * automatic merge, because a real merge needs the config-merge behaviour
-     * from issue #35, which does not exist yet. This only tells the admin what
-     * to set and where.
+     * Reports the v1 settings that have an equivalent here, and the key to put
+     * each one under. Never writes config.yml.
      */
     private void reportConfig(File pluginsDir, ImportReport report) {
         File configFile = new File(pluginsDir, "SetHomes/config.yml");

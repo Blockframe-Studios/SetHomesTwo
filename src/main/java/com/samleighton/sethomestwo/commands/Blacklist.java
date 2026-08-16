@@ -2,7 +2,6 @@ package com.samleighton.sethomestwo.commands;
 
 import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.Dao;
-import com.samleighton.sethomestwo.enums.DebugLevel;
 import com.samleighton.sethomestwo.enums.PluginError;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
@@ -25,8 +24,8 @@ import java.util.List;
  * into one executor. Bukkit only hands onCommand the label the player actually
  * typed (add-to-blacklist, remove-from-blacklist, get-blacklisted-dimensions, or
  * blacklist), so the subcommand is inferred from that label rather than always
- * reading args[0] - otherwise "/add-to-blacklist world_nether", the exact
- * pre-existing usage this command replaces, would silently fail.
+ * reading args[0]. Reading args[0] unconditionally would break the bare
+ * "/add-to-blacklist world_nether" form, which takes no subcommand.
  */
 public class Blacklist implements CommandExecutor {
 
@@ -128,9 +127,10 @@ public class Blacklist implements CommandExecutor {
                 continue;
             }
 
-            boolean success = blacklistDao.save(dimension);
-            if (!success && ConfigUtil.getDebugLevel().equals(DebugLevel.INFO)) {
-                Bukkit.getLogger().info(String.format("Failed to add dimension to blacklist. %s", dimension));
+            if (!blacklistDao.save(dimension)) {
+                Bukkit.getLogger().severe(String.format("Failed to add dimension to blacklist. %s", dimension));
+                ChatUtils.sendError(player, PluginError.ADD_DIMENSION_FAILED.getValue());
+                continue;
             }
 
             ChatUtils.sendSuccess(player, String.format(
@@ -169,10 +169,10 @@ public class Blacklist implements CommandExecutor {
                 continue;
             }
 
-            boolean success = blacklistDao.delete(dimension);
-            if (!success && ConfigUtil.getDebugLevel().equals(DebugLevel.ERROR)) {
-                Bukkit.getLogger().info(String.format("Failed to remove dimension from blacklist. %s", dimension));
+            if (!blacklistDao.delete(dimension)) {
+                Bukkit.getLogger().severe(String.format("Failed to remove dimension from blacklist. %s", dimension));
                 ChatUtils.sendError(player, PluginError.REMOVE_DIMENSION_FAILED.getValue());
+                continue;
             }
 
             ChatUtils.sendSuccess(player, String.format(

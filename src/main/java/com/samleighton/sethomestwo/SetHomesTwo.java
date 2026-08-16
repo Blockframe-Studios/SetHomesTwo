@@ -57,7 +57,7 @@ public class SetHomesTwo extends JavaPlugin {
         // Create config
         initConfig();
 
-        // After the config exists, before commands are registered.
+        // Needs the config on disk, so it cannot move above initConfig.
         PermissionOverrides.apply();
 
         // Built before the listeners: the join listener is handed this instance.

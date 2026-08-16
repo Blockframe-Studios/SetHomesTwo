@@ -201,6 +201,34 @@ class PermissionOverridesTest extends ServerTestBase {
     }
 
     @Test
+    void denyingThePlayerBundleTakesItFromOperatorsToo() {
+        plugin.getConfig().set("permissions.sh2.player", false);
+
+        PermissionOverrides.apply();
+
+        PlayerMock op = addPlayer();
+        op.setOp(true);
+
+        // sh2.admin lists sh2.player as a child, so a deny that stopped at
+        // ordinary players would leave operators holding the whole set.
+        assertFalse(op.hasPermission("sh2.player"));
+        assertFalse(op.hasPermission("sh2.create-home"));
+        assertTrue(op.hasPermission("sh2.import-homes"), "the admin-only nodes are untouched");
+    }
+
+    @Test
+    void aMixedCaseNodeStillDetachesFromItsBundle() {
+        plugin.getConfig().set("permissions.SH2.Manage-Homes", false);
+
+        PermissionOverrides.apply();
+
+        // getPermission lowercases its lookup but a bundle's children map does
+        // not, so a node found by one and missed by the other reads as applied
+        // in the log while sh2.player carries on granting it.
+        assertFalse(addPlayer().hasPermission("sh2.manage-homes"));
+    }
+
+    @Test
     void denyingTheAdminBundleLeavesOrdinaryPlayersAlone() {
         plugin.getConfig().set("permissions.sh2.admin", false);
 

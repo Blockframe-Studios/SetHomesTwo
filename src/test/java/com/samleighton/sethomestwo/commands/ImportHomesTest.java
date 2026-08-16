@@ -58,9 +58,9 @@ class ImportHomesTest extends ServerTestBase {
 
         server.execute("import-homes", player, "sethomes").assertSucceeded();
 
-        // 0 homes and 0 blacklist activity: only the summary line is sent.
-        // The dry-run hint is gated on (imported > 0 || hasBlacklistActivity()),
-        // so it does not fire here either.
+        // 0 homes and 0 blacklist activity: only the summary line is sent. The
+        // dry-run hint is gated on (imported > 0 || blacklistImported > 0), so
+        // it does not fire here either.
         String summary = player.nextMessage();
         assertFalse(summary.contains("blacklist"));
         assertNull(player.nextMessage());
