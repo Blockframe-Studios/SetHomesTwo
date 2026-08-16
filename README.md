@@ -24,17 +24,6 @@
 
 That is genuinely the whole setup. Player permissions default to granted, so your players can create and use homes the moment the plugin loads. See [Permissions](#permissions) if you want to change that.
 
-## Before you update
-
-New install? Skip this. These are the changes an existing Set Homes Two server will notice, and the first one is worth checking **before** you update.
-
-- **The world blacklist now works on every world.** Blacklisting always accepted any world name and reported success, but only the first three worlds were ever enforced, so a fourth was quietly ignored. It is enforced now. If you blacklisted a world beyond the first three, run `/blacklist list` first, because homes there will start being refused and existing ones will stop being reachable by players who do not hold `sh2.bypass-blacklist`.
-- **`/sethome base stone house` now means a stone icon and the description "house".** A second word naming a real item is taken as the icon. Put `d` in that position to keep the whole phrase: `/sethome base d stone house`.
-- **Home names and player names now ignore case everywhere.** `/home Base` always found `base`; `/delhome`, `/uhome` and the admin commands now match it too, so `/delhome Base` deletes `base`.
-- **The admin commands cannot find an offline player until that player logs in once.** Set Homes Two learns which name belongs to which account when a player joins, and a database written by an earlier release has none of those names recorded yet. Their homes are safe either way, and it corrects itself on their first login.
-
-Older releases are in the [changelog](#changelog).
-
 ## Commands
 
 | Command | What it does |
@@ -150,10 +139,10 @@ Two bundles group the nodes, so you can move a whole role in one line:
 | `sh2.import-homes` | OP | Importing from another plugin |
 | `sh2.update-notify` | OP | Being told on join that a newer release exists |
 | `sh2.bypass-max-homes` | OP | Creating homes past the configured maximum, whether the limit is server-wide or per group |
-| `sh2.bypass-blacklist` | OP | Creating a home in a blacklisted world, moving a home into one, and teleporting to a home already in one. It also stops `/homes` and `/list-homes` replacing the home's description with "Cannot teleport here: dimension blacklisted" |
+| `sh2.bypass-blacklist` | OP | Creating a home in a blacklisted world, moving a home into one, and teleporting to a home already in one |
 | `sh2.bypass-teleport-delay` | OP | Teleporting with no countdown, and not being cancelled by moving |
 
-The bundles are what actually grant these nodes. Each individual node is declared off in `plugin.yml`, and `sh2.player` or `sh2.admin` switches its whole set on, which is why denying a bundle takes that whole set away in one line. Granting or denying an individual node still works exactly as the table describes.
+These nodes are granted by the bundles, which is why denying a bundle takes its whole set away at once. Granting or denying an individual node works exactly as the table describes.
 
 Note that `sh2.move-home` sits in `sh2.player`, not behind `sh2.manage-homes`. If you took `sh2.manage-homes` away to stop players relocating their homes, deny `sh2.move-home` as well or `/uhome` gives the ability back.
 
@@ -172,20 +161,14 @@ permissions:
 
 Accepted values are `true` (everyone), `false` (nobody), `op` (operators only) and `not-op` (everyone except operators). A deny applies to operators too, so use `op` if you want a node gone for everyone except them.
 
+You can name a bundle here as well as a single node, so `sh2.player: false` moves all eight player nodes in one line. There is no wildcard, so list whatever you want changed. If a line does not seem to take effect, check the server log at startup: anything the plugin could not read is named there.
+
 **This only changes a default.** If you run LuckPerms or similar, an explicit grant or deny there still wins. The config block decides what happens to a player the permissions plugin says nothing about.
 
-Take care with `sh2.import-homes`. `/import-homes <source> confirm` writes homes for every player on the server and there is no second check inside the command, so granting it to everyone is a real risk.
+Take care with `sh2.import-homes`. Anyone who can run `/import-homes <source> confirm` can write homes for every player on the server, so granting it to everyone is a real risk.
 
 <details>
-<summary>More on changing permissions</summary>
-
-**Why a deny reaches operators.** `sh2.admin` contains `sh2.player`, so `sh2.player: false` stops operators creating homes as well, and `sh2.manage-homes: false` applies to them just the same. This is what makes a deny a real deny rather than something operators quietly keep. Every node the config detaches from a bundle is named in the server log at startup, so you can see exactly what moved.
-
-**Bundles are ordinary nodes.** `sh2.player: false` moves the whole player set at once, and `sh2.admin: true` hands every admin command to everybody. That last one is rarely what you want.
-
-**What gets logged.** A value the plugin cannot read is skipped with a warning in the server log, as is a node name that does not exist, and every override that does apply is written to the log at startup. Moving `sh2.import-homes` off `op` logs a warning of its own. There is no wildcard form, so list each node.
-
-**Spelling.** Bukkit parses the values, so case variants such as `OP` and spellings such as `notop` are accepted, as is any capitalisation of the node name itself. Stick to the four values above.
+<summary>Other ways to set permissions</summary>
 
 **With LuckPerms**, the equivalent one-liner is:
 
@@ -255,7 +238,7 @@ Existing homes are never overwritten, so re-running the import is always safe. H
 
 - **The v1 world blacklist**, added to your Set Homes Two blacklist alongside the homes. Re-running never adds a world twice.
 - **A report of your v1 `config.yml`**, listing any setting that has an equivalent here and the key to put it under. Nothing is written to `config.yml` automatically. The table further down has the same mapping for pasting in by hand.
-- **Player names**, resolved from the server's own player cache, with no network lookup involved. That means `/get-player-homes`, `/home-of`, `/delhome-of` and `/uhome-of` work on an imported player straight away, for any player this server has seen before. A player the server has never seen imports with no name and is picked up automatically on their first join.
+- **Player names**, read from the server's own player list. That means `/get-player-homes`, `/home-of`, `/delhome-of` and `/uhome-of` work on an imported player straight away, for anyone this server has seen before. A player the server has never seen imports with no name and is picked up automatically on their first join.
 
 </details>
 
@@ -298,7 +281,7 @@ Worth knowing before you copy a permissions file across:
 - **`homes.config_bypass` is three nodes now.** In v1 it let a player exceed the home limit, set homes in blacklisted worlds, and skip the teleport delay and cooldown, all at once. Grant all three `sh2.bypass-*` nodes to reproduce that. Nothing is lost on the cooldown, because Set Homes Two has no cooldown feature.
 - **Your v1 unnamed home is called `default`.** The importer files it under that name, and a bare `/sethome` or `/home` uses the same name, so both keep working exactly as they did. `/home-of steve default` reaches an imported unnamed home.
 - **`/sethome` takes a description straight after the name again**, as it did in v1. Set Homes Two adds an optional icon in between, so a second word naming a real item is read as the icon. `/sethome base d my main base` forces the default icon and keeps the whole phrase.
-- **The one-letter aliases are not provided.** v1 registered `/h`, `/sh`, `/dh`, `/lh`, `/ho`, `/dho`, `/uh`, `/uho`, `/bl` and `/sm`. `/h` in particular collides with several other homes plugins, and Bukkit resolves a collision silently by prefixing one of them, which is worse than not having it. If you want them, map them yourself in the server's own `commands.yml`.
+- **The one-letter aliases are not provided.** v1 registered `/h`, `/sh`, `/dh`, `/lh`, `/ho`, `/dho`, `/uh`, `/uho`, `/bl` and `/sm`. If your players are used to them, map them yourself in the server's own `commands.yml`.
 - **`/homes` means something different.** In v1 it printed a chat list. In Set Homes Two it opens the homes menu, and `/list-homes` prints the chat list.
 
 </details>
