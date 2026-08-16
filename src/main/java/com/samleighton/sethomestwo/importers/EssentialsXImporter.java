@@ -45,15 +45,19 @@ public class EssentialsXImporter implements HomesImporter {
             ConfigurationSection homes = userData.getConfigurationSection("homes");
             if (homes == null) continue;
 
+            // EssentialsX user files name by UUID and carry the last known
+            // account name directly, unlike v1's homes.yml, which has none.
+            String playerName = userData.getString("lastAccountName");
+
             for (String homeName : homes.getKeys(false)) {
-                importOne(homesDao, report, homes.getConfigurationSection(homeName), playerUUID, homeName, dryRun);
+                importOne(homesDao, report, homes.getConfigurationSection(homeName), playerUUID, playerName, homeName, dryRun);
             }
         }
 
         return report;
     }
 
-    private void importOne(HomesDao homesDao, ImportReport report, ConfigurationSection home, String playerUUID, String homeName, boolean dryRun) {
+    private void importOne(HomesDao homesDao, ImportReport report, ConfigurationSection home, String playerUUID, String playerName, String homeName, boolean dryRun) {
         try {
             if (home == null) {
                 report.failed++;
@@ -81,15 +85,20 @@ public class EssentialsXImporter implements HomesImporter {
                     (float) home.getDouble("pitch")
             );
 
+            if (playerName != null) report.namesResolved++;
+
             if (!dryRun) {
-                boolean saved = homesDao.save(new Home(
+                Home importedHome = new Home(
                         playerUUID,
                         HomesImporter.defaultMaterial(),
                         location,
                         homeName,
                         null,
                         world.getEnvironment().toString()
-                ));
+                );
+                importedHome.setPlayerName(playerName);
+
+                boolean saved = homesDao.save(importedHome);
                 if (!saved) {
                     report.failed++;
                     return;
