@@ -2,11 +2,11 @@ package com.samleighton.sethomestwo.tabcompleters;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.utils.HomesUtil;
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ public class HomesTabCompleter implements TabCompleter {
         Player player = (Player) commandSender;
         List<String> homeNames = HomesUtil.getPlayerHomesNameOnly(new HomesDao(), player.getUniqueId());
 
-        StringUtil.copyPartialMatches(args[0], homeNames, completions);
+        completions.addAll(TabCompletions.matching(args[0], homeNames));
         return completions;
     }
 }

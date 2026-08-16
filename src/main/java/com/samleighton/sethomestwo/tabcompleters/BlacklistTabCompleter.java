@@ -2,10 +2,10 @@ package com.samleighton.sethomestwo.tabcompleters;
 
 import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.utils.ServerUtil;
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ public class BlacklistTabCompleter implements TabCompleter {
         boolean canonical = "blacklist".equalsIgnoreCase(label);
 
         if (canonical && args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], Arrays.asList("add", "remove", "list"), completions);
+            completions.addAll(TabCompletions.matching(args[0], Arrays.asList("add", "remove", "list")));
             return completions;
         }
 
@@ -34,7 +34,7 @@ public class BlacklistTabCompleter implements TabCompleter {
         List<String> source = removing ? new BlacklistDao().getAll() : ServerUtil.getValidDimensions();
 
         String lastArg = args.length == 0 ? "" : args[args.length - 1];
-        StringUtil.copyPartialMatches(lastArg, source, completions);
+        completions.addAll(TabCompletions.matching(lastArg, source));
         return completions;
     }
 }

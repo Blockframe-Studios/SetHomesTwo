@@ -3,11 +3,11 @@ package com.samleighton.sethomestwo.tabcompleters;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ServerUtil;
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +27,7 @@ public class PlayerHomesTabCompleter implements TabCompleter {
         if (args.length == 1) {
             List<String> names = new ArrayList<>();
             Bukkit.getOnlinePlayers().forEach(player -> names.add(player.getName()));
-            StringUtil.copyPartialMatches(args[0], names, completions);
+            completions.addAll(TabCompletions.matching(args[0], names));
             return completions;
         }
 
@@ -40,7 +40,7 @@ public class PlayerHomesTabCompleter implements TabCompleter {
                 homeNames.add(home.getName());
             }
 
-            StringUtil.copyPartialMatches(args[1], homeNames, completions);
+            completions.addAll(TabCompletions.matching(args[1], homeNames));
         }
 
         return completions;
