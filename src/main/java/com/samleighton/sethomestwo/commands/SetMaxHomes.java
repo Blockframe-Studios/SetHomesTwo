@@ -24,7 +24,7 @@ public class SetMaxHomes implements CommandExecutor {
     public SetMaxHomes(Plugin plugin) {
         this.plugin = plugin;
     }
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(commandSender instanceof Player)) {
             commandSender.sendMessage(UserError.PLAYERS_ONLY.getValue());
             return false;
@@ -46,13 +46,13 @@ public class SetMaxHomes implements CommandExecutor {
         // Depending on if grouping is singular or groups, guard against incorrect number of args
         if (maxHomesType.equals("singular") && args.length != 1) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendError(player, UserError.SET_MAX_HOMES_SINGULAR.getValue());
+            ChatUtils.sendError(player, String.format(UserError.SET_MAX_HOMES_SINGULAR.getValue(), label));
             return false;
         }
 
         if (maxHomesType.equals("groups") && args.length != 2) {
             ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendError(player, UserError.SET_MAX_HOMES_GROUPS.getValue());
+            ChatUtils.sendError(player, String.format(UserError.SET_MAX_HOMES_GROUPS.getValue(), label));
             return false;
         }
 

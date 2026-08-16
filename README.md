@@ -82,7 +82,6 @@ Afterwards, remove the old jar. Set Homes Two provides `/sethome`, `/home` and `
 | `/uhome-of <player> [home]` | `/uhome-of <player> <home>` |
 | `/blacklist <add\|remove> <world>` | `/blacklist <add\|remove\|list> <world...>` |
 | `/setmax <group> <number>` | `/set-max-homes <group> <number>` |
-| `/strike` | Gone. See below. |
 
 | v1 permission | Set Homes Two permission |
 | --- | --- |
@@ -108,8 +107,6 @@ Worth knowing before you copy a permissions file across:
 - **Your v1 unnamed home is called `default`.** The importer files it under that name, and a bare `/sethome` or `/home` uses the same name, so both keep working exactly as they did. `/home-of steve default` reaches an imported unnamed home.
 - **`/sethome` takes a description straight after the name again**, as it did in v1. Set Homes Two adds an optional icon in between, so a second word naming a real item is read as the icon. `/sethome base d my main base` forces the default icon and keeps the whole phrase.
 - **The one-letter aliases are not provided.** v1 registered `/h`, `/sh`, `/dh`, `/lh`, `/ho`, `/dho`, `/uh`, `/uho`, `/bl` and `/sm`. `/h` in particular collides with several other homes plugins, and Bukkit resolves a collision silently by prefixing one of them, which is worse than not having it. If you want them, map them yourself in the server's own `commands.yml`.
-- **`/setmax` is not an alias either.** The command is `/set-max-homes`.
-- **`/strike` was removed on purpose.** It was a lightning wand, not a homes feature.
 - **`/homes` means something different.** In v1 it printed a chat list. In Set Homes Two it opens the homes menu, and `/list-homes` prints the chat list.
 
 </details>
@@ -135,7 +132,7 @@ On `/sethome`, a second word that names a real item becomes the icon, and everyt
 
 | Command | What it does |
 | --- | --- |
-| `/set-max-homes [group] <number>` | Sets the home limit, per LuckPerms group or server-wide. |
+| `/set-max-homes [group] <number>` (alias `/setmax`) | Sets the home limit, per LuckPerms group or server-wide. |
 | `/get-player-homes <player>` | Lists another player's homes. |
 | `/home-of <player> <home>` (long form `/go-player-home`) | Teleports you to another player's home. |
 | `/delhome-of <player> <home>` (long form `/delete-player-home`) | Deletes another player's home. |
@@ -264,21 +261,6 @@ Set Homes Two never touches a `config.yml` that already exists, so settings adde
 To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
 
 </details>
-
-## Upgrading an existing Set Homes Two server
-
-Your homes, your config and your permissions carry over untouched. These are the changes a player or an admin can notice, listed so that nobody has to work them out from the symptom. Only the first one is worth checking before you update.
-
-- **The world blacklist now works on every world.** Blacklisting always accepted any world name and reported success, but only the first three worlds were ever enforced, so a fourth was quietly ignored. It is enforced now. If you blacklisted a world beyond the first three, check `/blacklist list`, because homes there will start being refused and existing ones will stop being reachable.
-- **`/sethome base stone house` now means a stone icon and the description "house".** A second word naming a real item is taken as the icon. Put `d` in that position to force the default icon and keep the whole phrase: `/sethome base d stone house`. The reply names the icon it chose.
-- **A word like `water`, `fire`, `lava` or `wall_torch` stays description text.** Those are real materials but not items, so they cannot be a home icon. Rather than refusing the command, Set Homes Two treats them as the start of the description.
-- **The admin commands cannot find an offline player until that player logs in once.** Set Homes Two learns which name belongs to which account when a player joins, and a database written by an earlier release has none of those names recorded yet. Until a player has reconnected once, `/home-of`, `/delhome-of` and `/uhome-of` will say no player by that name is online or has any saved homes, even though their homes are safe and still there. It corrects itself the first time they log in.
-- **The confirmation for `/sethome` will not name the icon until you update `homeCreated`.** The icon is what tells you which word was taken as the icon rather than as description text, and it comes from a new second `%s` in that message. Your existing `config.yml` keeps the old wording, so copy `homeCreated` out of `default-config.yml` if you want it.
-- **Home names and player names now ignore case everywhere.** `/home Base` always found `base`; `/delhome`, `/uhome` and the admin commands now match it. `/delhome Base` therefore deletes `base`.
-- **`defaultHomeItem` now applies to homes players create.** It used to apply only to imported homes, so a server that set it to `chest` still got white wool on everything new. New homes with no icon now take the configured item.
-- **`/sethome` now checks the home name.** A blank name is refused and `maxHomeNameLength` is enforced. Both were previously checked only when renaming from the menu, which allowed a home nothing could address.
-- **A missing home is named in the error.** Four commands used to say "That home no longer exists"; they now say "The home 'base' does not exist". The menu keeps the old wording, where it is still the accurate one.
-- **Operators can now bypass the blacklist.** That includes moving another player's home into a blacklisted world. The owner, who does not hold `sh2.bypass-blacklist`, then sees "Cannot teleport here: dimension blacklisted" on that home and cannot reach it, so move it back out or grant them the node.
 
 ## FAQ
 

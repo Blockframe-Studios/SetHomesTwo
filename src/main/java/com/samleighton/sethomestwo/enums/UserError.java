@@ -5,8 +5,8 @@ public enum UserError {
     INVALID_HOME_ITEM("This home item does not belong to you."),
 
     /** Max Home restriction */
-    SET_MAX_HOMES_SINGULAR("Max Homes Type is singular. Usage: /set-max-homes [max number of homes]"),
-    SET_MAX_HOMES_GROUPS("Max Homes Type is groups. Usage: /set-max-homes [group name] [max number of homes]"),
+    SET_MAX_HOMES_SINGULAR("Max Homes Type is singular. Usage: /%s [max number of homes]"),
+    SET_MAX_HOMES_GROUPS("Max Homes Type is groups. Usage: /%s [group name] [max number of homes]"),
     MAX_HOMES("You have reached the maximum number of homes allowed."),
 
     /** Teleport restriction */
