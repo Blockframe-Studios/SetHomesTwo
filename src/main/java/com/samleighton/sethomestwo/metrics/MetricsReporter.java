@@ -135,9 +135,9 @@ public class MetricsReporter {
 
             // bStats keeps history (and time filters) only for line charts, and a
             // line chart carries one number, so each usage family gets a bar chart
-            // for the ranking of the last window plus line charts for trends. The
-            // bar chart drains the family and WindowShare hands the same window to
-            // the line charts registered after it, so nothing is read twice.
+            // for the ranking of the last window plus line charts for trends.
+            // WindowShare hands every chart the same drained window whatever order
+            // bStats calls them in, so nothing is read twice.
             WindowShare share = new WindowShare(counters);
 
             metrics.addCustomChart(new AdvancedBarChart("command_usage", () -> share.bars(UsageCounters.Family.COMMAND)));
