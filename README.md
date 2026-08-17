@@ -1,17 +1,17 @@
-![Set Homes Two](docs/img/logo.png)
+![Set Homes](docs/img/logo.png)
 
-**Set Homes Two gives every player a menu of their homes.** Left-click one to teleport. Right-click it to rename it, move it, change its icon, or delete it.
+**Set Homes gives every player a menu of their homes.** Left-click one to teleport. Right-click it to rename it, move it, change its icon, or delete it.
 
 [Source](https://github.com/Blockframe-Studios/SetHomesTwo) | [Report a bug](https://github.com/Blockframe-Studios/SetHomesTwo/issues) | [Donate](https://www.paypal.com/donate/?business=8LXCRFX27B37C&no_recurring=0&item_name=Thanks+for+your+support.+It+helps+keep+this+plugin+up+to+date+%3A%29&currency_code=USD)
 
 ![The homes menu, with each home shown as its own item](docs/img/homes-menu.png)
 
-## Why Set Homes Two
+## Why Set Homes
 
 - **A menu, or a list of commands.** Homes live in a chest-style GUI. Players open it with `/homes` or by right-clicking the configured "Home Item".
 - **Every home gets its own icon.** Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.
 - **Rename, move and delete in-game.** Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.
-- **Teleports that do not kill you.** Set Homes Two checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
+- **Teleports that do not kill you.** Set Homes checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
 - **Switch without losing anything.** One command imports every home from EssentialsX or Set Homes v1, and shows you exactly what it will do before it does it.
 - **Per-rank home limits.** Give donors more homes than default players with LuckPerms groups, or set one server-wide limit.
 - **Permissions you can change from the config.** Every `sh2.*` node has a sensible default, and any of them can be moved in `config.yml`. No permissions plugin required.
@@ -102,7 +102,7 @@ By default players wait three seconds before a teleport fires, and moving cancel
 
 ![Instant teleport](docs/img/teleport-instant.gif)
 
-Before it drops anyone anywhere, Set Homes Two checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is cancelled and they are told why. Turn it off with `teleportSafety: false`.
+Before it drops anyone anywhere, Set Homes checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is cancelled and they are told why. Turn it off with `teleportSafety: false`.
 
 ## Permissions
 
@@ -217,7 +217,7 @@ That table is only the common settings. For the complete list, see [`default-con
 <details>
 <summary><strong>Upgrading? Your existing config.yml will not gain the new settings</strong></summary>
 
-Set Homes Two never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
+Set Homes never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
 
 To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
 
@@ -229,7 +229,7 @@ Your players keep their homes. The old plugin does not even need to be running, 
 
 1. Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
 2. Happy with the numbers? Run it again with `confirm` on the end.
-3. Remove the old jar. Set Homes Two provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
+3. Remove the old jar. This plugin provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
 
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
@@ -238,7 +238,7 @@ Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A 
 <details>
 <summary>What else the Set Homes v1 import brings across</summary>
 
-- **The v1 world blacklist**, added to your Set Homes Two blacklist alongside the homes. Re-running never adds a world twice.
+- **The v1 world blacklist**, added to your Set Homes v2 blacklist alongside the homes. Re-running never adds a world twice.
 - **A report of your v1 `config.yml`**, listing any setting that has an equivalent here and the key to put it under. Nothing is written to `config.yml` automatically. The table further down has the same mapping for pasting in by hand.
 - **Player names**, read from the server's own player list. That means `/get-player-homes`, `/home-of`, `/delhome-of` and `/uhome-of` work on an imported player straight away, for anyone this server has seen before. A player the server has never seen imports with no name and is picked up automatically on their first join.
 
@@ -247,7 +247,7 @@ Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A 
 <details>
 <summary>Set Homes v1: what each command and permission became</summary>
 
-| Set Homes v1 | Set Homes Two |
+| Set Homes v1 | Set Homes v2 |
 | --- | --- |
 | `/sethome [name] [description]` | `/sethome [name] [icon] [description]` |
 | `/home [name]` | `/home [name]` |
@@ -260,7 +260,7 @@ Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A 
 | `/blacklist <add\|remove> <world>` | `/blacklist <add\|remove\|list> <world...>` |
 | `/setmax <group> <number>` | `/setmax`, or the long form `/set-max-homes` |
 
-| v1 permission | Set Homes Two permission |
+| v1 permission | v2 permission |
 | --- | --- |
 | `homes.home` | `sh2.go-home`, plus `sh2.teleport` to actually arrive |
 | `homes.sethome` | `sh2.create-home` |
@@ -280,25 +280,25 @@ Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A 
 
 Worth knowing before you copy a permissions file across:
 
-- **`homes.config_bypass` is three nodes now.** In v1 it let a player exceed the home limit, set homes in blacklisted worlds, and skip the teleport delay and cooldown, all at once. Grant all three `sh2.bypass-*` nodes to reproduce that. Nothing is lost on the cooldown, because Set Homes Two has no cooldown feature.
+- **`homes.config_bypass` is three nodes now.** In v1 it let a player exceed the home limit, set homes in blacklisted worlds, and skip the teleport delay and cooldown, all at once. Grant all three `sh2.bypass-*` nodes to reproduce that. Nothing is lost on the cooldown, because v2 has no cooldown feature.
 - **Your v1 unnamed home is called `default`.** The importer files it under that name, and a bare `/sethome` or `/home` uses the same name, so both keep working exactly as they did. `/home-of steve default` reaches an imported unnamed home.
-- **`/sethome` takes a description straight after the name again**, as it did in v1. Set Homes Two adds an optional icon in between, so a second word naming a real item is read as the icon. `/sethome base d my main base` forces the default icon and keeps the whole phrase.
+- **`/sethome` takes a description straight after the name again**, as it did in v1. v2 adds an optional icon in between, so a second word naming a real item is read as the icon. `/sethome base d my main base` forces the default icon and keeps the whole phrase.
 - **The one-letter aliases are not provided.** v1 registered `/h`, `/sh`, `/dh`, `/lh`, `/ho`, `/dho`, `/uh`, `/uho`, `/bl` and `/sm`. If your players are used to them, map them yourself in the server's own `commands.yml`.
-- **`/homes` means something different.** In v1 it printed a chat list. In Set Homes Two it opens the homes menu, and `/list-homes` prints the chat list.
+- **`/homes` means something different.** In v1 it printed a chat list. In v2 it opens the homes menu, and `/list-homes` prints the chat list.
 
 </details>
 
 <details>
-<summary>Set Homes v1: config.yml settings and their Set Homes Two equivalent</summary>
+<summary>Set Homes v1: config.yml settings and their v2 equivalent</summary>
 
-| v1 `config.yml` | Set Homes Two `config.yml` | Note |
+| v1 `config.yml` | v2 `config.yml` | Note |
 | --- | --- | --- |
 | `tp-delay` | `delay` | direct |
 | `tp-cancelOnMove` | `cancelOnMove` | direct |
-| `max-homes.<group>` | `maxHomes.<group>` | also set `maxHomesType: groups` and `maxHomeEnabled: true`. A v1 value of `0` means unlimited; leave that group out of `maxHomes` in Set Homes Two rather than setting it to `0`, which would cap it at zero homes instead. |
+| `max-homes.<group>` | `maxHomes.<group>` | also set `maxHomesType: groups` and `maxHomeEnabled: true`. A v1 value of `0` means unlimited; leave that group out of `maxHomes` in v2 rather than setting it to `0`, which would cap it at zero homes instead. |
 | `max-homes-msg` | `maxHomesReached` | direct. v1's `§` colour codes paste in unchanged |
 | `tp-cancelOnMove-msg` | `movedWhileTeleporting` | direct. v1's `§` colour codes paste in unchanged |
-| `tp-cooldown` | none | Set Homes Two has no cooldown feature |
+| `tp-cooldown` | none | v2 has no cooldown feature |
 | `tp-cooldown-msg` | none | follows the above |
 
 </details>
