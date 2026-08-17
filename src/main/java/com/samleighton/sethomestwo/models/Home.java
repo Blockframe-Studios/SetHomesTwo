@@ -6,6 +6,7 @@ import com.samleighton.sethomestwo.dao.TeleportAttemptsDao;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.enums.UserSuccess;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.TeleportSafetyUtil;
@@ -203,6 +204,7 @@ public class Home implements Serializable {
 
         // Home is blacklisted guard
         if(!this.getCanTeleport()) {
+            countOutcome(UsageCounters.OUTCOME_BLACKLISTED);
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportToBlacklistedDimension", UserError.TELEPORT_IS_BLACKLISTED.getValue()));
             return;
         }
@@ -212,6 +214,7 @@ public class Home implements Serializable {
 
         // Guard to check if player is currently teleporting
         if (isAlreadyTeleporting) {
+            countOutcome(UsageCounters.OUTCOME_ALREADY_TELEPORTING);
             ChatUtils.sendError(player, ConfigUtil.getConfig().getString("teleportedWhileTeleporting", UserError.ALREADY_TELEPORTING.getValue()));
             return;
         }
@@ -251,6 +254,7 @@ public class Home implements Serializable {
                     teleportAttemptsDao.delete(player.getUniqueId());
                     player.resetTitle();
                     player.removePotionEffect(PotionEffectType.NAUSEA);
+                    countOutcome(UsageCounters.OUTCOME_CANCELLED_MOVED);
                     bukkitTask.cancel();
                     return;
                 }
@@ -277,18 +281,21 @@ public class Home implements Serializable {
                 Location safeDestination = TeleportSafetyUtil.findSafeLocation(destination);
                 TeleportSafetyUtil.releaseChunkTickets(prefetchDestination, plugin);
                 if (safeDestination == null) {
+                    countOutcome(UsageCounters.OUTCOME_UNSAFE);
                     ChatUtils.sendError(player, ConfigUtil.getConfig().getString("unsafeHome", UserError.UNSAFE_HOME.getValue()));
                     player.resetTitle();
                     player.removePotionEffect(PotionEffectType.NAUSEA);
                     return;
                 }
                 if (safeDestination != destination) {
+                    countOutcome(UsageCounters.OUTCOME_RELOCATED);
                     ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("movedToSafeSpot", UserInfo.MOVED_TO_SAFE_SPOT.getValue()));
                 }
                 destination = safeDestination;
             }
 
             player.teleport(destination);
+            countOutcome(UsageCounters.OUTCOME_COMPLETED);
             player.removePotionEffect(PotionEffectType.NAUSEA);
             player.resetTitle();
             player.playNote(player.getLocation(), Instrument.BELL, Note.sharp(2, Note.Tone.F));
@@ -298,5 +305,9 @@ public class Home implements Serializable {
             ChatUtils.sendSuccess(player, String.format(teleportSuccess, this.getName()));
 
         }, 0, 20L);
+    }
+
+    private static void countOutcome(String outcome) {
+        SetHomesTwo.instance().getUsageCounters().increment(UsageCounters.Family.TELEPORT_OUTCOME, outcome);
     }
 }

@@ -308,6 +308,31 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
     }
 
     /**
+     * @return total homes on this server, 0 if the read fails
+     */
+    public int countAll() {
+        return countQuery(String.format("select count(*) as total from %s", TABLE_NAME));
+    }
+
+    /**
+     * @return number of distinct players holding at least one home, 0 if the read fails
+     */
+    public int countPlayersWithHomes() {
+        return countQuery(String.format("select count(distinct player_uuid) as total from %s", TABLE_NAME));
+    }
+
+    private int countQuery(String sql) {
+        ResultSet rs = DatabaseUtil.fetch(this.conn, sql);
+        if (rs == null) return 0;
+        try {
+            return rs.next() ? rs.getInt("total") : 0;
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("There was an issue counting homes.");
+            return 0;
+        }
+    }
+
+    /**
      * The UUID of the player who owns homes stored under this name, or null.
      * A stale name can collide across two accounts (an old owner who renamed
      * away and a new owner who took the name); returns null rather than

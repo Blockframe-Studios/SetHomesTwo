@@ -52,7 +52,7 @@ class BlacklistEnforcementTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.teleport(new Location(creative, 0, 64, 0));
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("blacklisted"));
         assertTrue(new com.samleighton.sethomestwo.dao.HomesDao().getAll(player.getUniqueId()).isEmpty());

@@ -43,6 +43,10 @@
                                     <pattern>net.wesjd.anvilgui</pattern>
                                     <shadedPattern>com.samleighton.sethomestwo.lib.anvilgui</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>com.samleighton.sethomestwo.lib.bstats</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -138,6 +142,12 @@
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
             <version>1.10.13-20260714.043149-1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

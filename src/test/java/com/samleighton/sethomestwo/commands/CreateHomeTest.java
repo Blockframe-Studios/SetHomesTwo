@@ -17,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +28,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 12, 65, -8));
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         var homes = new HomesDao().getAll(player.getUniqueId());
         assertEquals(1, homes.size());
@@ -42,7 +41,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.teleport(new Location(overworld, 7, 65, 7));
 
-        server.execute("create-home", player).assertSucceeded();
+        assertTrue(server.execute("create-home", player).hasSucceeded());
 
         List<Home> homes = new HomesDao().getAll(player.getUniqueId());
         assertEquals(1, homes.size());
@@ -56,9 +55,9 @@ class CreateHomeTest extends ServerTestBase {
     void theNameDefaultBehavesLikeTheBareCommand() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "default").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "default").hasSucceeded());
         player.nextMessage();
-        server.execute("create-home", player).assertSucceeded();
+        assertTrue(server.execute("create-home", player).hasSucceeded());
 
         assertTrue(player.nextMessage().contains("You already have a home called"));
         List<Home> homes = new HomesDao().getAll(player.getUniqueId());
@@ -74,7 +73,7 @@ class CreateHomeTest extends ServerTestBase {
     void theIconSentinelNeverBecomesTheHomeName() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "default").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "default").hasSucceeded());
 
         List<Home> homes = new HomesDao().getAll(player.getUniqueId());
         assertEquals(1, homes.size());
@@ -88,7 +87,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
 
-        server.execute("create-home", player, "BASE").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "BASE").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("You already have a home called"));
         assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
@@ -98,7 +97,7 @@ class CreateHomeTest extends ServerTestBase {
     void aNonMaterialSecondArgumentBecomesTheDescription() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "my", "main", "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "my", "main", "base").hasSucceeded());
 
         var homes = new HomesDao().getAll(player.getUniqueId());
         assertEquals(1, homes.size());
@@ -110,7 +109,7 @@ class CreateHomeTest extends ServerTestBase {
     void aMaterialSecondArgumentStillSetsTheIcon() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "diamond_block", "my", "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "diamond_block", "my", "base").hasSucceeded());
 
         var homes = new HomesDao().getAll(player.getUniqueId());
         assertEquals(Material.DIAMOND_BLOCK.name(), homes.get(0).getMaterial());
@@ -121,7 +120,7 @@ class CreateHomeTest extends ServerTestBase {
     void theChosenIconIsNamedInTheSuccessMessage() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "diamond_block").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "diamond_block").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("DIAMOND_BLOCK"));
     }
@@ -135,7 +134,7 @@ class CreateHomeTest extends ServerTestBase {
     void aDescriptionBeginningWithAMaterialWordLosesThatWordToTheIcon() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "stone", "house").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "stone", "house").hasSucceeded());
 
         Home home = new HomesDao().getAll(player.getUniqueId()).get(0);
         assertEquals(Material.STONE.name(), home.getMaterial());
@@ -146,7 +145,7 @@ class CreateHomeTest extends ServerTestBase {
     void aSuppliedMaterialIsStored() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "diamond").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "diamond").hasSucceeded());
 
         assertEquals(Material.DIAMOND.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
     }
@@ -157,7 +156,7 @@ class CreateHomeTest extends ServerTestBase {
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.blacklist(overworld.getName());
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("You cannot set a home in this dimension"));
         assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
@@ -172,7 +171,7 @@ class CreateHomeTest extends ServerTestBase {
 
         HomeFixtures.persist(player, "base");
 
-        server.execute("create-home", player, "camp").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "camp").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("maximum number of homes"));
         assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
@@ -188,7 +187,7 @@ class CreateHomeTest extends ServerTestBase {
 
         // The count alone would pass even if the groups branch were never reached.
         List<LogRecord> logged = captureLog(() ->
-                server.execute("create-home", player, "camp").assertSucceeded());
+                assertTrue(server.execute("create-home", player, "camp").hasSucceeded()));
 
         assertEquals(2, new HomesDao().getAll(player.getUniqueId()).size());
         assertTrue(loggedWarning(logged,
@@ -239,7 +238,7 @@ class CreateHomeTest extends ServerTestBase {
 
         // water names a real Material but not an item. Storing it as the icon
         // would make HomesGui throw on new ItemStack and the menu stop opening.
-        server.execute("create-home", player, "base", "water", "front").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "water", "front").hasSucceeded());
 
         Home home = new HomesDao().getAll(player.getUniqueId()).get(0);
         assertEquals(Material.WHITE_WOOL.name(), home.getMaterial());
@@ -249,9 +248,9 @@ class CreateHomeTest extends ServerTestBase {
     @Test
     void theHomesMenuStillOpensAfterAHomeNamedAfterANonItem() {
         PlayerMock player = addPlayer();
-        server.execute("create-home", player, "base", "water", "front").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "water", "front").hasSucceeded());
 
-        assertDoesNotThrow(() -> server.execute("homes", player).assertSucceeded());
+        assertTrue(server.execute("homes", player).hasSucceeded());
     }
 
     /**
@@ -273,8 +272,8 @@ class CreateHomeTest extends ServerTestBase {
     void theDefaultIconSentinelIsNotDescriptionText() {
         PlayerMock player = addPlayer();
 
-        server.execute("create-home", player, "base", "d").assertSucceeded();
-        server.execute("create-home", player, "camp", "default", "my", "spot").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base", "d").hasSucceeded());
+        assertTrue(server.execute("create-home", player, "camp", "default", "my", "spot").hasSucceeded());
 
         List<Home> homes = new HomesDao().getAll(player.getUniqueId());
         Home base = homes.stream().filter(h -> h.getName().equals("base")).findFirst().orElseThrow();
@@ -291,7 +290,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         plugin.getConfig().set("defaultHomeItem", "water");
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertEquals(Material.WHITE_WOOL.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
     }
@@ -301,7 +300,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         plugin.getConfig().set("defaultHomeItem", "chest");
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertEquals(Material.CHEST.name(), new HomesDao().getAll(player.getUniqueId()).get(0).getMaterial());
     }
@@ -324,7 +323,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         plugin.getConfig().set("maxHomeNameLength", 8);
 
-        server.execute("create-home", player, "waaaaaaaaaaaytoolong").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "waaaaaaaaaaaytoolong").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("too long"));
         assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
@@ -335,7 +334,7 @@ class CreateHomeTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         plugin.getConfig().set("maxHomeNameLength", 8);
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
     }

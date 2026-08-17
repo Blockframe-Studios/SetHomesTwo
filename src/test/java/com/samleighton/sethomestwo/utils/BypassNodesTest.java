@@ -63,7 +63,7 @@ class BypassNodesTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.bypass-max-homes", true);
         HomeFixtures.persist(player, "base");
 
-        server.execute("create-home", player, "second").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "second").hasSucceeded());
 
         assertEquals(2, new HomesDao().getAll(player.getUniqueId()).size());
     }
@@ -74,7 +74,7 @@ class BypassNodesTest extends ServerTestBase {
         TestPlayer player = addPlayer();
         HomeFixtures.persist(player, "base");
 
-        server.execute("create-home", player, "second").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "second").hasSucceeded());
 
         assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
     }
@@ -86,7 +86,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.blacklist(nether.getName());
         player.teleport(new Location(nether, 10, 70, 10));
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertEquals(1, new HomesDao().getAll(player.getUniqueId()).size());
     }
@@ -97,7 +97,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.blacklist(nether.getName());
         player.teleport(new Location(nether, 10, 70, 10));
 
-        server.execute("create-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("create-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("blacklisted"));
         assertTrue(new HomesDao().getAll(player.getUniqueId()).isEmpty());
@@ -111,7 +111,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.blacklist(nether.getName());
         player.teleport(new Location(nether, 10, 70, 10));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         Home moved = new HomesDao(true).getAll(player.getUniqueId()).get(0);
         assertEquals(nether.getUID().toString(), moved.getWorld());
@@ -125,7 +125,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.blacklist(nether.getName());
         player.teleport(new Location(nether, 10, 70, 10));
 
-        server.execute("move-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("move-home", player, "base").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("blacklisted"));
         assertEquals(overworld.getUID().toString(),
@@ -142,7 +142,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.persist(HomeFixtures.home(player, "far", new Location(nether, 100, 70, 100)));
         HomeFixtures.blacklist(nether.getName());
 
-        server.execute("go-home", player, "far").assertSucceeded();
+        assertTrue(server.execute("go-home", player, "far").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
         assertEquals(nether.getName(), player.getWorld().getName());
@@ -158,7 +158,7 @@ class BypassNodesTest extends ServerTestBase {
         HomeFixtures.persist(HomeFixtures.home(player, "far", new Location(nether, 100, 70, 100)));
         HomeFixtures.blacklist(nether.getName());
 
-        server.execute("go-home", player, "far").assertSucceeded();
+        assertTrue(server.execute("go-home", player, "far").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
         assertEquals(overworld.getName(), player.getWorld().getName());
@@ -174,7 +174,7 @@ class BypassNodesTest extends ServerTestBase {
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.persist(HomeFixtures.home(player, "base", new Location(overworld, 100, 70, 100)));
 
-        server.execute("go-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("go-home", player, "base").hasSucceeded());
         server.getScheduler().performOneTick();
 
         assertEquals(100, player.getLocation().getBlockX());
@@ -188,7 +188,7 @@ class BypassNodesTest extends ServerTestBase {
         player.teleport(new Location(overworld, 0, 64, 0));
         HomeFixtures.persist(HomeFixtures.home(player, "base", new Location(overworld, 100, 70, 100)));
 
-        server.execute("go-home", player, "base").assertSucceeded();
+        assertTrue(server.execute("go-home", player, "base").hasSucceeded());
         server.getScheduler().performOneTick();
 
         assertEquals(0, player.getLocation().getBlockX());

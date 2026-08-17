@@ -2,9 +2,16 @@ package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.ClickType;
@@ -15,11 +22,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,7 +66,7 @@ class HomesGuiPaginationTest extends ServerTestBase {
         for (ItemStack item : inventory.getContents()) {
             if (item == null || item.getItemMeta() == null) continue;
             if (!item.getItemMeta().getPersistentDataContainer().has(key, new PersistentHome())) continue;
-            names.add(item.getItemMeta().getDisplayName());
+            names.add(PlainTextComponentSerializer.plainText().serialize(Objects.requireNonNull(item.getItemMeta().displayName())));
         }
 
         return names;
@@ -90,6 +92,22 @@ class HomesGuiPaginationTest extends ServerTestBase {
                 InventoryAction.PICKUP_ALL
         );
         gui.onClick(event, session);
+    }
+
+    @Test
+    void pageTurnsAreCounted() {
+        PlayerMock player = addPlayer();
+        HomesGui gui = new HomesGui(player);
+        GuiSession session = new GuiSession(gui);
+        gui.setHomes(homes(player, 46));
+        gui.displayInventory(player);
+
+        clickSlot(gui, session, player, NEXT_PAGE_SLOT);
+        clickSlot(gui, session, player, PREV_PAGE_SLOT);
+
+        var actions = plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION);
+        assertEquals(1, actions.get(UsageCounters.GUI_PAGE_NEXT));
+        assertEquals(1, actions.get(UsageCounters.GUI_PAGE_PREVIOUS));
     }
 
     @Test

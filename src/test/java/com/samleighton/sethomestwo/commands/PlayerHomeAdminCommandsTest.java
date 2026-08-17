@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.commands;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
@@ -35,7 +36,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         PlayerMock admin = addPlayer("Admin");
         admin.addAttachment(plugin, "sh2.delete-player-home", true);
 
-        server.execute("delete-player-home", admin, "Steve", "base").assertSucceeded();
+        assertTrue(server.execute("delete-player-home", admin, "Steve", "base").hasSucceeded());
 
         assertTrue(new HomesDao(true).getAll(targetId).isEmpty());
     }
@@ -51,7 +52,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         admin.addAttachment(plugin, "sh2.move-player-home", true);
         admin.teleport(new Location(overworld, 250, 70, 250));
 
-        server.execute("move-player-home", admin, "Steve", "base").assertSucceeded();
+        assertTrue(server.execute("move-player-home", admin, "Steve", "base").hasSucceeded());
 
         assertEquals(250.0, new HomesDao(true).getAll(targetId).get(0).getX());
     }
@@ -70,7 +71,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         // TeleportSafetyUtil.prefetchChunks reaches an unimplemented MockBukkit call.
         plugin.getConfig().set("teleportSafety", false);
 
-        server.execute("go-player-home", admin, "Steve", "base").assertSucceeded();
+        assertTrue(server.execute("go-player-home", admin, "Steve", "base").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
         assertEquals(30.0, admin.getLocation().getX());
@@ -81,7 +82,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         PlayerMock admin = addPlayer("Admin");
         admin.addAttachment(plugin, "sh2.delete-player-home", true);
 
-        server.execute("delete-player-home", admin, "Nobody", "base").assertSucceeded();
+        assertTrue(server.execute("delete-player-home", admin, "Nobody", "base").hasSucceeded());
 
         assertTrue(admin.nextMessage().contains("No player by that name"));
     }
@@ -94,7 +95,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         PlayerMock admin = addPlayer("Admin");
         admin.addAttachment(plugin, "sh2.delete-player-home", false);
 
-        server.execute("delete-player-home", admin, "Steve", "base").assertSucceeded();
+        assertTrue(server.execute("delete-player-home", admin, "Steve", "base").hasSucceeded());
 
         assertTrue(admin.nextMessage().contains("permission"));
         assertEquals(1, new HomesDao(true).getAll(target.getUniqueId()).size());
@@ -128,7 +129,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         PlayerMock admin = addPlayer("Admin");
         admin.addAttachment(plugin, "sh2.delete-player-home", true);
 
-        server.execute("delhome-of", admin, "Steve", "base").assertSucceeded();
+        assertTrue(server.execute("delhome-of", admin, "Steve", "base").hasSucceeded());
 
         assertTrue(new HomesDao(true).getAll(target.getUniqueId()).isEmpty());
     }
@@ -138,7 +139,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         PlayerMock admin = addPlayer("Admin");
         admin.addAttachment(plugin, "sh2.move-player-home", true);
 
-        server.execute("move-player-home", admin, "Steve").assertSucceeded();
+        assertTrue(server.execute("move-player-home", admin, "Steve").hasSucceeded());
 
         assertTrue(admin.nextMessage().contains("Incorrect number of arguments"));
         assertTrue(admin.nextMessage().contains("Usage: /move-player-home <player> <home>"));
@@ -214,13 +215,13 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         admin.addAttachment(plugin, "sh2.move-player-home", true);
         admin.addAttachment(plugin, "sh2.go-player-home", true);
 
-        server.execute("delete-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(server.execute("delete-player-home", admin, "Steve", "nope").hasSucceeded());
         assertUnknownHomeNamed(admin, "nope");
 
-        server.execute("move-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(server.execute("move-player-home", admin, "Steve", "nope").hasSucceeded());
         assertUnknownHomeNamed(admin, "nope");
 
-        server.execute("go-player-home", admin, "Steve", "nope").assertSucceeded();
+        assertTrue(server.execute("go-player-home", admin, "Steve", "nope").hasSucceeded());
         assertUnknownHomeNamed(admin, "nope");
 
         assertEquals(1, new HomesDao(true).getAll(target.getUniqueId()).size());
@@ -236,7 +237,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
 
         // Both names typed in the wrong case. The reply must echo the stored
         // spelling, not what was typed.
-        server.execute("delete-player-home", admin, "sTeVe", "BaSe").assertSucceeded();
+        assertTrue(server.execute("delete-player-home", admin, "sTeVe", "BaSe").hasSucceeded());
 
         String reply = admin.nextMessage();
         assertTrue(reply.contains("Steve"), reply);
@@ -263,11 +264,27 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
         admin.addAttachment(plugin, "sh2.bypass-blacklist", false);
 
-        server.execute("go-player-home", admin, "Steve", "hideout").assertSucceeded();
+        assertTrue(server.execute("go-player-home", admin, "Steve", "hideout").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
         assertEquals("world", admin.getLocation().getWorld().getName());
         assertTrue(admin.nextMessage().contains("blacklisted"));
+    }
+
+    @Test
+    void aBlacklistedTeleportCountsTheBlacklistedOutcome() {
+        TestPlayer owner = addPlayer("Steve");
+        HomeFixtures.persist(HomeFixtures.home(owner, "hideout", new Location(nether, 33, 70, 33)));
+        HomeFixtures.blacklist("world_nether");
+        owner.disconnect();
+
+        TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
+        admin.addAttachment(plugin, "sh2.bypass-blacklist", false);
+
+        assertTrue(server.execute("go-player-home", admin, "Steve", "hideout").hasSucceeded());
+        server.getScheduler().performTicks(100L);
+
+        assertEquals(1, plugin.getUsageCounters().snapshot(UsageCounters.Family.TELEPORT_OUTCOME).get(UsageCounters.OUTCOME_BLACKLISTED));
     }
 
     @Test
@@ -280,7 +297,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         TestPlayer admin = adminAt(new Location(overworld, 0, 70, 0));
         admin.addAttachment(plugin, "sh2.bypass-blacklist", true);
 
-        server.execute("go-player-home", admin, "Steve", "hideout").assertSucceeded();
+        assertTrue(server.execute("go-player-home", admin, "Steve", "hideout").hasSucceeded());
         server.getScheduler().performTicks(100L);
 
         assertEquals("world_nether", admin.getLocation().getWorld().getName());
@@ -297,7 +314,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         admin.addAttachment(plugin, "sh2.get-player-homes", true);
         admin.addAttachment(plugin, "sh2.bypass-blacklist", false);
 
-        server.execute("get-player-homes", admin, "Steve").assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin, "Steve").hasSucceeded());
         clickFirstHome(admin);
         server.getScheduler().performTicks(100L);
 
@@ -314,7 +331,7 @@ class PlayerHomeAdminCommandsTest extends ServerTestBase {
         admin.addAttachment(plugin, "sh2.get-player-homes", true);
         admin.addAttachment(plugin, "sh2.bypass-blacklist", true);
 
-        server.execute("get-player-homes", admin, "Steve").assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin, "Steve").hasSucceeded());
         clickFirstHome(admin);
         server.getScheduler().performTicks(100L);
 

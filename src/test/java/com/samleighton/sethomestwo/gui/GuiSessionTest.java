@@ -3,6 +3,9 @@ package com.samleighton.sethomestwo.gui;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import java.util.HashMap;
+import java.util.Map;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
@@ -15,9 +18,6 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -68,7 +68,7 @@ class GuiSessionTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
-        InventoryClickEvent event = clickOn(player, Bukkit.createInventory(player, 9, "other"), 0);
+        InventoryClickEvent event = clickOn(player, Bukkit.createInventory(player, 9, Component.text("other")), 0);
         session.handleClick(event);
 
         assertFalse(event.isCancelled());
@@ -79,10 +79,10 @@ class GuiSessionTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
-        RecordingScreen screen = new RecordingScreen(Bukkit.createInventory(player, 9, "active"));
+        RecordingScreen screen = new RecordingScreen(Bukkit.createInventory(player, 9, Component.text("active")));
         session.setActiveScreen(screen);
 
-        InventoryClickEvent event = clickOn(player, Bukkit.createInventory(player, 9, "foreign"), 0);
+        InventoryClickEvent event = clickOn(player, Bukkit.createInventory(player, 9, Component.text("foreign")), 0);
         session.handleClick(event);
 
         assertFalse(event.isCancelled());
@@ -94,7 +94,7 @@ class GuiSessionTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
-        Inventory inventory = Bukkit.createInventory(player, 9, "active");
+        Inventory inventory = Bukkit.createInventory(player, 9, Component.text("active"));
         RecordingScreen screen = new RecordingScreen(inventory);
         session.setActiveScreen(screen);
 
@@ -110,7 +110,7 @@ class GuiSessionTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
 
-        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, "other"));
+        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, Component.text("other")));
         session.handleDrag(event);
 
         assertFalse(event.isCancelled());
@@ -120,9 +120,9 @@ class GuiSessionTest extends ServerTestBase {
     void dragInAForeignInventoryIsNotCancelled() {
         PlayerMock player = addPlayer();
         GuiSession session = new GuiSession(new HomesGui(player));
-        session.setActiveScreen(new RecordingScreen(Bukkit.createInventory(player, 9, "active")));
+        session.setActiveScreen(new RecordingScreen(Bukkit.createInventory(player, 9, Component.text("active"))));
 
-        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, "foreign"));
+        InventoryDragEvent event = dragOn(player, Bukkit.createInventory(player, 9, Component.text("foreign")));
         session.handleDrag(event);
 
         assertFalse(event.isCancelled());
@@ -131,7 +131,7 @@ class GuiSessionTest extends ServerTestBase {
     @Test
     void dragInTheActiveScreenIsCancelled() {
         PlayerMock player = addPlayer();
-        Inventory inventory = Bukkit.createInventory(player, 9, "active");
+        Inventory inventory = Bukkit.createInventory(player, 9, Component.text("active"));
         GuiSession session = new GuiSession(new HomesGui(player));
         session.setActiveScreen(new RecordingScreen(inventory));
 

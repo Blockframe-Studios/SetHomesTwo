@@ -17,7 +17,7 @@ class BlacklistTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.add-to-blacklist", true);
 
-        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
 
         assertTrue(new BlacklistDao().getAll().contains("world_nether"));
     }
@@ -28,7 +28,7 @@ class BlacklistTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
 
-        server.execute("blacklist", player, "remove", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
 
         assertFalse(new BlacklistDao().getAll().contains("world_nether"));
     }
@@ -39,7 +39,7 @@ class BlacklistTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
 
-        server.execute("blacklist", player, "list").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "list").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("world_nether"));
     }
@@ -50,7 +50,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
         player.addAttachment(plugin, "sh2.add-to-blacklist", false);
 
-        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("permission"));
         assertFalse(new BlacklistDao().getAll().contains("world_nether"));
@@ -63,7 +63,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
         player.addAttachment(plugin, "sh2.remove-from-blacklist", false);
 
-        server.execute("blacklist", player, "remove", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("permission"));
         assertTrue(new BlacklistDao().getAll().contains("world_nether"));
@@ -77,7 +77,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
         player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", false);
 
-        server.execute("blacklist", player, "list").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "list").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("permission"));
     }
@@ -87,7 +87,7 @@ class BlacklistTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.add-to-blacklist", true);
 
-        server.execute("add-to-blacklist", player, "add", "world_nether").assertSucceeded();
+        assertTrue(server.execute("add-to-blacklist", player, "add", "world_nether").hasSucceeded());
 
         assertTrue(new BlacklistDao().getAll().contains("world_nether"));
     }
@@ -97,7 +97,7 @@ class BlacklistTest extends ServerTestBase {
         PlayerMock player = addPlayer();
         player.addAttachment(plugin, "sh2.add-to-blacklist", true);
 
-        server.execute("blacklist", player, "add", "not_a_world").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "add", "not_a_world").hasSucceeded());
 
         String message = player.nextMessage();
         assertTrue(message.contains("not_a_world"), message);
@@ -113,7 +113,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.add-to-blacklist", true);
         plugin.getConfig().set("dimensionAddedToBlacklist", "Blocked %s.");
 
-        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
 
         assertTrue(player.nextMessage().contains("Blocked world_nether."));
     }
@@ -124,7 +124,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.add-to-blacklist", true);
         HomeFixtures.breakBlacklistWrites();
 
-        server.execute("blacklist", player, "add", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
 
         String message = player.nextMessage();
         assertTrue(message.contains("issue adding dimension"), message);
@@ -139,7 +139,7 @@ class BlacklistTest extends ServerTestBase {
         player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
         HomeFixtures.breakBlacklistWrites();
 
-        server.execute("blacklist", player, "remove", "world_nether").assertSucceeded();
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
 
         String message = player.nextMessage();
         assertTrue(message.contains("issue removing dimension"), message);

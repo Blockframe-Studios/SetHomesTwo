@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.utils;
 
 import com.samleighton.sethomestwo.enums.DebugLevel;
+import com.samleighton.sethomestwo.metrics.Errors;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,6 +87,7 @@ public class DatabaseUtil {
             return true;
         } catch (SQLException e) {
             Bukkit.getLogger().severe("Could not execute sql statement.");
+            Errors.count(Errors.SQL_WRITE);
         }
 
         return false;
@@ -106,6 +108,7 @@ public class DatabaseUtil {
             return statement.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().severe("Could not execute sql update statement.");
+            Errors.count(Errors.SQL_WRITE);
         }
 
         return -1;
@@ -128,6 +131,7 @@ public class DatabaseUtil {
             return statement.executeQuery();
         } catch (SQLException e) {
             Bukkit.getLogger().severe("Could not execute sql fetch statement.");
+            Errors.count(Errors.SQL_READ);
         }
 
         return null;
