@@ -5,6 +5,7 @@ import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.models.Home;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -247,11 +248,11 @@ public class SetHomesV1Importer implements HomesImporter {
         }
 
         if (v1.isSet("max-homes-msg")) {
-            report.configNotes.add(String.format("v1 max-homes-msg: '%s' -> set maxHomesReached: '%s' in config.yml", v1.getString("max-homes-msg"), v1.getString("max-homes-msg")));
+            report.configNotes.add(messageNote("max-homes-msg", "maxHomesReached", v1.getString("max-homes-msg")));
         }
 
         if (v1.isSet("tp-cancelOnMove-msg")) {
-            report.configNotes.add(String.format("v1 tp-cancelOnMove-msg: '%s' -> set movedWhileTeleporting: '%s' in config.yml", v1.getString("tp-cancelOnMove-msg"), v1.getString("tp-cancelOnMove-msg")));
+            report.configNotes.add(messageNote("tp-cancelOnMove-msg", "movedWhileTeleporting", v1.getString("tp-cancelOnMove-msg")));
         }
 
         ConfigurationSection maxHomes = v1.getConfigurationSection("max-homes");
@@ -267,7 +268,18 @@ public class SetHomesV1Importer implements HomesImporter {
         }
 
         if (v1.isSet("tp-cooldown")) {
-            report.configNotes.add(String.format("v1 tp-cooldown: %s has no Set Homes Two equivalent; teleport cooldown is not supported.", v1.get("tp-cooldown")));
+            report.configNotes.add(String.format("v1 tp-cooldown: %s has no v2 equivalent; teleport cooldown is not supported.", v1.get("tp-cooldown")));
         }
+    }
+
+    // A v1 message may carry section-sign colour codes, which chat would apply
+    // to the rest of the line. Show them as & so the note stays legible.
+    private static String messageNote(String v1Key, String v2Key, String value) {
+        String shown = value.replace(ChatColor.COLOR_CHAR, '&');
+        String note = String.format("v1 %s -> set %s: '%s' in config.yml", v1Key, v2Key, shown);
+        if (!shown.equals(value)) {
+            note += " (colour codes shown as &; copy the original from plugins/SetHomes/config.yml to keep them)";
+        }
+        return note;
     }
 }

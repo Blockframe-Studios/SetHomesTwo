@@ -22,7 +22,6 @@ public enum UserError {
     DELETE_HOME_USAGE("Usage: /%s [name]"),
     INVALID_MATERIAL("The material you entered is not valid, please try a different one."),
     PLAYER_NOT_FOUND("No player by that name is online or has any saved homes."),
-    NO_HOMES("You have not created any homes yet. Use /create-home."),
     PLAYERS_ONLY("Only players may execute this command."),
     DIMENSION_ALREADY_BLACKLISTED("The %s dimension has already been blacklisted. You cannot add it again."),
     GROUP_DOES_NOT_EXIST("Group does not exist. Use /get-max-homes-groups to see all groups."),

@@ -3,11 +3,13 @@ package com.samleighton.sethomestwo.commands;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OpenHomesGuiTest extends ServerTestBase {
@@ -25,7 +27,9 @@ class OpenHomesGuiTest extends ServerTestBase {
 
         assertTrue(server.execute("homes", player).hasSucceeded());
 
-        assertTrue(player.nextMessage().contains("You have not created any homes yet."));
+        String message = player.nextMessage();
+        assertTrue(message.contains("You have not created any homes yet."));
+        assertFalse(message.contains(ChatColor.RED.toString()), "having no homes is not an error");
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
+import org.bukkit.ChatColor;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -144,6 +145,8 @@ class HomesGuiClickTest extends ServerTestBase {
         gui.setHomes(new HomesDao().getAll(player.getUniqueId()));
         gui.displayInventory(player);
 
-        assertTrue(player.nextMessage().contains("You have not created any homes yet."));
+        String message = player.nextMessage();
+        assertTrue(message.contains("You have not created any homes yet."));
+        assertFalse(message.contains(ChatColor.RED.toString()), "having no homes is not an error");
     }
 }

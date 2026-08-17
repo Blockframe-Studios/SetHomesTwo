@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
@@ -94,8 +95,7 @@ public class HomesGui implements GuiScreen {
 
         if (homesForDisplay == null || homesForDisplay.isEmpty()) {
             player.closeInventory();
-            String noHomesError = ConfigUtil.getConfig().getString("noHomes", UserError.NO_HOMES.getValue());
-            ChatUtils.sendError(player, noHomesError);
+            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserInfo.NO_HOMES.getValue()));
             return;
         }
 
