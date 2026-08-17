@@ -4,6 +4,9 @@ import com.samleighton.sethomestwo.commands.*;
 import com.samleighton.sethomestwo.connections.ConnectionManager;
 import com.samleighton.sethomestwo.dao.TeleportAttemptsDao;
 import com.samleighton.sethomestwo.enums.DebugLevel;
+import com.samleighton.sethomestwo.metrics.CommandUsageListener;
+import com.samleighton.sethomestwo.metrics.MetricsReporter;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.events.PlayerJoin;
 import com.samleighton.sethomestwo.events.PlayerLeave;
 import com.samleighton.sethomestwo.events.PlayerMoveWhileTeleporting;
@@ -39,7 +42,9 @@ import java.util.UUID;
 public class SetHomesTwo extends JavaPlugin {
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
+    private final UsageCounters usageCounters = new UsageCounters();
     private UpdateChecker updateChecker;
+    private MetricsReporter metricsReporter;
 
     /**
      * Looked up by name because JavaPlugin.getPlugin(SetHomesTwo.class) needs the
@@ -67,6 +72,9 @@ public class SetHomesTwo extends JavaPlugin {
                 new GitHubReleaseSource(getDescription().getVersion())
         );
         updateChecker.checkLater();
+
+        metricsReporter = new MetricsReporter(this);
+        metricsReporter.startLater();
 
         // Plugin startup logic
         registerCommands();
@@ -117,6 +125,8 @@ public class SetHomesTwo extends JavaPlugin {
             player.resetTitle();
             player.removePotionEffect(PotionEffectType.NAUSEA);
         }
+
+        if (metricsReporter != null) metricsReporter.shutdown();
 
         // Close database connections
         connectionManager.closeConnections();
@@ -217,6 +227,7 @@ public class SetHomesTwo extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerLeave(this), this);
         getServer().getPluginManager().registerEvents(new RightClickHomeItem(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveWhileTeleporting(), this);
+        getServer().getPluginManager().registerEvents(new CommandUsageListener(this), this);
     }
 
     /**
@@ -251,7 +262,15 @@ public class SetHomesTwo extends JavaPlugin {
         return this.updateChecker;
     }
 
+    public MetricsReporter getMetricsReporter() {
+        return this.metricsReporter;
+    }
+
     public Map<UUID, GuiSession> getGuiSessionMap() {
         return this.guiSessionMap;
+    }
+
+    public UsageCounters getUsageCounters() {
+        return this.usageCounters;
     }
 }

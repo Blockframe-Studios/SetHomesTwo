@@ -5,6 +5,7 @@ import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
 import com.samleighton.sethomestwo.support.TestPlayer;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
+import net.kyori.adventure.text.Component;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ class PlayerJoinTest extends ServerTestBase {
 
         TestPlayer player = addPlayer();
         player.addAttachment(plugin, UpdateChecker.NOTIFY_PERMISSION, true);
-        server.getPluginManager().callEvent(new PlayerJoinEvent(player, ""));
+        server.getPluginManager().callEvent(new PlayerJoinEvent(player, Component.empty()));
 
         String message = player.nextMessage();
         assertNotNull(message, "expected the join listener to deliver the update notice");
@@ -40,7 +41,7 @@ class PlayerJoinTest extends ServerTestBase {
         // account had been seen under a different name previously.
         new HomesDao().refreshPlayerName(player.getUniqueId(), "OldSteve");
 
-        server.getPluginManager().callEvent(new PlayerJoinEvent(player, ""));
+        server.getPluginManager().callEvent(new PlayerJoinEvent(player, Component.empty()));
 
         assertEquals(player.getUniqueId().toString(), new HomesDao().uuidForName("Steve"));
     }

@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ListHomes implements CommandExecutor {
+    // Bungee chat is deprecated upstream in favour of Adventure, which Spigot servers do not have.
+    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         // Players only guard

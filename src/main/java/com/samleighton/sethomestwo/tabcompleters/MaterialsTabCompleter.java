@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MaterialsTabCompleter implements TabCompleter {
     @Nullable
@@ -29,7 +30,9 @@ public class MaterialsTabCompleter implements TabCompleter {
         Material[] allMaterials = Material.values();
         for(Material mat : allMaterials){
             if(!mat.isItem()) continue;
-            validMaterials.add(mat.getKey().toString().toLowerCase());
+            // Every non-legacy material is keyed minecraft:<name>, so this equals
+            // getKey() without touching the deprecated accessor.
+            validMaterials.add("minecraft:" + mat.name().toLowerCase(Locale.ROOT));
         }
 
         completions.addAll(TabCompletions.matching(args[1], validMaterials));

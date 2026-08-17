@@ -28,6 +28,20 @@ jobs:
       - name: Build and test
         run: mvn -B verify
 
+      - name: Prove the shaded libraries were relocated
+        run: |
+          jar="$(ls target/SetHomesTwo-*.jar | head -n 1)"
+          listing="$(unzip -l "$jar")"
+          if echo "$listing" | grep -q ' org/bstats/'; then
+            echo "org.bstats was not relocated"; exit 1
+          fi
+          if ! echo "$listing" | grep -q ' com/samleighton/sethomestwo/lib/bstats/'; then
+            echo "relocated bstats classes are missing"; exit 1
+          fi
+          if echo "$listing" | grep -q ' net/wesjd/'; then
+            echo "anvilgui was not relocated"; exit 1
+          fi
+
       - name: Run the release script tests
         run: bash scripts/test-release.sh
 

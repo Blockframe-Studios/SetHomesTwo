@@ -1,6 +1,7 @@
 package com.samleighton.sethomestwo.connections;
 
 import com.samleighton.sethomestwo.SetHomesTwo;
+import com.samleighton.sethomestwo.metrics.Errors;
 import org.bukkit.Bukkit;
 
 import java.sql.Connection;
@@ -34,6 +35,7 @@ public class ConnectionManager {
             return true;
         } catch (SQLException e) {
             Bukkit.getLogger().severe(String.format("There was an issue creating the database %s", dbName));
+            Errors.count(Errors.DB_CONNECT);
         }
 
         return false;
