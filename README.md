@@ -233,6 +233,8 @@ Your players keep their homes. The old plugin does not even need to be running, 
 2. Happy with the numbers? Run it again with `confirm` on the end.
 3. Move the old jar out of `plugins/`. Keep it somewhere safe rather than deleting it, so you can go back if you want to.
 
+**You will not silently end up with an empty homes list.** Once the old jar is out and Set Homes starts, if `plugins/SetHomes/homes.yml` still holds homes and none have been imported here yet, the console says so at startup, naming the file, how many are waiting and the command to run. Anyone holding `sh2.import-homes` gets the same reminder in chat when they join, because plenty of admins never read the console. Both stop for good the moment any home exists here, so there is nothing to switch off afterwards. To reword the chat line, set `v1ImportPending` in `config.yml`.
+
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
 Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second one is imported under the next free name, so `Base` arrives as `Base2`, and the report and the server log name it. No home is dropped for a name clash.

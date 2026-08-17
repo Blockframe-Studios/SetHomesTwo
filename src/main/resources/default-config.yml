@@ -73,6 +73,12 @@ homeItemLore: "Right click this item to open your home's list."
 playerHomeDeleted: "%s's home '%s' has been deleted."
 playerHomeMoved: "%s's home '%s' has been moved to your location."
 
+# Shown on join to anyone holding sh2.import-homes while Set Homes v1 homes are
+# sitting in plugins/SetHomes/homes.yml and none have been imported here yet.
+# The single %s is how many are waiting. It stops on its own once any home
+# exists here, so there is nothing to switch off after the import.
+v1ImportPending: "Set Homes v1 has %s home(s) waiting to be imported. Run /import-homes sethomes for a preview, then add confirm to bring them across."
+
 # -- ERROR MESSAGES --
 
 # Vestigial. No code path reaches this message any more: create-home treats a

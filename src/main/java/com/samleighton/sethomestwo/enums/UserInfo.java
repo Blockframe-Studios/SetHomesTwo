@@ -11,7 +11,8 @@ public enum UserInfo {
     MOVE_HOME_USAGE("Usage: /%s <name>"),
     GO_PLAYER_HOME_USAGE("Usage: /%s <player> <home>"),
     DELETE_PLAYER_HOME_USAGE("Usage: /%s <player> <home>"),
-    MOVE_PLAYER_HOME_USAGE("Usage: /%s <player> <home>");
+    MOVE_PLAYER_HOME_USAGE("Usage: /%s <player> <home>"),
+    V1_IMPORT_PENDING("Set Homes v1 has %s home(s) waiting to be imported. Run /import-homes sethomes for a preview, then add confirm to bring them across.");
 
     private final String value;
 
