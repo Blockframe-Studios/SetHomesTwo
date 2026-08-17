@@ -233,6 +233,8 @@ Your players keep their homes. The old plugin does not even need to be running, 
 
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
+Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second one is imported under the next free name, so `Base` arrives as `Base2`, and the report and the server log name it. No home is dropped for a name clash.
+
 <details>
 <summary>What else the Set Homes v1 import brings across</summary>
 

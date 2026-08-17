@@ -25,6 +25,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HomesDaoTest extends ServerTestBase {
 
     @Test
+    void namesForReturnsEveryHomeNameWithItsStoredCasing() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "Base");
+        HomeFixtures.persist(player, "shop");
+
+        List<String> names = new HomesDao().namesFor(player.getUniqueId());
+
+        assertEquals(2, names.size());
+        assertTrue(names.contains("Base"));
+        assertTrue(names.contains("shop"));
+    }
+
+    @Test
+    void namesForIsEmptyForAPlayerWithNoHomes() {
+        PlayerMock player = addPlayer();
+
+        assertTrue(new HomesDao().namesFor(player.getUniqueId()).isEmpty());
+    }
+
+    @Test
     void savedHomeComesBackFromGetAll() {
         PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");

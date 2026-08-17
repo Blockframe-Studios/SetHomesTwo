@@ -11,8 +11,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class SetHomesV1Importer implements HomesImporter {
@@ -35,6 +38,7 @@ public class SetHomesV1Importer implements HomesImporter {
 
         YamlConfiguration source = YamlConfiguration.loadConfiguration(homesFile);
         HomesDao homesDao = new HomesDao();
+        NameLedger ledger = new NameLedger(homesDao);
         Map<UUID, String> cachedNames = HomesImporter.cachedNames();
 
         // Named homes: allNamedHomes.<uuid>.<name>.{world,x,y,z,pitch,yaw,desc}
@@ -44,7 +48,7 @@ public class SetHomesV1Importer implements HomesImporter {
                 ConfigurationSection playerSection = allNamed.getConfigurationSection(uuid);
                 if (playerSection == null) continue;
                 for (String homeName : playerSection.getKeys(false)) {
-                    importOne(homesDao, report, playerSection.getConfigurationSection(homeName), uuid, homeName, cachedNames, dryRun);
+                    importOne(homesDao, ledger, report, playerSection.getConfigurationSection(homeName), uuid, homeName, cachedNames, dryRun);
                 }
             }
         }
@@ -53,7 +57,7 @@ public class SetHomesV1Importer implements HomesImporter {
         ConfigurationSection unknown = source.getConfigurationSection("unknownHomes");
         if (unknown != null) {
             for (String uuid : unknown.getKeys(false)) {
-                importOne(homesDao, report, unknown.getConfigurationSection(uuid), uuid, "default", cachedNames, dryRun);
+                importOne(homesDao, ledger, report, unknown.getConfigurationSection(uuid), uuid, "default", cachedNames, dryRun);
             }
         }
 
@@ -63,7 +67,7 @@ public class SetHomesV1Importer implements HomesImporter {
         return report;
     }
 
-    private void importOne(HomesDao homesDao, ImportReport report, ConfigurationSection home, String playerUUID, String homeName, Map<UUID, String> cachedNames, boolean dryRun) {
+    private void importOne(HomesDao homesDao, NameLedger ledger, ImportReport report, ConfigurationSection home, String playerUUID, String homeName, Map<UUID, String> cachedNames, boolean dryRun) {
         try {
             if (home == null) {
                 report.failed++;
@@ -77,9 +81,21 @@ public class SetHomesV1Importer implements HomesImporter {
                 return;
             }
 
-            if (homesDao.get(UUID.fromString(playerUUID), homeName) != null) {
+            UUID owner = UUID.fromString(playerUUID);
+
+            if (ledger.importedBefore(owner, homeName)) {
                 report.skippedExisting++;
                 return;
+            }
+
+            String storedName = ledger.claim(owner, homeName);
+            if (!storedName.equals(homeName)) {
+                report.renamed++;
+                String note = String.format(
+                        "Home '%s' for player %s differs only in capitalisation from another of that player's homes, which Set Homes v1 allowed. It takes the name '%s' here, so both locations are kept.",
+                        homeName, playerUUID, storedName);
+                report.warnings.add(note);
+                if (!dryRun) Bukkit.getLogger().warning(note);
             }
 
             Location location = new Location(
@@ -91,7 +107,7 @@ public class SetHomesV1Importer implements HomesImporter {
                     (float) home.getDouble("pitch")
             );
 
-            String playerName = cachedNames.get(UUID.fromString(playerUUID));
+            String playerName = cachedNames.get(owner);
             if (playerName != null) report.namesResolved++;
 
             if (!dryRun) {
@@ -99,7 +115,7 @@ public class SetHomesV1Importer implements HomesImporter {
                         playerUUID,
                         HomesImporter.defaultMaterial(),
                         location,
-                        homeName,
+                        storedName,
                         home.getString("desc"),
                         world.getEnvironment().toString()
                 );
@@ -116,6 +132,65 @@ public class SetHomesV1Importer implements HomesImporter {
         } catch (Exception e) {
             report.failed++;
             report.warnings.add(String.format("Home '%s' for player %s could not be read: %s", homeName, playerUUID, e.getMessage()));
+        }
+    }
+
+    /**
+     * Which home names are taken for each player, so a name that v1 allowed but
+     * this plugin cannot store twice is renamed instead of dropped. Names here
+     * are unique per player ignoring case, while v1 matched case sensitively, so
+     * one player could hold both 'base' and 'Base'.
+     * <p>
+     * Names already in the database are snapshotted per player before that
+     * player's first import, and names taken during the run are tracked
+     * separately. That split is what lets a dry run, which writes nothing,
+     * report the same numbers as the confirm that follows it.
+     */
+    private static final class NameLedger {
+        private final HomesDao homesDao;
+        private final Map<UUID, Set<String>> beforeThisRun = new HashMap<>();
+        private final Map<UUID, Set<String>> takenThisRun = new HashMap<>();
+
+        private NameLedger(HomesDao homesDao) {
+            this.homesDao = homesDao;
+        }
+
+        /** True when this player already had a home of this name before the run started. */
+        private boolean importedBefore(UUID player, String name) {
+            return namesBeforeThisRun(player).contains(name.toLowerCase());
+        }
+
+        /**
+         * Take a name for this player: the one asked for, or the first free
+         * numbered variant of it.
+         *
+         * @return The name actually taken, equal to the one asked for when it was free
+         */
+        private String claim(UUID player, String wanted) {
+            String candidate = wanted;
+
+            for (int suffix = 2; isTaken(player, candidate); suffix++) {
+                candidate = wanted + suffix;
+            }
+
+            takenThisRun.computeIfAbsent(player, p -> new HashSet<>()).add(candidate.toLowerCase());
+            return candidate;
+        }
+
+        private boolean isTaken(UUID player, String name) {
+            String lowered = name.toLowerCase();
+            return namesBeforeThisRun(player).contains(lowered)
+                    || takenThisRun.getOrDefault(player, Set.of()).contains(lowered);
+        }
+
+        private Set<String> namesBeforeThisRun(UUID player) {
+            return beforeThisRun.computeIfAbsent(player, p -> {
+                Set<String> names = new HashSet<>();
+                for (String name : homesDao.namesFor(p)) {
+                    names.add(name.toLowerCase());
+                }
+                return names;
+            });
         }
     }
 

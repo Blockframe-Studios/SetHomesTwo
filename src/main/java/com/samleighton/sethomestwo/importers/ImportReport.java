@@ -5,6 +5,7 @@ import java.util.List;
 
 public class ImportReport {
     public int imported = 0;
+    public int renamed = 0;
     public int skippedExisting = 0;
     public int skippedWorldMissing = 0;
     public int failed = 0;
@@ -17,8 +18,8 @@ public class ImportReport {
     public String summary(boolean dryRun) {
         String verb = dryRun ? "Would import" : "Imported";
         String base = String.format(
-                "%s %d homes (%d skipped: name exists, %d skipped: world missing, %d failed).",
-                verb, imported, skippedExisting, skippedWorldMissing, failed
+                "%s %d homes (%d renamed to avoid a name clash, %d skipped: already imported, %d skipped: world missing, %d failed).",
+                verb, imported, renamed, skippedExisting, skippedWorldMissing, failed
         );
         if (namesResolved > 0) {
             base += String.format(" %d home(s) matched an owner name.", namesResolved);
