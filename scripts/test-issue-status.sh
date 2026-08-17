@@ -119,6 +119,57 @@ test_a_non_numeric_reference_is_rejected() {
   assert_equals "hash word" "" "$(refs_of 'Closes #abc')"
 }
 
+# Runs pr_numbers_from_log over log subjects and joins the result with commas.
+prs_of() {
+  printf '%s' "$1" | pr_numbers_from_log | paste -sd, -
+}
+
+# -- which pull requests reached a commit range --
+
+test_a_merge_subject_yields_its_number() {
+  assert_equals "merge commit" "58" \
+    "$(prs_of 'Merge pull request #58 from Blockframe-Studios/issue-53-refuse-alongside-v1')"
+}
+
+test_a_squash_subject_yields_its_number() {
+  assert_equals "squash commit" "44" \
+    "$(prs_of 'Tab completion matches anywhere in a name (#44)')"
+}
+
+test_a_release_commit_yields_nothing() {
+  assert_equals "release commit" "" "$(prs_of 'chore(release): 1.2.3')"
+}
+
+test_an_ordinary_commit_yields_nothing() {
+  assert_equals "plain commit" "" "$(prs_of 'fix: send the BukkitDev metadata with --form-string')"
+}
+
+# A subject may cite an issue without the commit having come from that pull
+# request. Only the merge and squash forms count.
+test_a_mention_in_a_subject_is_not_a_pull_request() {
+  assert_equals "bare mention" "" "$(prs_of 'fix: address feedback on #41')"
+}
+
+test_an_empty_range_is_empty_and_clean() {
+  assert_equals "empty range" "" "$(prs_of '')"
+  printf '%s' '' | pr_numbers_from_log > /dev/null
+  assert_equals "exit status" "0" "$?"
+}
+
+test_repeated_numbers_collapse() {
+  local log
+  log='Merge pull request #31 from Blockframe-Studios/fix/bukkitdev-metadata-semicolon
+Merge pull request #31 from Blockframe-Studios/fix/bukkitdev-metadata-semicolon'
+  assert_equals "deduped" "31" "$(prs_of "$log")"
+}
+
+test_several_merges_keep_first_appearance_order() {
+  local log
+  log='Merge pull request #58 from Blockframe-Studios/issue-53-refuse-alongside-v1
+Merge pull request #52 from Blockframe-Studios/issue-49-import-report-colour-codes'
+  assert_equals "order kept" "58,52" "$(prs_of "$log")"
+}
+
 test_each_keyword_matches
 test_keywords_are_case_insensitive
 test_a_colon_and_extra_space_are_tolerated
@@ -132,6 +183,14 @@ test_a_body_with_no_reference_is_empty_and_clean
 test_an_empty_body_is_empty_and_clean
 test_issue_zero_is_rejected
 test_a_non_numeric_reference_is_rejected
+test_a_merge_subject_yields_its_number
+test_a_squash_subject_yields_its_number
+test_a_release_commit_yields_nothing
+test_an_ordinary_commit_yields_nothing
+test_a_mention_in_a_subject_is_not_a_pull_request
+test_an_empty_range_is_empty_and_clean
+test_repeated_numbers_collapse
+test_several_merges_keep_first_appearance_order
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 if [ "$FAIL" -gt 0 ]; then

@@ -17,3 +17,14 @@ closing_refs() {
     | awk '!seen[$0]++'
   return 0
 }
+
+# Reads `git log --format=%s` output on stdin and writes the pull request
+# numbers it contains to stdout, one per line, deduplicated. Subjects only:
+# a body may mention a pull request the commit did not come from.
+pr_numbers_from_log() {
+  grep -oE '(Merge pull request #[0-9]+|\(#[0-9]+\))' \
+    | grep -oE '[0-9]+' \
+    | grep -E '^[1-9][0-9]*$' \
+    | awk '!seen[$0]++'
+  return 0
+}
