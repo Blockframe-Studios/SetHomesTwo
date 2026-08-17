@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
+import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -46,8 +47,7 @@ public class ListHomes implements CommandExecutor {
 
         // Player has no homes guard
         if (playersHomes.isEmpty()) {
-            ChatUtils.sendInfo(player, UserInfo.NO_HOMES.getValue());
-            ChatUtils.sendInfo(player, UserInfo.CREATE_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserInfo.NO_HOMES.getValue()));
             return true;
         }
 

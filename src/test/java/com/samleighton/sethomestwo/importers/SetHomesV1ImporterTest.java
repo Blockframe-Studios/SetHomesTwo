@@ -206,7 +206,49 @@ class SetHomesV1ImporterTest extends ServerTestBase {
 
         ImportReport report = importer.run(true);
 
-        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("tp-cooldown") && n.contains("no Set Homes Two equivalent")));
+        assertTrue(report.configNotes.stream().anyMatch(n -> n.contains("tp-cooldown") && n.contains("no v2 equivalent")));
+    }
+
+    @Test
+    void v1MessagesAreShownWithTheirColourCodesAsAmpersands() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> {
+            v1.set("max-homes-msg", "§4You have reached the maximum amount of saved homes!");
+            v1.set("tp-cancelOnMove-msg", "§kMovement detected!");
+        });
+
+        ImportReport report = importer.run(true);
+
+        for (String note : report.configNotes) {
+            assertFalse(note.contains("§"), "section sign leaked into: " + note);
+        }
+        assertTrue(report.configNotes.stream().anyMatch(n ->
+                n.contains("maxHomesReached") && n.contains("&4You have reached the maximum amount of saved homes!")));
+        assertTrue(report.configNotes.stream().anyMatch(n ->
+                n.contains("movedWhileTeleporting") && n.contains("&kMovement detected!")));
+    }
+
+    @Test
+    void aColourCodedV1MessageSaysWhereTheExactOriginalLives() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("max-homes-msg", "§4Too many homes!"));
+
+        ImportReport report = importer.run(true);
+
+        assertTrue(report.configNotes.stream().anyMatch(n ->
+                n.contains("maxHomesReached") && n.contains("plugins/SetHomes/config.yml")));
+    }
+
+    @Test
+    void aPlainV1MessageIsShownAsIsWithoutTheColourCodeCaveat() throws IOException {
+        writeEmptyHomesFile();
+        writeV1Config(v1 -> v1.set("max-homes-msg", "Too many homes!"));
+
+        ImportReport report = importer.run(true);
+
+        String note = report.configNotes.stream().filter(n -> n.contains("maxHomesReached")).findFirst().orElseThrow();
+        assertTrue(note.contains("'Too many homes!'"));
+        assertFalse(note.contains("plugins/SetHomes/config.yml"));
     }
 
     @Test
