@@ -12,7 +12,7 @@
 - **Every home gets its own icon.** Pick any Minecraft item when you create a home, or change it later to whatever you are holding. A base, a mine and a farm stop looking identical.
 - **Rename, move and delete in-game.** Right-click any home to manage it. Deleting always asks first, so nobody loses a base to a misclick.
 - **Teleports that do not kill you.** Set Homes checks the destination and relocates you to the nearest safe spot rather than dropping you into blocks, lava, or a fall.
-- **Switch without losing anything.** `/import-homes essentialsx` brings every EssentialsX home across, and previews exactly what it will do before it does it. Then remove EssentialsX, since both plugins claim `/sethome` and `/home`.
+- **Switch without losing anything.** One command imports every home from EssentialsX or Set Homes v1, and shows you exactly what it will do before it does it.
 - **Per-rank home limits.** Give donors more homes than default players with LuckPerms groups, or set one server-wide limit.
 - **Permissions you can change from the config.** Every `sh2.*` node has a sensible default, and any of them can be moved in `config.yml`. No permissions plugin required.
 
@@ -89,6 +89,16 @@ Settings live in `plugins/SetHomesTwo/config.yml`, written the first time the pl
 
 Per-rank limits need [LuckPerms](https://luckperms.net/download). Everything else is in [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from.
 
+## Coming from EssentialsX or Set Homes v1
+
+Your players keep their homes. The old plugin does not even need to be running, because the importer reads its data files directly.
+
+1. Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports what it would import and skip, and changes nothing.
+2. Happy with the numbers? Run it again with `confirm` on the end.
+3. Remove the old jar. This plugin provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
+
+Existing homes are never overwritten, so re-running the import is always safe. Coming from Set Homes v1, the world blacklist comes across too, and the [migration guide](https://github.com/Blockframe-Studios/SetHomesTwo#coming-from-essentialsx-or-set-homes-v1) on GitHub maps every v1 command, permission and config setting to its v2 equivalent.
+
 ## Requirements
 
 - Paper or Spigot **1.21+**
@@ -97,7 +107,7 @@ Per-rank limits need [LuckPerms](https://luckperms.net/download). Everything els
 
 ## Support
 
-The [README on GitHub](https://github.com/Blockframe-Studios/SetHomesTwo#readme) has the full command and permission lists, the EssentialsX import guide, an FAQ and the changelog.
+The [README on GitHub](https://github.com/Blockframe-Studios/SetHomesTwo#readme) has the full command and permission lists, the migration tables, an FAQ and the changelog.
 
 Found a bug or want a feature? Open an issue on [GitHub](https://github.com/Blockframe-Studios/SetHomesTwo/issues). It gets seen faster than a comment on this page.
 
