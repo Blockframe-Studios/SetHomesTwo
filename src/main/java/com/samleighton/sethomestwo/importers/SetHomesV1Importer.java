@@ -135,17 +135,9 @@ public class SetHomesV1Importer implements HomesImporter {
         }
     }
 
-    /**
-     * Which home names are taken for each player, so a name that v1 allowed but
-     * this plugin cannot store twice is renamed instead of dropped. Names here
-     * are unique per player ignoring case, while v1 matched case sensitively, so
-     * one player could hold both 'base' and 'Base'.
-     * <p>
-     * Names already in the database are snapshotted per player before that
-     * player's first import, and names taken during the run are tracked
-     * separately. That split is what lets a dry run, which writes nothing,
-     * report the same numbers as the confirm that follows it.
-     */
+    // v1 allowed case-only duplicate names ('base' and 'Base'); v2 does not, so
+    // the second one is stored as 'Base2' instead of dropped. Names taken this
+    // run are tracked in memory so a dry run reports the same as the confirm.
     private static final class NameLedger {
         private final HomesDao homesDao;
         private final Map<UUID, Set<String>> beforeThisRun = new HashMap<>();
@@ -155,17 +147,12 @@ public class SetHomesV1Importer implements HomesImporter {
             this.homesDao = homesDao;
         }
 
-        /** True when this player already had a home of this name before the run started. */
+        // True when the player had a home of this name before the run started.
         private boolean importedBefore(UUID player, String name) {
             return namesBeforeThisRun(player).contains(name.toLowerCase());
         }
 
-        /**
-         * Take a name for this player: the one asked for, or the first free
-         * numbered variant of it.
-         *
-         * @return The name actually taken, equal to the one asked for when it was free
-         */
+        // Returns the name asked for, or the first free numbered variant of it.
         private String claim(UUID player, String wanted) {
             String candidate = wanted;
 

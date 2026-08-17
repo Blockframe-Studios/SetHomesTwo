@@ -92,13 +92,11 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
     }
 
     /**
-     * Every home name this player owns, with the casing it was stored under.
-     * Reads the name column alone, so it resolves no worlds and builds no
-     * {@link Home}, and works on a database holding a home in a world that no
-     * longer exists.
+     * Every home name this player owns, as stored. Reads only the name column,
+     * so it works when a home's world no longer exists.
      *
      * @param playerUUID The owner
-     * @return The names, in no particular order; empty when the player has none
+     * @return The names, unordered; empty when the player has none
      */
     public List<String> namesFor(UUID playerUUID) {
         List<String> names = new ArrayList<>();

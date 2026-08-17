@@ -254,15 +254,11 @@ class SetHomesV1ImporterTest extends ServerTestBase {
         assertEquals(before, new File(plugin.getDataFolder(), "config.yml").lastModified());
     }
 
-    // -- Case-only duplicates from v1 (issue #48) --------------------------
-    //
-    // v1 matched home names case sensitively, so one player could hold 'base'
-    // and 'Base' as two separate homes. Names here are unique per player
-    // ignoring case, so the second one is renamed rather than dropped.
+    // Case-only duplicates from v1: 'base' and 'Base' were two homes there.
 
     private final YamlConfiguration v1Homes = new YamlConfiguration();
 
-    /** Adds one entry to allNamedHomes. Distinct x values tell the rows apart. */
+    // Adds one entry to allNamedHomes. Distinct x values tell the rows apart.
     private void addV1Home(UUID owner, String homeName, String worldName, double x) {
         String path = "allNamedHomes." + owner + "." + homeName + ".";
         v1Homes.set(path + "world", worldName);
@@ -273,7 +269,7 @@ class SetHomesV1ImporterTest extends ServerTestBase {
         v1Homes.set(path + "yaw", 0.0);
     }
 
-    /** Adds the player's unnamed v1 home, which imports under the name 'default'. */
+    // Adds the player's unnamed v1 home, which imports as 'default'.
     private void addV1UnnamedHome(UUID owner, double x) {
         String path = "unknownHomes." + owner + ".";
         v1Homes.set(path + "world", "world");
