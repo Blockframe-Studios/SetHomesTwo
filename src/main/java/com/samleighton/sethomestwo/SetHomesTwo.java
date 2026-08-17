@@ -38,8 +38,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class SetHomesTwo extends JavaPlugin {
+    // Set Homes v1's plugin.yml name. Ours differs, so Bukkit loads both happily.
+    private static final String SET_HOMES_V1 = "SetHomes";
+
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
     private final UsageCounters usageCounters = new UsageCounters();
@@ -56,6 +60,12 @@ public class SetHomesTwo extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Before anything touches disk, so a refused boot leaves the server as it was.
+        if (Bukkit.getPluginManager().getPlugin(SET_HOMES_V1) != null) {
+            refuseToRunAlongsideV1();
+            return;
+        }
+
         // Create the directories for the plugin
         createDirectories();
 
@@ -107,6 +117,35 @@ public class SetHomesTwo extends JavaPlugin {
         } else {
             Bukkit.getLogger().severe("Could not create database connection!");
         }
+    }
+
+    /**
+     * Logs why we are not starting and disables us. The text is hardcoded because
+     * this runs before initConfig, so there is no config to override it from.
+     */
+    private void refuseToRunAlongsideV1() {
+        Logger log = Bukkit.getLogger();
+        log.severe("============================================================");
+        log.severe("Set Homes v2 did not start: Set Homes v1 is installed too.");
+        log.severe("");
+        log.severe("Both plugins claim /sethome, /home and /delhome, and v1 takes");
+        log.severe("them whatever the load order. Left alone, your players' homes");
+        log.severe("would be split between the two plugins with nothing to show");
+        log.severe("for it in the logs.");
+        log.severe("");
+        log.severe("To finish the upgrade:");
+        log.severe("  1. Stop the server.");
+        log.severe("  2. Move the old SetHomes jar file out of plugins/ and keep it");
+        log.severe("     until you have migrated to v2.");
+        log.severe("     It is how you roll back if you change your mind.");
+        log.severe("  3. Leave plugins/SetHomes/ folder where it is. Nothing ever");
+        log.severe("     writes to it, but is needed for migrating homes to v2.");
+        log.severe("  4. Start the server, then run /import-homes sethomes.");
+        log.severe("");
+        log.severe("Set Homes v1 is still running, exactly as it was.");
+        log.severe("============================================================");
+
+        getServer().getPluginManager().disablePlugin(this);
     }
 
     @Override

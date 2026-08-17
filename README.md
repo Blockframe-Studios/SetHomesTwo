@@ -227,9 +227,11 @@ To pick one up, copy the key you want out of [`default-config.yml`](https://gith
 
 Your players keep their homes. The old plugin does not even need to be running, because the importer reads its data files directly.
 
+**Coming from Set Homes v1, move the old jar out of `plugins/` first and keep it.** Both plugins provide `/sethome`, `/home` and `/delhome`, and v1 wins those names whatever the load order, so homes created after the upgrade would go into v1's files while the menu read ours. Rather than let that happen quietly, Set Homes refuses to start while a Set Homes v1 jar is installed, and prints what to do in the console. Your server keeps running v1 exactly as before until you move the jar. Leave the `plugins/SetHomes/` folder itself alone; the importer reads it and never writes to it.
+
 1. Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
 2. Happy with the numbers? Run it again with `confirm` on the end.
-3. Remove the old jar. This plugin provides `/sethome`, `/home` and `/delhome`, and two plugins claiming the same commands will fight over them.
+3. Move the old jar out of `plugins/`. Keep it somewhere safe rather than deleting it, so you can go back if you want to.
 
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
