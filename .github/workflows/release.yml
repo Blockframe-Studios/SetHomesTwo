@@ -16,6 +16,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   release:
@@ -96,6 +97,17 @@ jobs:
           echo "current=$CURRENT"
           echo "next=$NEXT"
 
+      - name: Dry run - list the issues this release would close
+        if: steps.plan.outputs.release == 'true' && inputs.dry_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.plan.outputs.next }}
+          DRY_RUN: '1'
+        run: |
+          set -uo pipefail
+          PREV_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)" \
+            bash scripts/close-released-issues.sh
+
       - name: Dry run - resolve BukkitDev game versions
         if: steps.plan.outputs.release == 'true' && inputs.dry_run
         env:
@@ -115,6 +127,17 @@ jobs:
                   (.[] | "  \(.name) [type \(.gameVersionTypeID)] -> \(.id)")
                 end
             '
+
+      # Must run before Commit and tag creates v$NEXT, or the range below is
+      # empty and nothing closes.
+      - name: Record the previous release tag
+        id: prev
+        if: steps.plan.outputs.release == 'true'
+        run: |
+          set -uo pipefail
+          tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Previous release tag: ${tag:-none}"
 
       - name: Commit and tag
         if: steps.plan.outputs.release == 'true' && !inputs.dry_run
@@ -153,3 +176,15 @@ jobs:
           gh release create "v$VERSION" "SetHomesTwo.V$VERSION.jar" \
             --title "SetHomesTwo V$VERSION" \
             --notes "$NOTES"
+
+      # An issue closes when the commit that fixed it is contained in the commit
+      # being released. That is what keeps work sitting on dev open when an
+      # immediate fix ships from master, and closes an immediate fix that never
+      # passed through dev.
+      - name: Close the issues this release contains
+        if: steps.plan.outputs.release == 'true' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
+          VERSION: ${{ steps.plan.outputs.next }}
+        run: bash scripts/close-released-issues.sh
