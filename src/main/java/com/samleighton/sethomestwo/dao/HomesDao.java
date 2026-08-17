@@ -92,6 +92,33 @@ public class HomesDao extends SQLiteDao implements Dao<Home> {
     }
 
     /**
+     * Every home name this player owns, as stored. Reads only the name column,
+     * so it works when a home's world no longer exists.
+     *
+     * @param playerUUID The owner
+     * @return The names, unordered; empty when the player has none
+     */
+    public List<String> namesFor(UUID playerUUID) {
+        List<String> names = new ArrayList<>();
+
+        String sql = "select name from %s where player_uuid = ?";
+        ResultSet rs = DatabaseUtil.fetch(this.conn, String.format(sql, TABLE_NAME), playerUUID.toString());
+
+        if (rs == null) return names;
+
+        try {
+            while (rs.next()) {
+                names.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().severe("There was an issue reading home names for player " + playerUUID);
+            Bukkit.getLogger().info(e.getMessage());
+        }
+
+        return names;
+    }
+
+    /**
      * Look a home up by owner and name. The name match ignores case, which is
      * safe because {@link #nameExists} makes names unique per player ignoring
      * case, so at most one home can ever match.
