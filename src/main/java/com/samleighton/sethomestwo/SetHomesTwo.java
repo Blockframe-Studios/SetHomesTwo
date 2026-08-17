@@ -13,6 +13,7 @@ import com.samleighton.sethomestwo.events.PlayerMoveWhileTeleporting;
 import com.samleighton.sethomestwo.events.RightClickHomeItem;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
+import com.samleighton.sethomestwo.importers.PendingV1Import;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
 import com.samleighton.sethomestwo.updates.GitHubReleaseSource;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
@@ -117,6 +118,28 @@ public class SetHomesTwo extends JavaPlugin {
         } else {
             Bukkit.getLogger().severe("Could not create database connection!");
         }
+
+        // Last, because it asks the database whether anything has been imported.
+        announcePendingV1Import();
+    }
+
+    /**
+     * Says so when v1 homes are sitting there unimported. Silent once any home
+     * exists here, so it needs no marker file.
+     */
+    private void announcePendingV1Import() {
+        int waiting = PendingV1Import.waitingToBeImported();
+        if (waiting == 0) return;
+
+        Logger log = Bukkit.getLogger();
+        log.warning("============================================================");
+        log.warning("Set Homes found " + waiting + " home(s) in " + PendingV1Import.SOURCE_PATH);
+        log.warning("and none of its own, so your players cannot see theirs yet.");
+        log.warning("");
+        log.warning("Run /import-homes sethomes for a preview that changes");
+        log.warning("nothing, then /import-homes sethomes confirm to bring");
+        log.warning("them across.");
+        log.warning("============================================================");
     }
 
     /**
