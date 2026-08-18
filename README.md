@@ -216,30 +216,42 @@ Per-rank limits need [LuckPerms](https://luckperms.net/download) and `maxHomesTy
 
 That table is only the common settings. For the complete list, see [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from. Every setting the plugin has is in there, commented in place.
 
-<details>
-<summary><strong>Upgrading? Your existing config.yml will not gain the new settings</strong></summary>
+**Your `config.yml` is written once and never touched again.** Installing the plugin, updating the jar and restarting the server all leave the file exactly as you last saved it, so a setting added in a later release will not appear in a file written by an earlier one. Anything missing falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
 
-Set Homes never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
-
-To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
-
-</details>
+To pick a new setting up, copy the key out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
 
 ## Coming from EssentialsX or Set Homes v1
 
 Your players keep their homes. The old plugin does not even need to be running, because the importer reads its data files directly.
 
-**Coming from Set Homes v1, move the old jar out of `plugins/` first and keep it.** Both plugins provide `/sethome`, `/home` and `/delhome`, and v1 wins those names whatever the load order, so homes created after the upgrade would go into v1's files while the menu read ours. Rather than let that happen quietly, Set Homes refuses to start while a Set Homes v1 jar is installed, and prints what to do in the console. Your server keeps running v1 exactly as before until you move the jar. Leave the `plugins/SetHomes/` folder itself alone; the importer reads it and never writes to it.
+1. **Stop the server.**
+2. **Move the old plugin's jar out of `plugins/`** and keep it somewhere safe rather than deleting it. That jar is your way back. Leave its data folder exactly where it is: the importer reads `plugins/SetHomes/` or `plugins/Essentials/userdata/` and never writes to either.
+3. **Start the server.** Set Homes creates its own folder and an empty database. No homes are visible yet, and the console tells you how many are waiting.
+4. **Run `/import-homes sethomes`** (or `/import-homes essentialsx`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
+5. **Happy with the numbers?** Run it again with `confirm` on the end.
+6. **Paste any settings the config report listed** into `plugins/SetHomesTwo/config.yml`, then restart the server. Nothing is written there automatically, and there is no in-game reload, so a pasted setting does nothing until the server comes back up.
 
-1. Run `/import-homes essentialsx` (or `/import-homes sethomes`). This is a **preview only**. It reports how many homes it would import and warns about any it would skip, and changes nothing.
-2. Happy with the numbers? Run it again with `confirm` on the end.
-3. Move the old jar out of `plugins/`. Keep it somewhere safe rather than deleting it, so you can go back if you want to.
+**The jar has to move before the import, not after.** Set Homes v2 will not start while a Set Homes v1 jar is still in `plugins/`. Both plugins provide `/sethome`, `/home` and `/delhome`, and v1 usually takes priority and wins those names regardless the load order.
 
-**You will not silently end up with an empty homes list.** Once the old jar is out and Set Homes starts, if `plugins/SetHomes/homes.yml` still holds homes and none have been imported here yet, the console says so at startup, naming the file, how many are waiting and the command to run. Anyone holding `sh2.import-homes` gets the same reminder in chat when they join, because plenty of admins never read the console. Both stop for good the moment any home exists here, so there is nothing to switch off afterwards. To reword the chat line, set `v1ImportPending` in `config.yml`.
+**You are reminded until you import.** While `plugins/SetHomes/homes.yml` still holds homes and none have been imported here, every startup says so in the console, and anyone holding `sh2.import-homes` gets the same reminder in chat on join. Both stop for good once any home exists here.
 
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
-Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second one is imported under the next free name, so `Base` arrives as `Base2`, and the report and the server log name it. No home is dropped for a name clash.
+Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second is imported under the next free name, so `Base` arrives as `Base2`, named in the report and the server log.
+
+**You can go back at any time.** The old plugin's data folder is never written to, so rolling back is mostly putting its jar back.
+<details>
+<summary><strong>Rolling back to your old plugin</strong></summary>
+
+1. **Stop the server.**
+2. **Put the old plugin's jar back in `plugins/`** and take the Set Homes jar out.
+3. **Start the server.** Both data folders are untouched, so the old plugin picks up where it left off.
+
+Homes your players created under Set Homes live only in `plugins/SetHomesTwo/database/homes.db`, which the old plugin cannot read, so they are invisible while you stay rolled back. Nothing is lost, and they come back with the plugin. Re-import when you return, to pick up anything created in the old plugin meanwhile.
+
+</details>
+
+<br>
 
 <details>
 <summary>What else the Set Homes v1 import brings across</summary>
@@ -307,6 +319,8 @@ Worth knowing before you copy a permissions file across:
 | `tp-cooldown` | none | v2 has no cooldown feature |
 | `tp-cooldown-msg` | none | follows the above |
 
+**If your v1 server had no permissions plugin, `max-homes` was never in force.** v1 logs `Could not connect to a permissions plugin! Config setting "max-homes" will be ignored!` at startup and ignores the caps entirely, so the numbers in your v1 config may never have applied to anyone. Copying them across does not newly restrict your players either: Set Homes in `groups` mode also declines to enforce without LuckPerms, and says so at startup. Install [LuckPerms](https://luckperms.net/download) if you want per-rank limits to actually take effect.
+
 </details>
 
 ## FAQ
@@ -349,7 +363,9 @@ Install LuckPerms, set `maxHomeEnabled: true` and `maxHomesType: groups`, then r
 <details>
 <summary>Can I run it alongside EssentialsX?</summary>
 
-Not comfortably. Both register `/sethome`, `/home` and `/delhome`, and whichever loads last wins. Import your homes, then remove EssentialsX.
+You can, but the two will split three command names between them. EssentialsX declares `/sethome`, `/home` and `/delhome` as its own commands, while Set Homes declares them as aliases of `/create-home`, `/go-home` and `/delete-home`. Bukkit never lets an alias take a name another plugin already owns, so EssentialsX keeps all three whatever the load order, and homes set with them go into EssentialsX's files while `/homes` reads ours.
+
+Unlike Set Homes v1, EssentialsX does not stop Set Homes from starting, so nothing warns you about the split. If you want Set Homes handling homes, follow the migration steps above, moving the EssentialsX jar out before you import. If you keep EssentialsX for everything else it does, disable those three commands in its own config instead. Set Homes' own names, `/homes`, `/list-homes`, `/create-home`, `/go-home` and `/delete-home`, always reach Set Homes either way.
 
 </details>
 
