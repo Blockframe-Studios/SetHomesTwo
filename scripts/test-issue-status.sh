@@ -163,6 +163,50 @@ Merge pull request #31 from Blockframe-Studios/fix/bukkitdev-metadata-semicolon'
   assert_equals "deduped" "31" "$(prs_of "$log")"
 }
 
+# Joins a push plan with commas so an expectation reads as one string.
+plan_of() {
+  push_plan "$1" | paste -sd, -
+}
+
+# -- what a push should aim for --
+
+test_a_branch_under_review_aims_for_in_review() {
+  assert_equals "target under review" "In review" "$(push_plan open-pr | head -1)"
+}
+
+test_a_branch_under_review_may_advance_from_in_progress() {
+  assert_equals "allowed under review" "In review,Todo,unset,In progress" \
+    "$(plan_of open-pr)"
+}
+
+test_a_branch_with_no_pull_request_aims_for_in_progress() {
+  assert_equals "target with no pull request" "In progress" \
+    "$(push_plan none | head -1)"
+}
+
+test_a_branch_with_no_pull_request_cannot_leave_in_progress() {
+  assert_equals "allowed with no pull request" "In progress,Todo,unset" \
+    "$(plan_of none)"
+}
+
+# Neither plan lists Ready for release or Done, so a push can never pull an
+# issue back out of either.
+test_neither_plan_can_disturb_a_shipped_issue() {
+  local plan
+  for arg in open-pr none; do
+    plan="$(plan_of "$arg")"
+    # Asserted first, so an empty plan cannot pass this test by matching nothing.
+    if [ -z "$plan" ]; then
+      fail "$arg plan is empty"
+      continue
+    fi
+    case "$plan" in
+      *"Ready for release"*|*Done*) fail "$arg plan must not list a shipped state" ;;
+      *) pass "$arg plan leaves shipped states alone" ;;
+    esac
+  done
+}
+
 test_several_merges_keep_first_appearance_order() {
   local log
   log='Merge pull request #58 from Blockframe-Studios/issue-53-refuse-alongside-v1
@@ -191,6 +235,12 @@ test_a_mention_in_a_subject_is_not_a_pull_request
 test_an_empty_range_is_empty_and_clean
 test_repeated_numbers_collapse
 test_several_merges_keep_first_appearance_order
+
+test_a_branch_under_review_aims_for_in_review
+test_a_branch_under_review_may_advance_from_in_progress
+test_a_branch_with_no_pull_request_aims_for_in_progress
+test_a_branch_with_no_pull_request_cannot_leave_in_progress
+test_neither_plan_can_disturb_a_shipped_issue
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 if [ "$FAIL" -gt 0 ]; then
