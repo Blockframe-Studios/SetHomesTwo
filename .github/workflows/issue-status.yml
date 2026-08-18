@@ -13,6 +13,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions: {}
+
 env:
   PROJECT_NUMBER: '1'
   GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -39,7 +41,9 @@ jobs:
           bash scripts/set-issue-status.sh "$issue" "In progress" Todo unset
 
   pull-request:
-    if: github.event_name == 'pull_request'
+    # Fork runs get no secrets, so GH_TOKEN would be empty and every external
+    # contribution would show a red check it has no way to fix.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out
@@ -63,8 +67,12 @@ jobs:
               exit 0
             fi
             status="Ready for release"
+            allowed=()
           else
             status="In review"
+            # Guards an edit on an already merged pull request from pulling
+            # the issue back out of Ready for release or Done.
+            allowed=(Todo unset "In progress")
           fi
 
           refs="$(printf '%s' "$BODY" | closing_refs)"
@@ -73,7 +81,15 @@ jobs:
             exit 0
           fi
 
+          failures=0
           while IFS= read -r issue; do
             [ -n "$issue" ] || continue
-            bash scripts/set-issue-status.sh "$issue" "$status"
+            if ! bash scripts/set-issue-status.sh "$issue" "$status" "${allowed[@]}"; then
+              printf 'FAILED: could not set #%s to %s\n' "$issue" "$status" >&2
+              failures=$((failures + 1))
+            fi
           done <<< "$refs"
+
+          if [ "$failures" -gt 0 ]; then
+            exit 1
+          fi
