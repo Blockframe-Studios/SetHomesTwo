@@ -231,15 +231,27 @@ Your players keep their homes. The old plugin does not even need to be running, 
 5. **Happy with the numbers?** Run it again with `confirm` on the end.
 6. **Paste any settings the config report listed** into `plugins/SetHomesTwo/config.yml`, then restart the server. Nothing is written there automatically, and there is no in-game reload, so a pasted setting does nothing until the server comes back up.
 
-**The jar has to move before the import, not after.** Set Homes refuses to start while a Set Homes v1 jar is still in `plugins/`, and prints what to move in the console. Both plugins provide `/sethome`, `/home` and `/delhome`, and v1 wins those names whatever the load order, so homes created after the upgrade would go into v1's files while the menu read ours. Rather than let that happen quietly, Set Homes stays off and your server keeps running v1 exactly as before until you move the jar.
+**The jar has to move before the import, not after.** Set Homes v2 will not start while a Set Homes v1 jar is still in `plugins/`. Both plugins provide `/sethome`, `/home` and `/delhome`, and v1 usually takes priority and wins those names regardless the load order.
 
-**You will not silently end up with an empty homes list.** After step 3, if `plugins/SetHomes/homes.yml` still holds homes and none have been imported here yet, the console says so at startup, naming the file, how many are waiting and the command to run. Anyone holding `sh2.import-homes` gets the same reminder in chat when they join, because plenty of admins never read the console. Both stop for good the moment any home exists here, so there is nothing to switch off afterwards. To reword the chat line, set `v1ImportPending` in `config.yml`.
-
-**Rolling back.** Put the old jar back in `plugins/`, take the Set Homes jar out, and restart. Both data folders are still there and untouched, so the old plugin picks up exactly where it left off. There is one thing to know before you rely on that: homes your players create under Set Homes after the migration exist only in `plugins/SetHomesTwo/database/homes.db`, and the old plugin cannot read them. They are not destroyed, and coming back to Set Homes restores them, but they are invisible for as long as you stay rolled back. So roll back promptly if you are going to, keep both data folders, and re-import when you return: homes created in the old plugin during the rollback are absent from the Set Homes database, so a later import brings those across too.
+**You are reminded until you import.** While `plugins/SetHomes/homes.yml` still holds homes and none have been imported here, every startup says so in the console, and anyone holding `sh2.import-homes` gets the same reminder in chat on join. Both stop for good once any home exists here.
 
 Existing homes are never overwritten, so re-running the import is always safe. Homes in worlds that no longer exist are skipped with a warning naming the world.
 
-Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second one is imported under the next free name, so `Base` arrives as `Base2`, and the report and the server log name it. No home is dropped for a name clash.
+Set Homes v1 told `base` and `Base` apart, while home names here ignore case. A player holding both keeps both: the second is imported under the next free name, so `Base` arrives as `Base2`, named in the report and the server log.
+
+**You can go back at any time.** The old plugin's data folder is never written to, so rolling back is mostly putting its jar back.
+<details>
+<summary><strong>Rolling back to your old plugin</strong></summary>
+
+1. **Stop the server.**
+2. **Put the old plugin's jar back in `plugins/`** and take the Set Homes jar out.
+3. **Start the server.** Both data folders are untouched, so the old plugin picks up where it left off.
+
+Homes your players created under Set Homes live only in `plugins/SetHomesTwo/database/homes.db`, which the old plugin cannot read, so they are invisible while you stay rolled back. Nothing is lost, and they come back with the plugin. Re-import when you return, to pick up anything created in the old plugin meanwhile.
+
+</details>
+
+<br>
 
 <details>
 <summary>What else the Set Homes v1 import brings across</summary>
