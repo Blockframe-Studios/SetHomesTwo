@@ -88,7 +88,7 @@ v1ImportPending: "Set Homes v1 has %s home(s) waiting to be imported. Run /impor
 invalidHomeItem: "The material you entered is not valid, please try a different one."
 falseHomeItem: "This home item does not belong to you."
 teleportedWhileTeleporting: "You cannot teleport while already teleporting."
-movedWhileTeleporting: "Your teleport has been cancelled because you have moved."
+movedWhileTeleporting: "Your teleport has been canceled because you have moved."
 noHomes: "You have not created any homes yet. Use /create-home to make your first one."
 teleportToBlacklistedDimension: "You cannot teleport to this home because the dimension it is in has been blacklisted."
 maxHomesReached: "You have reached the maximum number of homes allowed."
@@ -101,7 +101,7 @@ homeDoesNotExist: "The home '%s' does not exist."
 
 # Shown when a player name matches nobody online and nobody with saved homes.
 playerNotFound: "No player by that name is online or has any saved homes."
-unsafeHome: "Teleport cancelled: this home is not safe to stand in and no safe spot was found nearby."
+unsafeHome: "Teleport canceled: this home is not safe to stand in and no safe spot was found nearby."
 movedToSafeSpot: "Your home was not safe to stand in, so you were moved to the nearest safe spot."
 
 # -- DEBUGGING --
@@ -117,7 +117,7 @@ renamePromptTitle: "New home name"
 
 # Hint shown on each home in the homes list, below the description.
 # Only shown to players who can actually manage the home (sh2.manage-homes)
-# and never on another player's homes. Supports '&' colour codes.
+# and never on another player's homes. Supports '&' color codes.
 # Set to "" to hide it.
 manageHomeHint: "&7Right click to edit home"
 
@@ -125,7 +125,7 @@ manageHomeHint: "&7Right click to edit home"
 maxHomeNameLength: 32
 
 # Buttons in the management menu.
-# Button names support '&' colour codes (e.g. &c for red).
+# Button names support '&' color codes (e.g. &c for red).
 renameButtonItem: "name_tag"
 renameButtonName: "Rename"
 moveHomeButtonItem: "ender_pearl"

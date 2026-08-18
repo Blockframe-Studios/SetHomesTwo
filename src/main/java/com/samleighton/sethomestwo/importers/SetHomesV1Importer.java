@@ -93,7 +93,7 @@ public class SetHomesV1Importer implements HomesImporter {
             if (!storedName.equals(homeName)) {
                 report.renamed++;
                 String note = String.format(
-                        "Home '%s' for player %s differs only in capitalisation from another of that player's homes, which Set Homes v1 allowed. It takes the name '%s' here, so both locations are kept.",
+                        "Home '%s' for player %s differs only in capitalization from another of that player's homes, which Set Homes v1 allowed. It takes the name '%s' here, so both locations are kept.",
                         homeName, playerUUID, storedName);
                 report.warnings.add(note);
                 if (!dryRun) Bukkit.getLogger().warning(note);
@@ -272,13 +272,13 @@ public class SetHomesV1Importer implements HomesImporter {
         }
     }
 
-    // A v1 message may carry section-sign colour codes, which chat would apply
+    // A v1 message may carry section-sign color codes, which chat would apply
     // to the rest of the line. Show them as & so the note stays legible.
     private static String messageNote(String v1Key, String v2Key, String value) {
         String shown = value.replace(ChatColor.COLOR_CHAR, '&');
         String note = String.format("v1 %s -> set %s: '%s' in config.yml", v1Key, v2Key, shown);
         if (!shown.equals(value)) {
-            note += " (colour codes shown as &; copy the original from plugins/SetHomes/config.yml to keep them)";
+            note += " (color codes shown as &; copy the original from plugins/SetHomes/config.yml to keep them)";
         }
         return note;
     }
