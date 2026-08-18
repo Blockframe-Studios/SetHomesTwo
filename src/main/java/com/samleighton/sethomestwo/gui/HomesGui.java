@@ -231,7 +231,7 @@ public class HomesGui implements GuiScreen {
 
         // Right-click opens management, left-click teleports. Management is only
         // offered on the viewer's own list; the admin view of another player's
-        // homes falls through to teleport behaviour on any click.
+        // homes falls through to teleport behavior on any click.
         if (event.isRightClick() && isOwnList) {
             if (!player.hasPermission("sh2.manage-homes")) return;
 

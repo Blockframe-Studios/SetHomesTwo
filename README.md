@@ -104,7 +104,7 @@ By default players wait three seconds before a teleport fires, and moving cancel
 
 ![Instant teleport](docs/img/teleport-instant.gif)
 
-Before it drops anyone anywhere, Set Homes checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is cancelled and they are told why. Turn it off with `teleportSafety: false`.
+Before it drops anyone anywhere, Set Homes checks the destination is safe to stand in. If a home has been built over, flooded with lava, or left hanging above a drop, the player is moved to the nearest safe spot instead, or the teleport is canceled and they are told why. Turn it off with `teleportSafety: false`.
 
 ## Permissions
 
@@ -142,7 +142,7 @@ Two bundles group the nodes, so you can move a whole role in one line:
 | `sh2.update-notify` | OP | Being told on join that a newer release exists |
 | `sh2.bypass-max-homes` | OP | Creating homes past the configured maximum, whether the limit is server-wide or per group |
 | `sh2.bypass-blacklist` | OP | Creating a home in a blacklisted world, moving a home into one, and teleporting to a home already in one |
-| `sh2.bypass-teleport-delay` | OP | Teleporting with no countdown, and not being cancelled by moving |
+| `sh2.bypass-teleport-delay` | OP | Teleporting with no countdown, and not being canceled by moving |
 
 These nodes are granted by the bundles, which is why denying a bundle takes its whole set away at once. Granting or denying an individual node works exactly as the table describes.
 
@@ -314,8 +314,8 @@ Worth knowing before you copy a permissions file across:
 | `tp-delay` | `delay` | direct |
 | `tp-cancelOnMove` | `cancelOnMove` | direct |
 | `max-homes.<group>` | `maxHomes.<group>` | also set `maxHomesType: groups` and `maxHomeEnabled: true`. A v1 value of `0` means unlimited; leave that group out of `maxHomes` in v2 rather than setting it to `0`, which would cap it at zero homes instead. |
-| `max-homes-msg` | `maxHomesReached` | direct. v1's `§` colour codes paste in unchanged |
-| `tp-cancelOnMove-msg` | `movedWhileTeleporting` | direct. v1's `§` colour codes paste in unchanged |
+| `max-homes-msg` | `maxHomesReached` | direct. v1's `§` color codes paste in unchanged |
+| `tp-cancelOnMove-msg` | `movedWhileTeleporting` | direct. v1's `§` color codes paste in unchanged |
 | `tp-cooldown` | none | v2 has no cooldown feature |
 | `tp-cooldown-msg` | none | follows the above |
 

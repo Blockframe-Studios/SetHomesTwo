@@ -162,7 +162,7 @@ public class SetHomesTwo extends JavaPlugin {
         log.severe("     until you have migrated to v2.");
         log.severe("     It is how you roll back if you change your mind.");
         log.severe("  3. Leave plugins/SetHomes/ folder where it is. Nothing ever");
-        log.severe("     writes to it, but is needed for migrating homes to v2.");
+        log.severe("     writes to it, but it is needed for migrating homes to v2.");
         log.severe("  4. Start the server, then run /import-homes sethomes.");
         log.severe("");
         log.severe("Set Homes v1 is still running, exactly as it was.");
