@@ -7,14 +7,23 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 913275 is set-homes-two. Not 312833 - that is Set Homes v1.
-PROJECT_ID=913275
+# 312833 is the Set Homes listing, the one v1 servers already watch for updates.
+PROJECT_ID=312833
 API=https://dev.bukkit.org/api
 
 if [ -z "${CURSEFORGE_TOKEN:-}" ]; then
   echo "CURSEFORGE_TOKEN is not set" >&2
   exit 1
 fi
+
+# This listing carries Set Homes v1, which last shipped 1.3.1, so anything below
+# 2.0.0 would reach those servers as an update that reads as a downgrade.
+case "$VERSION" in
+  0.*|1.*)
+    echo "$VERSION is below the 2.0.0 floor for this listing, refusing to publish" >&2
+    exit 1
+    ;;
+esac
 
 GAME_VERSIONS=$(curl -sS -H "X-Api-Token: $CURSEFORGE_TOKEN" "$API/game/versions" \
   | jq -f "$SCRIPT_DIR/game-versions.jq" \
@@ -40,7 +49,7 @@ CHANGELOG=$(bash "$SCRIPT_DIR/release.sh" notes --readme README.md --version "$V
 # backslashes and newlines.
 METADATA=$(jq -n \
   --arg changelog "$CHANGELOG" \
-  --arg displayName "SetHomesTwo V$VERSION" \
+  --arg displayName "Set Homes V$VERSION" \
   --argjson gameVersions "$GAME_VERSIONS" \
   '{
     changelog: $changelog,
@@ -55,7 +64,7 @@ METADATA=$(jq -n \
 RESPONSE=$(curl -sS -w '\n%{http_code}' -X POST "$API/projects/$PROJECT_ID/upload-file" \
   -H "X-Api-Token: $CURSEFORGE_TOKEN" \
   --form-string "metadata=$METADATA" \
-  -F "file=@SetHomesTwo.V$VERSION.jar")
+  -F "file=@SetHomes.V$VERSION.jar")
 
 BODY=$(echo "$RESPONSE" | head -n -1)
 CODE=$(echo "$RESPONSE" | tail -n 1)
