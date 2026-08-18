@@ -38,6 +38,23 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>true</minimizeJar>
+                            <filters>
+                                <!-- Both are loaded reflectively, so the minimizer cannot see the
+                                     references and would strip them. Keep each artifact whole. -->
+                                <filter>
+                                    <artifact>net.wesjd:anvilgui</artifact>
+                                    <includes><include>**</include></includes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.bstats:*</artifact>
+                                    <includes><include>**</include></includes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes><exclude>META-INF/maven/**</exclude></excludes>
+                                </filter>
+                            </filters>
                             <relocations>
                                 <relocation>
                                     <pattern>net.wesjd.anvilgui</pattern>
@@ -127,7 +144,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.luckperms</groupId>
