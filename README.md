@@ -216,14 +216,9 @@ Per-rank limits need [LuckPerms](https://luckperms.net/download) and `maxHomesTy
 
 That table is only the common settings. For the complete list, see [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml), the file your `config.yml` is first written from. Every setting the plugin has is in there, commented in place.
 
-<details>
-<summary><strong>Upgrading? Your existing config.yml will not gain the new settings</strong></summary>
+**Your `config.yml` is written once and never touched again.** Installing the plugin, updating the jar and restarting the server all leave the file exactly as you last saved it, so a setting added in a later release will not appear in a file written by an earlier one. Anything missing falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
 
-Set Homes never touches a `config.yml` that already exists, so settings added in a later release do not appear in a file written by an earlier one. Any missing setting quietly falls back to its default, so nothing breaks, but you cannot change a setting you cannot see.
-
-To pick one up, copy the key you want out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
-
-</details>
+To pick a new setting up, copy the key out of [`default-config.yml`](https://github.com/Blockframe-Studios/SetHomesTwo/blob/master/src/main/resources/default-config.yml) into your file and restart. To start clean, rename your `config.yml` and restart. A fresh one is written with everything in it, and you can copy your old values across.
 
 ## Coming from EssentialsX or Set Homes v1
 
