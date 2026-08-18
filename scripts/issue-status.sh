@@ -28,3 +28,18 @@ pr_numbers_from_log() {
     | awk '!seen[$0]++'
   return 0
 }
+
+# What a push should do, given `open-pr` when the branch already has an open
+# pull request and anything else when it does not. Prints the target status
+# first, then the states it may advance from, one per line.
+#
+# A branch under review must not be reported as work in progress: merging the
+# base branch in is a push like any other. Neither plan names Ready for release
+# or Done, so a push can never pull a shipped issue backwards.
+push_plan() {
+  if [ "${1:-}" = "open-pr" ]; then
+    printf 'In review\nTodo\nunset\nIn progress\n'
+  else
+    printf 'In progress\nTodo\nunset\n'
+  fi
+}
