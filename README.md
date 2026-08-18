@@ -37,7 +37,7 @@ That is genuinely the whole setup. Player permissions default to granted, so you
 Names are optional on `/sethome` and `/home`. Leave the name off and both use a home called `default`. Home names are unique per player and ignore case, so `base` and `Base` are the same home.
 
 <details>
-<summary>Every command, with long forms and admin commands</summary>
+<summary>All commands + alias</summary>
 
 | Command | Long form | What it does |
 | --- | --- | --- |
@@ -50,8 +50,10 @@ Names are optional on `/sethome` and `/home`. Leave the name off and both use a 
 | `/give-homes-item` | - | Gives you the item that opens the menu. |
 
 On `/sethome`, a second word that names a real item becomes the icon, and everything after it is the description. So `/sethome base stone house` creates `base` with a stone icon and the description "house". If you wanted the whole phrase as the description, put `d` in the icon position: `/sethome base d stone house`. The reply names the icon it chose, so there is never any guessing.
+</details>
 
-**Admin commands**
+<details>
+<summary>Admin commands</summary>
 
 | Command | What it does |
 | --- | --- |
