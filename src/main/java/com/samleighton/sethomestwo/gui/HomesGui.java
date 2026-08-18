@@ -4,6 +4,8 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.datatypes.PersistentHome;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.enums.UserInfo;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
@@ -93,8 +95,7 @@ public class HomesGui implements GuiScreen {
 
         if (homesForDisplay == null || homesForDisplay.isEmpty()) {
             player.closeInventory();
-            String noHomesError = ConfigUtil.getConfig().getString("noHomes", UserError.NO_HOMES.getValue());
-            ChatUtils.sendError(player, noHomesError);
+            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserInfo.NO_HOMES.getValue()));
             return;
         }
 
@@ -201,11 +202,19 @@ public class HomesGui implements GuiScreen {
             if (!(clickedItem.getType().equals(backPageMaterial) || clickedItem.getType().equals(nextPageMaterial)))
                 return;
 
+            UsageCounters counters = SetHomesTwo.instance().getUsageCounters();
+
             // Move to prev page
-            if (clickedItem.getType().equals(backPageMaterial)) currentPage--;
+            if (clickedItem.getType().equals(backPageMaterial)) {
+                currentPage--;
+                counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_PAGE_PREVIOUS);
+            }
 
             // Move to next page
-            if (clickedItem.getType().equals(nextPageMaterial)) currentPage++;
+            if (clickedItem.getType().equals(nextPageMaterial)) {
+                currentPage++;
+                counters.increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_PAGE_NEXT);
+            }
 
             // Display new inv state to player
             this.displayInventory(player);
@@ -222,7 +231,7 @@ public class HomesGui implements GuiScreen {
 
         // Right-click opens management, left-click teleports. Management is only
         // offered on the viewer's own list; the admin view of another player's
-        // homes falls through to teleport behaviour on any click.
+        // homes falls through to teleport behavior on any click.
         if (event.isRightClick() && isOwnList) {
             if (!player.hasPermission("sh2.manage-homes")) return;
 
@@ -240,6 +249,8 @@ public class HomesGui implements GuiScreen {
         }
 
         player.closeInventory();
+
+        SetHomesTwo.instance().getUsageCounters().increment(UsageCounters.Family.GUI_ACTION, UsageCounters.GUI_TELEPORT);
 
         // Teleport player to home
         home.teleport(player);

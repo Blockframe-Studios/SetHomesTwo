@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.SetHomesTwo;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
+import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
 import com.samleighton.sethomestwo.models.Home;
@@ -41,12 +42,12 @@ public class OpenHomesGui implements CommandExecutor {
             return true;
         }
 
-        Dao<Home> homesDao = new HomesDao();
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
         // Guard for no homes yet
         if (playersHomes == null || playersHomes.isEmpty()) {
-            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserError.NO_HOMES.getValue()));
+            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserInfo.NO_HOMES.getValue()));
             return true;
         }
 

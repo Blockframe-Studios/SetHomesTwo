@@ -4,21 +4,27 @@ import com.samleighton.sethomestwo.commands.*;
 import com.samleighton.sethomestwo.connections.ConnectionManager;
 import com.samleighton.sethomestwo.dao.TeleportAttemptsDao;
 import com.samleighton.sethomestwo.enums.DebugLevel;
+import com.samleighton.sethomestwo.metrics.CommandUsageListener;
+import com.samleighton.sethomestwo.metrics.MetricsReporter;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.events.PlayerJoin;
 import com.samleighton.sethomestwo.events.PlayerLeave;
 import com.samleighton.sethomestwo.events.PlayerMoveWhileTeleporting;
 import com.samleighton.sethomestwo.events.RightClickHomeItem;
 import com.samleighton.sethomestwo.gui.GuiSession;
 import com.samleighton.sethomestwo.gui.HomesGui;
+import com.samleighton.sethomestwo.importers.PendingV1Import;
 import com.samleighton.sethomestwo.models.TeleportAttempt;
 import com.samleighton.sethomestwo.updates.GitHubReleaseSource;
 import com.samleighton.sethomestwo.updates.UpdateChecker;
-import com.samleighton.sethomestwo.tabcompleters.DimensionTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.BlacklistTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.HomesTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.ImportSourcesTabCompleter;
 import com.samleighton.sethomestwo.tabcompleters.MaterialsTabCompleter;
-import com.samleighton.sethomestwo.tabcompleters.RemoveDimensionTabCompleter;
+import com.samleighton.sethomestwo.tabcompleters.PlayerHomesTabCompleter;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.utils.DatabaseUtil;
+import com.samleighton.sethomestwo.utils.PermissionOverrides;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -33,11 +39,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class SetHomesTwo extends JavaPlugin {
+    // Set Homes v1's plugin.yml name. Ours differs, so Bukkit loads both happily.
+    private static final String SET_HOMES_V1 = "SetHomes";
+
     private final ConnectionManager connectionManager = new ConnectionManager();
     private final Map<UUID, GuiSession> guiSessionMap = new HashMap<>();
+    private final UsageCounters usageCounters = new UsageCounters();
     private UpdateChecker updateChecker;
+    private MetricsReporter metricsReporter;
 
     /**
      * Looked up by name because JavaPlugin.getPlugin(SetHomesTwo.class) needs the
@@ -49,11 +61,20 @@ public class SetHomesTwo extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Before anything touches disk, so a refused boot leaves the server as it was.
+        if (Bukkit.getPluginManager().getPlugin(SET_HOMES_V1) != null) {
+            refuseToRunAlongsideV1();
+            return;
+        }
+
         // Create the directories for the plugin
         createDirectories();
 
         // Create config
         initConfig();
+
+        // Needs the config on disk, so it cannot move above initConfig.
+        PermissionOverrides.apply();
 
         // Built before the listeners: the join listener is handed this instance.
         updateChecker = new UpdateChecker(
@@ -62,6 +83,9 @@ public class SetHomesTwo extends JavaPlugin {
                 new GitHubReleaseSource(getDescription().getVersion())
         );
         updateChecker.checkLater();
+
+        metricsReporter = new MetricsReporter(this);
+        metricsReporter.startLater();
 
         // Plugin startup logic
         registerCommands();
@@ -94,6 +118,57 @@ public class SetHomesTwo extends JavaPlugin {
         } else {
             Bukkit.getLogger().severe("Could not create database connection!");
         }
+
+        // Last, because it asks the database whether anything has been imported.
+        announcePendingV1Import();
+    }
+
+    /**
+     * Says so when v1 homes are sitting there unimported. Silent once any home
+     * exists here, so it needs no marker file.
+     */
+    private void announcePendingV1Import() {
+        int waiting = PendingV1Import.waitingToBeImported();
+        if (waiting == 0) return;
+
+        Logger log = Bukkit.getLogger();
+        log.warning("============================================================");
+        log.warning("Set Homes found " + waiting + " home(s) in " + PendingV1Import.SOURCE_PATH);
+        log.warning("and none of its own, so your players cannot see theirs yet.");
+        log.warning("");
+        log.warning("Run /import-homes sethomes for a preview that changes");
+        log.warning("nothing, then /import-homes sethomes confirm to bring");
+        log.warning("them across.");
+        log.warning("============================================================");
+    }
+
+    /**
+     * Logs why we are not starting and disables us. The text is hardcoded because
+     * this runs before initConfig, so there is no config to override it from.
+     */
+    private void refuseToRunAlongsideV1() {
+        Logger log = Bukkit.getLogger();
+        log.severe("============================================================");
+        log.severe("Set Homes v2 did not start: Set Homes v1 is installed too.");
+        log.severe("");
+        log.severe("Both plugins claim /sethome, /home and /delhome, and v1 takes");
+        log.severe("them whatever the load order. Left alone, your players' homes");
+        log.severe("would be split between the two plugins with nothing to show");
+        log.severe("for it in the logs.");
+        log.severe("");
+        log.severe("To finish the upgrade:");
+        log.severe("  1. Stop the server.");
+        log.severe("  2. Move the old SetHomes jar file out of plugins/ and keep it");
+        log.severe("     until you have migrated to v2.");
+        log.severe("     It is how you roll back if you change your mind.");
+        log.severe("  3. Leave plugins/SetHomes/ folder where it is. Nothing ever");
+        log.severe("     writes to it, but it is needed for migrating homes to v2.");
+        log.severe("  4. Start the server, then run /import-homes sethomes.");
+        log.severe("");
+        log.severe("Set Homes v1 is still running, exactly as it was.");
+        log.severe("============================================================");
+
+        getServer().getPluginManager().disablePlugin(this);
     }
 
     @Override
@@ -112,6 +187,8 @@ public class SetHomesTwo extends JavaPlugin {
             player.resetTitle();
             player.removePotionEffect(PotionEffectType.NAUSEA);
         }
+
+        if (metricsReporter != null) metricsReporter.shutdown();
 
         // Close database connections
         connectionManager.closeConnections();
@@ -173,16 +250,9 @@ public class SetHomesTwo extends JavaPlugin {
         deleteHome.setExecutor(new DeleteHome());
         deleteHome.setTabCompleter(new HomesTabCompleter());
 
-        PluginCommand addToBlacklist = Objects.requireNonNull(this.getCommand("add-to-blacklist"));
-        addToBlacklist.setExecutor(new AddDimensionToBlacklist());
-        addToBlacklist.setTabCompleter(new DimensionTabCompleter());
-
-        PluginCommand removeFromBlacklist = Objects.requireNonNull(this.getCommand("remove-from-blacklist"));
-        removeFromBlacklist.setExecutor(new RemoveDimensionFromBlacklist());
-        removeFromBlacklist.setTabCompleter(new RemoveDimensionTabCompleter());
-
-        PluginCommand getBlacklistedDimensions = Objects.requireNonNull(this.getCommand("get-blacklisted-dimensions"));
-        getBlacklistedDimensions.setExecutor(new GetBlacklistedDimensions());
+        PluginCommand blacklist = Objects.requireNonNull(this.getCommand("blacklist"));
+        blacklist.setExecutor(new Blacklist());
+        blacklist.setTabCompleter(new BlacklistTabCompleter());
 
         PluginCommand getPlayerHomes = Objects.requireNonNull(this.getCommand("get-player-homes"));
         getPlayerHomes.setExecutor(new GetPlayerHomes(this));
@@ -192,6 +262,23 @@ public class SetHomesTwo extends JavaPlugin {
 
         PluginCommand importHomes = Objects.requireNonNull(this.getCommand("import-homes"));
         importHomes.setExecutor(new ImportHomes());
+        importHomes.setTabCompleter(new ImportSourcesTabCompleter());
+
+        PluginCommand moveHome = Objects.requireNonNull(this.getCommand("move-home"));
+        moveHome.setExecutor(new MoveHome());
+        moveHome.setTabCompleter(new HomesTabCompleter());
+
+        PluginCommand goPlayerHome = Objects.requireNonNull(this.getCommand("go-player-home"));
+        goPlayerHome.setExecutor(new GoPlayerHome());
+        goPlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand deletePlayerHome = Objects.requireNonNull(this.getCommand("delete-player-home"));
+        deletePlayerHome.setExecutor(new DeletePlayerHome());
+        deletePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
+
+        PluginCommand movePlayerHome = Objects.requireNonNull(this.getCommand("move-player-home"));
+        movePlayerHome.setExecutor(new MovePlayerHome());
+        movePlayerHome.setTabCompleter(new PlayerHomesTabCompleter());
     }
 
     /**
@@ -202,6 +289,7 @@ public class SetHomesTwo extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerLeave(this), this);
         getServer().getPluginManager().registerEvents(new RightClickHomeItem(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveWhileTeleporting(), this);
+        getServer().getPluginManager().registerEvents(new CommandUsageListener(this), this);
     }
 
     /**
@@ -236,7 +324,15 @@ public class SetHomesTwo extends JavaPlugin {
         return this.updateChecker;
     }
 
+    public MetricsReporter getMetricsReporter() {
+        return this.metricsReporter;
+    }
+
     public Map<UUID, GuiSession> getGuiSessionMap() {
         return this.guiSessionMap;
+    }
+
+    public UsageCounters getUsageCounters() {
+        return this.usageCounters;
     }
 }

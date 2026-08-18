@@ -1,0 +1,200 @@
+package com.samleighton.sethomestwo.commands;
+
+import com.samleighton.sethomestwo.dao.BlacklistDao;
+import com.samleighton.sethomestwo.support.HomeFixtures;
+import com.samleighton.sethomestwo.support.ServerTestBase;
+import org.junit.jupiter.api.Test;
+import org.mockbukkit.mockbukkit.entity.PlayerMock;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class BlacklistTest extends ServerTestBase {
+
+    @Test
+    void addStoresTheWorld() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
+
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void removeDropsTheWorld() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
+
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
+
+        assertFalse(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void listPrintsTheEntries() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
+
+        assertTrue(server.execute("blacklist", player, "list").hasSucceeded());
+
+        assertTrue(player.nextMessage().contains("world_nether"));
+    }
+
+    @Test
+    void addIsRefusedWithoutItsOwnNode() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
+        player.addAttachment(plugin, "sh2.add-to-blacklist", false);
+
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
+
+        assertTrue(player.nextMessage().contains("permission"));
+        assertFalse(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void removeIsRefusedWithoutItsOwnNode() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", false);
+
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
+
+        assertTrue(player.nextMessage().contains("permission"));
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void listIsRefusedWithoutItsOwnNode() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
+        player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", false);
+
+        assertTrue(server.execute("blacklist", player, "list").hasSucceeded());
+
+        assertTrue(player.nextMessage().contains("permission"));
+    }
+
+    @Test
+    void theOldCommandNameStillWorks() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+
+        assertTrue(server.execute("add-to-blacklist", player, "add", "world_nether").hasSucceeded());
+
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void anUnknownWorldIsRejected() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+
+        assertTrue(server.execute("blacklist", player, "add", "not_a_world").hasSucceeded());
+
+        String message = player.nextMessage();
+        assertTrue(message.contains("not_a_world"), message);
+        // The old wording advertised nether, overworld and end, none of which
+        // the validator accepts. It must name the server's real worlds instead.
+        assertTrue(message.contains("world_nether"), message);
+        assertTrue(new BlacklistDao().getAll().isEmpty());
+    }
+
+    @Test
+    void theAddSuccessMessageIsOverridableInConfig() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+        plugin.getConfig().set("dimensionAddedToBlacklist", "Blocked %s.");
+
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
+
+        assertTrue(player.nextMessage().contains("Blocked world_nether."));
+    }
+
+    @Test
+    void aFailedAddIsReportedInsteadOfClaimingSuccess() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+        HomeFixtures.breakBlacklistWrites();
+
+        assertTrue(server.execute("blacklist", player, "add", "world_nether").hasSucceeded());
+
+        String message = player.nextMessage();
+        assertTrue(message.contains("issue adding dimension"), message);
+        assertNull(player.nextMessage(), "a failed write must not also send the success message");
+        assertFalse(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void aFailedRemoveIsReportedInsteadOfClaimingSuccess() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
+        HomeFixtures.breakBlacklistWrites();
+
+        assertTrue(server.execute("blacklist", player, "remove", "world_nether").hasSucceeded());
+
+        String message = player.nextMessage();
+        assertTrue(message.contains("issue removing dimension"), message);
+        assertNull(player.nextMessage(), "a failed write must not also send the success message");
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    // The old command names arrive at onCommand with no subcommand token at
+    // all (e.g. "/add-to-blacklist world_nether"), unlike the new "blacklist"
+    // name, which always expects one. Bukkit hands onCommand the exact label
+    // the player typed only when the command is dispatched through the real
+    // command line, so these use server.dispatchCommand rather than
+    // server.execute, which always reports the canonical command name as the
+    // label regardless of which alias was used to look it up.
+
+    @Test
+    void bareAddToBlacklistAliasWithNoSubcommandStillAdds() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+
+        server.dispatchCommand(player, "add-to-blacklist world_nether");
+
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void bareRemoveFromBlacklistAliasWithNoSubcommandStillRemoves() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.remove-from-blacklist", true);
+
+        server.dispatchCommand(player, "remove-from-blacklist world_nether");
+
+        assertFalse(new BlacklistDao().getAll().contains("world_nether"));
+    }
+
+    @Test
+    void bareGetBlacklistedDimensionsAliasListsEntries() {
+        HomeFixtures.blacklist("world_nether");
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.get-blacklisted-dimensions", true);
+
+        server.dispatchCommand(player, "get-blacklisted-dimensions");
+
+        assertTrue(player.nextMessage().contains("world_nether"));
+    }
+
+    @Test
+    void explicitSubcommandViaOldAliasIsNotTreatedAsAWorldName() {
+        PlayerMock player = addPlayer();
+        player.addAttachment(plugin, "sh2.add-to-blacklist", true);
+
+        server.dispatchCommand(player, "add-to-blacklist add world_nether");
+
+        assertTrue(new BlacklistDao().getAll().contains("world_nether"));
+        assertFalse(new BlacklistDao().getAll().contains("add"));
+    }
+}

@@ -9,6 +9,13 @@ import java.util.UUID;
 
 public class HomesUtil {
 
+    /**
+     * The name a home takes when created or requested without one. Matches the
+     * name SetHomesV1Importer gives an imported v1 unnamed home, so an importing
+     * server's homes line up with what a bare command reaches for.
+     */
+    public static final String DEFAULT_HOME_NAME = "default";
+
     public static List<String> getPlayerHomesNameOnly(Dao<Home> homesDao, UUID playerUUID){
         List<Home> playerHomes = homesDao.getAll(playerUUID);
         return Lists.transform(playerHomes, Home::getName);

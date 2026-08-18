@@ -17,7 +17,7 @@ class GetPlayerHomesTest extends ServerTestBase {
     void aNonOpIsRefused() {
         PlayerMock admin = addPlayer();
 
-        server.execute("get-player-homes", admin, "someone").assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin, "someone").hasSucceeded());
 
         // Bukkit's dispatcher rejects non-op senders before onCommand runs, so this
         // is its denial message, not the plugin's. The substring matches both.
@@ -29,9 +29,9 @@ class GetPlayerHomesTest extends ServerTestBase {
         PlayerMock admin = addPlayer();
         admin.setOp(true);
 
-        server.execute("get-player-homes", admin, "nobody").assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin, "nobody").hasSucceeded());
 
-        assertTrue(admin.nextMessage().contains("not online"));
+        assertTrue(admin.nextMessage().contains("No player by that name"));
     }
 
     @Test
@@ -39,7 +39,7 @@ class GetPlayerHomesTest extends ServerTestBase {
         PlayerMock admin = addPlayer();
         admin.setOp(true);
 
-        server.execute("get-player-homes", admin).assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin).hasSucceeded());
 
         assertTrue(admin.nextMessage().contains("Incorrect number of arguments"));
     }
@@ -51,7 +51,7 @@ class GetPlayerHomesTest extends ServerTestBase {
         admin.setOp(true);
         HomeFixtures.persist(target, "base");
 
-        server.execute("get-player-homes", admin, "target").assertSucceeded();
+        assertTrue(server.execute("get-player-homes", admin, "target").hasSucceeded());
 
         GuiSession session = plugin.getGuiSessionMap().get(admin.getUniqueId());
         assertNotNull(session);

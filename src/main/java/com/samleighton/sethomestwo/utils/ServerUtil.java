@@ -2,7 +2,9 @@ package com.samleighton.sethomestwo.utils;
 
 import com.samleighton.sethomestwo.dao.BlacklistDao;
 import com.samleighton.sethomestwo.dao.Dao;
+import com.samleighton.sethomestwo.dao.HomesDao;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -48,27 +50,46 @@ public class ServerUtil {
     }
 
     /**
-     * Whether homes are barred from a dimension.
+     * Whether homes are barred from a world. Blacklist rows hold lowercased
+     * world names, so the world is compared directly rather than through an
+     * environment mapping, which could only ever address the first three worlds.
      *
-     * @param dimension The environment name, as produced by
-     *                  world.getEnvironment().toString()
-     * @return true when the dimension is blacklisted
+     * @param world The world to check
+     * @return true when the world is blacklisted
      */
-    public static boolean isDimensionBlacklisted(String dimension) {
+    public static boolean isWorldBlacklisted(World world) {
         Dao<String> blacklistDao = new BlacklistDao();
-        List<String> blacklistedDimensions = blacklistDao.getAll();
-
-        return blacklistedDimensions.contains(getDimensionsMap().get(dimension));
+        return isWorldBlacklisted(world, blacklistDao.getAll());
     }
 
-    public static String getPlayerUUID(String playerName){
-        for(Player player : Bukkit.getOnlinePlayers()) {
-            String name = player.getDisplayName();
-            if(name.equals(playerName)) {
+    /**
+     * Same rule as {@link #isWorldBlacklisted(World)}, against an
+     * already-fetched blacklist so a caller checking many worlds does not
+     * query once per check.
+     *
+     * @param world             The world to check
+     * @param blacklistedWorlds Lowercased world names, as returned by
+     *                          {@code new BlacklistDao().getAll()}
+     * @return true when the world is blacklisted
+     */
+    public static boolean isWorldBlacklisted(World world, List<String> blacklistedWorlds) {
+        if (world == null) return false;
+
+        return blacklistedWorlds.contains(world.getName().toLowerCase());
+    }
+
+    /**
+     * Resolve a player name to a UUID, falling back to the names stored against
+     * saved homes so offline players can be addressed. The match ignores case,
+     * which is safe because Minecraft names are unique ignoring case.
+     */
+    public static String getPlayerUUID(String playerName) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getName().equalsIgnoreCase(playerName)) {
                 return player.getUniqueId().toString();
             }
         }
 
-        return null;
+        return new HomesDao().uuidForName(playerName);
     }
 }

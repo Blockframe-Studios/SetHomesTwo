@@ -163,16 +163,36 @@ else
 fi
 
 DISPLAY_NAME=$(printf '%s' "$METADATA" | jq -r '.displayName // ""' 2>/dev/null)
-if [ "$DISPLAY_NAME" = "SetHomesTwo V9.9.9" ]; then
+if [ "$DISPLAY_NAME" = "Set Homes V9.9.9" ]; then
   pass "names the file after the version"
 else
   fail "names the file after the version" "got: $DISPLAY_NAME"
 fi
 
-if has_arg "file=@SetHomesTwo.V9.9.9.jar"; then
+if has_arg "file=@SetHomes.V9.9.9.jar"; then
   pass "uploads the versioned jar"
 else
   fail "uploads the versioned jar" "args were: $(args_summary)"
+fi
+
+# The listing this publishes to carries Set Homes v1, which shipped 1.3.1, so a
+# 1.x upload would be offered to those servers as an update. The guard runs
+# before the first API call, so a refused run records no curl at all.
+REFUSE_ARGS_DIR="$WORK/args-refused"
+REFUSE_OUTPUT=$(cd "$WORK/run" && PATH="$WORK/bin:$PATH" CURSEFORGE_TOKEN=test-token \
+  VERSION=1.2.3 CURL_ARGS_DIR="$REFUSE_ARGS_DIR" bash "$PUBLISH_SH" 2>&1)
+REFUSE_STATUS=$?
+
+if [ "$REFUSE_STATUS" -ne 0 ]; then
+  pass "refuses to publish a version below 2.0.0"
+else
+  fail "refuses to publish a version below 2.0.0" "exited 0: $REFUSE_OUTPUT"
+fi
+
+if [ ! -d "$REFUSE_ARGS_DIR" ]; then
+  pass "calls nothing when it refuses"
+else
+  fail "calls nothing when it refuses" "recorded: $(ls "$REFUSE_ARGS_DIR")"
 fi
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"

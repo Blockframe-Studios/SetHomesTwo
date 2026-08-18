@@ -3,11 +3,11 @@ package com.samleighton.sethomestwo.commands;
 import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
-import com.samleighton.sethomestwo.enums.UserInfo;
 import com.samleighton.sethomestwo.enums.UserSuccess;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.HomeNameValidator;
 import com.samleighton.sethomestwo.utils.HomesUtil;
 import com.samleighton.sethomestwo.utils.ServerUtil;
 import net.luckperms.api.LuckPerms;
@@ -45,13 +45,6 @@ public class CreateHome implements CommandExecutor {
             return true;
         }
 
-        // Guard to ensure we have minimum number of args
-        if (args.length < 1) {
-            ChatUtils.incorrectNumArguments(player);
-            ChatUtils.sendInfo(player, UserInfo.CREATE_HOME_USAGE.getValue());
-            return true;
-        }
-
         // Guard to check if player has exceeded the max number of homes
         if (this.maxHomesReached(player, homesDao)){
             String errorMessage = ConfigUtil.getConfig().getString("maxHomesReached", UserError.MAX_HOMES.getValue());
@@ -62,50 +55,63 @@ public class CreateHome implements CommandExecutor {
         String playerDimension = player.getWorld().getEnvironment().toString();
 
         // Check if player is in a blacklisted dimension before creating home
-        if (ServerUtil.isDimensionBlacklisted(playerDimension)) {
+        if (!player.hasPermission("sh2.bypass-blacklist") && ServerUtil.isWorldBlacklisted(player.getWorld())) {
             String errorMessage = ConfigUtil.getConfig().getString("dimensionBlacklisted", UserError.DIMENSION_IS_BLACKLISTED.getValue());
             ChatUtils.sendError(player, errorMessage);
             return true;
         }
 
-        // Extract parameters from command arguments
-        String homeName = args[0];
+        // Extract parameters from command arguments. A bare command is the v1
+        // form, naming the home rather than erroring.
+        String homeName = HomeNameValidator.normalise(
+                args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0]);
 
-        String material = "";
-        if (args.length > 1)
-            material = args[1];
+        // The same shape rules the GUI rename applies. A double space yields an
+        // empty first argument, and an empty name leaves a home that no command
+        // can address, so none can delete it either.
+        int maxNameLength = ConfigUtil.getConfig().getInt("maxHomeNameLength", 32);
 
-        // Guard to ensure material entered is a valid material
-        boolean isMaterialBlankOrDefault = material.equalsIgnoreCase("d") || material.equalsIgnoreCase("default") || material.equalsIgnoreCase("");
-        Material mat = isMaterialBlankOrDefault ? Material.WHITE_WOOL : Material.matchMaterial(material);
-        if (mat == null) {
-            String errorMessage = ConfigUtil.getConfig().getString("invalidHomeItem", UserError.INVALID_MATERIAL.getValue());
-            ChatUtils.sendError(player, errorMessage);
-            return true;
+        switch (HomeNameValidator.validate(homeName, maxNameLength)) {
+            case EMPTY:
+                ChatUtils.sendError(player, ConfigUtil.getConfig().getString(
+                        "invalidHomeName", UserError.INVALID_HOME_NAME.getValue()));
+                return true;
+            case TOO_LONG:
+                String tooLong = ConfigUtil.getConfig().getString(
+                        "homeNameTooLong", UserError.HOME_NAME_TOO_LONG.getValue());
+                ChatUtils.sendError(player, String.format(tooLong, maxNameLength));
+                return true;
+            default:
+                break;
         }
-        if (!mat.isItem()) {
-            String errorMessage = ConfigUtil.getConfig().getString("invalidHomeItem", UserError.INVALID_MATERIAL.getValue());
-            ChatUtils.sendError(player, errorMessage);
-            return true;
-        }
 
-        material = mat.name();
-        String description = null;
-        StringBuilder stringBuilder = new StringBuilder();
+        Material mat = null;
+        int descriptionStart = 1;
 
-        // Build description from leftover arguments
-        if (args.length > 2) {
-            String[] remainingArgs = Arrays.copyOfRange(args, 2, args.length);
-            for (int i = 0; i < remainingArgs.length; i++) {
-                String arg = remainingArgs[i];
-                if (i == remainingArgs.length - 1) {
-                    stringBuilder.append(arg);
-                } else {
-                    stringBuilder.append(arg).append(" ");
+        if (args.length > 1) {
+            String candidate = args[1];
+
+            if (candidate.isEmpty() || candidate.equalsIgnoreCase("d") || candidate.equalsIgnoreCase("default")) {
+                mat = defaultHomeItem();
+                descriptionStart = 2;
+            } else {
+                Material matched = Material.matchMaterial(candidate);
+                if (matched != null && matched.isItem()) {
+                    mat = matched;
+                    descriptionStart = 2;
                 }
             }
+        }
 
-            description = stringBuilder.toString();
+        // An argument 2 that names no item is description text, not an error, so
+        // that the v1 form "/sethome base my main base" still works.
+        if (mat == null) mat = defaultHomeItem();
+
+        String material = mat.name();
+
+        String description = null;
+        if (args.length > descriptionStart) {
+            description = String.join(" ", Arrays.copyOfRange(args, descriptionStart, args.length));
         }
 
         // Duplicate name guard
@@ -133,11 +139,13 @@ public class CreateHome implements CommandExecutor {
         }
 
         String message = ConfigUtil.getConfig().getString("homeCreated", UserSuccess.HOME_CREATED.getValue());
-        ChatUtils.sendSuccess(player, String.format(message, homeName));
+        ChatUtils.sendSuccess(player, String.format(message, homeName, material));
         return true;
     }
 
     private boolean maxHomesReached(Player player, Dao<Home> homesDao){
+        if (player.hasPermission("sh2.bypass-max-homes")) return false;
+
         boolean isMaxHomesEnabled = ConfigUtil.getConfig().getBoolean("maxHomeEnabled", false);
         if (!isMaxHomesEnabled) return false;
 
@@ -175,5 +183,17 @@ public class CreateHome implements CommandExecutor {
 
         int playersHomeCount = HomesUtil.getPlayerHomesCount(homesDao, player.getUniqueId());
         return playersHomeCount >= maxHomesAllowed;
+    }
+
+    /**
+     * The icon a home takes when none is given. A configured value that names no
+     * item falls back to white wool, because a non-item material stored as an
+     * icon makes HomesGui throw when it builds the ItemStack.
+     */
+    private static Material defaultHomeItem() {
+        Material configured = Material.matchMaterial(
+                ConfigUtil.getConfig().getString("defaultHomeItem", "white_wool"));
+
+        return configured != null && configured.isItem() ? configured : Material.WHITE_WOOL;
     }
 }

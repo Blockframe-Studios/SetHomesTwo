@@ -38,10 +38,31 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>true</minimizeJar>
+                            <filters>
+                                <!-- Both are loaded reflectively, so the minimizer cannot see the
+                                     references and would strip them. Keep each artifact whole. -->
+                                <filter>
+                                    <artifact>net.wesjd:anvilgui</artifact>
+                                    <includes><include>**</include></includes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.bstats:*</artifact>
+                                    <includes><include>**</include></includes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes><exclude>META-INF/maven/**</exclude></excludes>
+                                </filter>
+                            </filters>
                             <relocations>
                                 <relocation>
                                     <pattern>net.wesjd.anvilgui</pattern>
                                     <shadedPattern>com.samleighton.sethomestwo.lib.anvilgui</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>com.samleighton.sethomestwo.lib.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -123,7 +144,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.luckperms</groupId>
@@ -138,6 +159,12 @@
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
             <version>1.10.13-20260714.043149-1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

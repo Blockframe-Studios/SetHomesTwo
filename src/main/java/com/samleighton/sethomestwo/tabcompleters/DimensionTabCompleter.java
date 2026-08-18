@@ -1,10 +1,10 @@
 package com.samleighton.sethomestwo.tabcompleters;
 
 import com.samleighton.sethomestwo.utils.ServerUtil;
+import com.samleighton.sethomestwo.utils.TabCompletions;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +17,7 @@ public class DimensionTabCompleter implements TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
         for(String arg : args){
-            StringUtil.copyPartialMatches(arg, ServerUtil.getValidDimensions(), completions);
+            completions.addAll(TabCompletions.matching(arg, ServerUtil.getValidDimensions()));
         }
 
         return completions;

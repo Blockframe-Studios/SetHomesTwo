@@ -2,6 +2,7 @@ package com.samleighton.sethomestwo.datatypes;
 
 import com.samleighton.sethomestwo.models.Home;
 import org.apache.commons.lang3.SerializationUtils;
+import com.samleighton.sethomestwo.metrics.Errors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,6 +40,7 @@ public class PersistentHome implements PersistentDataType<byte[], Home> {
             return (Home) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             Bukkit.getLogger().severe("There was a problem deserializing a home.");
+            Errors.count(Errors.ITEM_DATA);
             e.printStackTrace();
         }
 

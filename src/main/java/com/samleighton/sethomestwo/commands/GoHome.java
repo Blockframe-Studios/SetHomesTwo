@@ -5,6 +5,8 @@ import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
+import com.samleighton.sethomestwo.utils.ConfigUtil;
+import com.samleighton.sethomestwo.utils.HomesUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,8 +26,9 @@ public class GoHome implements CommandExecutor {
 
         Player player = (Player) commandSender;
 
-        // Args length guard
-        if(args.length != 1){
+        // Args length guard. A bare command is the v1 form, so only too many
+        // arguments is an error.
+        if(args.length > 1){
             ChatUtils.incorrectNumArguments(player);
             return true;
         }
@@ -37,8 +40,8 @@ public class GoHome implements CommandExecutor {
         }
 
         // Get players home dao instance
-        String desiredHomeName = args[0];
-        Dao<Home> homesDao = new HomesDao();
+        String desiredHomeName = args.length < 1 ? HomesUtil.DEFAULT_HOME_NAME : args[0];
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         ArrayList<Home> playerHomes = (ArrayList<Home>) homesDao.getAll(player.getUniqueId());
         Home homeToTeleportTo = null;
 
@@ -51,7 +54,8 @@ public class GoHome implements CommandExecutor {
 
         // Home does not exist guard
         if(homeToTeleportTo == null){
-            ChatUtils.sendError(player, UserError.HOME_DOES_NOT_EXIST.getValue());
+            String message = ConfigUtil.getConfig().getString("homeDoesNotExist", UserError.HOME_DOES_NOT_EXIST.getValue());
+            ChatUtils.sendError(player, String.format(message, desiredHomeName));
             return true;
         }
 

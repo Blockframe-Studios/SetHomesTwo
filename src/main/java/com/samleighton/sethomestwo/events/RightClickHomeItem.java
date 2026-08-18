@@ -71,7 +71,7 @@ public class RightClickHomeItem implements Listener {
             return;
         }
 
-        Dao<Home> homesDao = new HomesDao();
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
         GuiSession session = plugin.getGuiSessionMap().get(player.getUniqueId());

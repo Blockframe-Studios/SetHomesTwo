@@ -4,6 +4,7 @@ import com.samleighton.sethomestwo.dao.Dao;
 import com.samleighton.sethomestwo.dao.HomesDao;
 import com.samleighton.sethomestwo.enums.UserError;
 import com.samleighton.sethomestwo.enums.UserInfo;
+import com.samleighton.sethomestwo.utils.ConfigUtil;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.utils.ChatUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -23,6 +24,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ListHomes implements CommandExecutor {
+    // Bungee chat is deprecated upstream in favour of Adventure, which Spigot servers do not have.
+    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         // Players only guard
@@ -39,13 +42,12 @@ public class ListHomes implements CommandExecutor {
             return true;
         }
 
-        Dao<Home> homesDao = new HomesDao();
+        Dao<Home> homesDao = new HomesDao(player.hasPermission("sh2.bypass-blacklist"));
         List<Home> playersHomes = homesDao.getAll(player.getUniqueId());
 
         // Player has no homes guard
         if (playersHomes.isEmpty()) {
-            ChatUtils.sendInfo(player, UserInfo.NO_HOMES.getValue());
-            ChatUtils.sendInfo(player, UserInfo.CREATE_HOME_USAGE.getValue());
+            ChatUtils.sendInfo(player, ConfigUtil.getConfig().getString("noHomes", UserInfo.NO_HOMES.getValue()));
             return true;
         }
 

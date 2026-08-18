@@ -25,6 +25,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HomesDaoTest extends ServerTestBase {
 
     @Test
+    void namesForReturnsEveryHomeNameWithItsStoredCasing() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "Base");
+        HomeFixtures.persist(player, "shop");
+
+        List<String> names = new HomesDao().namesFor(player.getUniqueId());
+
+        assertEquals(2, names.size());
+        assertTrue(names.contains("Base"));
+        assertTrue(names.contains("shop"));
+    }
+
+    @Test
+    void namesForIsEmptyForAPlayerWithNoHomes() {
+        PlayerMock player = addPlayer();
+
+        assertTrue(new HomesDao().namesFor(player.getUniqueId()).isEmpty());
+    }
+
+    @Test
     void savedHomeComesBackFromGetAll() {
         PlayerMock player = addPlayer();
         HomeFixtures.persist(player, "base");
@@ -34,6 +54,17 @@ class HomesDaoTest extends ServerTestBase {
         assertEquals(1, homes.size());
         assertEquals("base", homes.get(0).getName());
         assertNotNull(homes.get(0).getId());
+    }
+
+    @Test
+    void getIsCaseInsensitive() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "base");
+
+        Home found = new HomesDao().get(player.getUniqueId(), "BaSe");
+
+        assertNotNull(found);
+        assertEquals("base", found.getName());
     }
 
     @Test
@@ -186,6 +217,23 @@ class HomesDaoTest extends ServerTestBase {
         Home home = new HomesDao(true).getAll(player.getUniqueId()).get(0);
 
         assertTrue(home.getCanTeleport());
+    }
+
+    @Test
+    void countsCoverEveryPlayer() {
+        PlayerMock steve = addPlayer("Steve");
+        PlayerMock alex = addPlayer("Alex");
+        HomesDao dao = new HomesDao();
+
+        assertEquals(0, dao.countAll());
+        assertEquals(0, dao.countPlayersWithHomes());
+
+        HomeFixtures.persist(steve, "a");
+        HomeFixtures.persist(steve, "b");
+        HomeFixtures.persist(alex, "c");
+
+        assertEquals(3, dao.countAll());
+        assertEquals(2, dao.countPlayersWithHomes());
     }
 
     /**

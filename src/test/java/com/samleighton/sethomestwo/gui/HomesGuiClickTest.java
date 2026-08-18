@@ -1,9 +1,12 @@
 package com.samleighton.sethomestwo.gui;
 
 import com.samleighton.sethomestwo.dao.HomesDao;
+import com.samleighton.sethomestwo.metrics.UsageCounters;
 import com.samleighton.sethomestwo.models.Home;
 import com.samleighton.sethomestwo.support.HomeFixtures;
 import com.samleighton.sethomestwo.support.ServerTestBase;
+import com.samleighton.sethomestwo.support.TestPlayer;
+import org.bukkit.ChatColor;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -11,6 +14,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -111,6 +115,29 @@ class HomesGuiClickTest extends ServerTestBase {
     }
 
     @Test
+    void leftClickCountsAGuiTeleport() {
+        TestPlayer player = addTestPlayer("traveller");
+        HomeFixtures.persist(player, "base");
+        plugin.getConfig().set("teleportSafety", false);
+
+        HomesGui gui = openOwnList(player);
+        click(gui, new GuiSession(gui), player, 0, ClickType.LEFT);
+
+        assertEquals(1, plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).get(UsageCounters.GUI_TELEPORT));
+    }
+
+    @Test
+    void rightClickIntoManagementCountsNoTeleport() {
+        PlayerMock player = addPlayer();
+        HomeFixtures.persist(player, "base");
+
+        HomesGui gui = openOwnList(player);
+        click(gui, new GuiSession(gui), player, 0, ClickType.RIGHT);
+
+        assertTrue(plugin.getUsageCounters().snapshot(UsageCounters.Family.GUI_ACTION).isEmpty());
+    }
+
+    @Test
     void anEmptyHomeListClosesTheMenuAndExplainsWhy() {
         PlayerMock player = addPlayer();
 
@@ -118,6 +145,8 @@ class HomesGuiClickTest extends ServerTestBase {
         gui.setHomes(new HomesDao().getAll(player.getUniqueId()));
         gui.displayInventory(player);
 
-        assertTrue(player.nextMessage().contains("You have not created any homes yet."));
+        String message = player.nextMessage();
+        assertTrue(message.contains("You have not created any homes yet."));
+        assertFalse(message.contains(ChatColor.RED.toString()), "having no homes is not an error");
     }
 }
