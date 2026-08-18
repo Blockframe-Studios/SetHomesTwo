@@ -29,18 +29,31 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Move the issue to In progress
+      - name: Move the issue along
         env:
           BRANCH: ${{ github.ref_name }}
         run: |
           set -uo pipefail
+          source scripts/issue-status.sh
+
           issue="$(printf '%s' "$BRANCH" | sed -nE 's/^issue-([0-9]+)-.*/\1/p')"
           if [ -z "$issue" ]; then
             echo "Branch $BRANCH does not name an issue - nothing to do."
             exit 0
           fi
-          # Todo or unset only, so a later push cannot pull it out of In review.
-          bash scripts/set-issue-status.sh "$issue" "In progress" Todo unset
+
+          # Pushing to a branch that is already under review, by merging the
+          # base branch in for example, must not report it as in progress.
+          # synchronize is not a trigger type, so this job is the only thing
+          # that runs on such a push.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')" = "0" ]; then
+            state="none"
+          else
+            state="open-pr"
+          fi
+
+          mapfile -t plan < <(push_plan "$state")
+          bash scripts/set-issue-status.sh "$issue" "${plan[0]}" "${plan[@]:1}"
 
   pull-request:
     # Fork runs get no secrets, so GH_TOKEN would be empty and every external
