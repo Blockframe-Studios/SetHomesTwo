@@ -1,0 +1,79 @@
+name: Issue status
+
+# Moves issues across the project board as their work progresses. GitHub does
+# not link an issue to a pull request based on dev, so the closing keywords are
+# parsed out of the body here rather than read back from the API.
+on:
+  push:
+    branches: ['issue-*']
+  pull_request:
+    types: [opened, reopened, ready_for_review, edited, closed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PROJECT_NUMBER: '1'
+  GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+jobs:
+  in-progress:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Move the issue to In progress
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -uo pipefail
+          issue="$(printf '%s' "$BRANCH" | sed -nE 's/^issue-([0-9]+)-.*/\1/p')"
+          if [ -z "$issue" ]; then
+            echo "Branch $BRANCH does not name an issue - nothing to do."
+            exit 0
+          fi
+          # Todo or unset only, so a later push cannot pull it out of In review.
+          bash scripts/set-issue-status.sh "$issue" "In progress" Todo unset
+
+  pull-request:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Move the referenced issues
+        env:
+          # Through the environment, never interpolated into the script: a body
+          # is attacker controllable text.
+          BODY: ${{ github.event.pull_request.body }}
+          MERGED: ${{ github.event.pull_request.merged }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          set -uo pipefail
+          source scripts/issue-status.sh
+
+          if [ "$ACTION" = "closed" ]; then
+            if [ "$MERGED" != "true" ] || [ "$BASE" != "dev" ]; then
+              echo "Closed without merging into dev - nothing to do."
+              exit 0
+            fi
+            status="Ready for release"
+          else
+            status="In review"
+          fi
+
+          refs="$(printf '%s' "$BODY" | closing_refs)"
+          if [ -z "$refs" ]; then
+            echo "No closing references in the body - nothing to do."
+            exit 0
+          fi
+
+          while IFS= read -r issue; do
+            [ -n "$issue" ] || continue
+            bash scripts/set-issue-status.sh "$issue" "$status"
+          done <<< "$refs"
