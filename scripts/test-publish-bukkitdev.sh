@@ -163,13 +163,13 @@ else
 fi
 
 DISPLAY_NAME=$(printf '%s' "$METADATA" | jq -r '.displayName // ""' 2>/dev/null)
-if [ "$DISPLAY_NAME" = "Set Homes V9.9.9" ]; then
+if [ "$DISPLAY_NAME" = "SetHomes V9.9.9" ]; then
   pass "names the file after the version"
 else
   fail "names the file after the version" "got: $DISPLAY_NAME"
 fi
 
-if has_arg "file=@SetHomes.V9.9.9.jar"; then
+if has_arg "file=@SetHomes-9.9.9.jar"; then
   pass "uploads the versioned jar"
 else
   fail "uploads the versioned jar" "args were: $(args_summary)"

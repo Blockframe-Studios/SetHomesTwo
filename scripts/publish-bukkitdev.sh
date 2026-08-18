@@ -49,7 +49,7 @@ CHANGELOG=$(bash "$SCRIPT_DIR/release.sh" notes --readme README.md --version "$V
 # backslashes and newlines.
 METADATA=$(jq -n \
   --arg changelog "$CHANGELOG" \
-  --arg displayName "Set Homes V$VERSION" \
+  --arg displayName "SetHomes V$VERSION" \
   --argjson gameVersions "$GAME_VERSIONS" \
   '{
     changelog: $changelog,
@@ -64,7 +64,7 @@ METADATA=$(jq -n \
 RESPONSE=$(curl -sS -w '\n%{http_code}' -X POST "$API/projects/$PROJECT_ID/upload-file" \
   -H "X-Api-Token: $CURSEFORGE_TOKEN" \
   --form-string "metadata=$METADATA" \
-  -F "file=@SetHomes.V$VERSION.jar")
+  -F "file=@SetHomes-$VERSION.jar")
 
 BODY=$(echo "$RESPONSE" | head -n -1)
 CODE=$(echo "$RESPONSE" | tail -n 1)
