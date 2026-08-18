@@ -13,6 +13,12 @@ VERSION="${VERSION:?VERSION must be set}"
 PREV_TAG="${PREV_TAG:-}"
 DRY_RUN="${DRY_RUN:-0}"
 
+if [ -z "$PREV_TAG" ] && [ -n "$(git tag --list)" ]; then
+  echo "Error: PREV_TAG is empty but the repository already has tags - refusing to scan all of history." >&2
+  echo "This usually means the checkout is missing tags or full history. Fix the checkout rather than closing every referenced issue." >&2
+  exit 1
+fi
+
 range="HEAD"
 if [ -n "$PREV_TAG" ]; then
   range="$PREV_TAG..HEAD"

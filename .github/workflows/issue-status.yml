@@ -21,7 +21,9 @@ env:
 
 jobs:
   in-progress:
-    if: github.event_name == 'push'
+    # A branch deletion after its pull request merges can also fire a push
+    # event, with no branch left to check out.
+    if: github.event_name == 'push' && github.event.deleted == false
     runs-on: ubuntu-latest
     steps:
       - name: Check out
@@ -67,7 +69,11 @@ jobs:
               exit 0
             fi
             status="Ready for release"
-            allowed=()
+            # Every state except Done: a merge into dev always beats an
+            # earlier state, but a down-merge from master can repeat a
+            # Closes reference for an issue that already shipped, and that
+            # must not drag it backwards out of Done.
+            allowed=(Todo unset "In progress" "In review" "Ready for release")
           else
             status="In review"
             # Guards an edit on an already merged pull request from pulling
