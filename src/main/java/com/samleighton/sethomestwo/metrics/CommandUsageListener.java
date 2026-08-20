@@ -12,9 +12,10 @@ import org.bukkit.event.server.ServerCommandEvent;
 import java.util.Locale;
 
 /**
- * Counts every SetHomesTwo command typed by a player or the console, by
- * canonical name and by the label actually typed. Commands owned by other
- * plugins are ignored. Never cancels or alters the event.
+ * Counts every SetHomesTwo command typed by a player or the console, once,
+ * under the label actually typed: the canonical name goes to COMMAND and an
+ * alias to ALIAS, so the two can be retired on separate evidence. Commands
+ * owned by other plugins are ignored. Never cancels or alters the event.
  */
 public class CommandUsageListener implements Listener {
 
@@ -50,8 +51,11 @@ public class CommandUsageListener implements Listener {
             String typed = label.startsWith(namespace) ? label.substring(namespace.length()) : label;
 
             UsageCounters counters = plugin.getUsageCounters();
-            counters.increment(UsageCounters.Family.COMMAND, command.getName());
-            counters.increment(UsageCounters.Family.ALIAS, typed);
+            if (typed.equals(command.getName().toLowerCase(Locale.ROOT))) {
+                counters.increment(UsageCounters.Family.COMMAND, command.getName());
+            } else {
+                counters.increment(UsageCounters.Family.ALIAS, typed);
+            }
         } catch (RuntimeException ignored) {
             // Counting is best effort.
         }

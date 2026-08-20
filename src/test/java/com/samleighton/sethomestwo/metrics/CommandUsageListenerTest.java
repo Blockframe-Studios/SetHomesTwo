@@ -33,7 +33,7 @@ class CommandUsageListenerTest extends ServerTestBase {
         playerTypes("/go-home base");
 
         assertEquals(1, commands().get("go-home"));
-        assertEquals(1, aliases().get("go-home"));
+        assertTrue(aliases().isEmpty(), "a canonical name is not an alias use");
     }
 
     @Test
@@ -45,21 +45,30 @@ class CommandUsageListenerTest extends ServerTestBase {
     }
 
     @Test
-    void anAliasCountsUnderTheCanonicalNameAndTheTypedAlias() {
+    void anAliasCountsOnlyUnderTheTypedAlias() {
         playerTypes("/sethome base");
 
-        assertEquals(1, commands().get("create-home"));
         assertEquals(1, aliases().get("sethome"));
-        assertTrue(!aliases().containsKey("create-home"));
+        assertTrue(commands().isEmpty(), "an alias use is not a use of the canonical name");
+    }
+
+    @Test
+    void aCommandAndItsAliasAreCountedSeparately() {
+        playerTypes("/create-home one");
+        playerTypes("/sethome two");
+        playerTypes("/sethome three");
+
+        assertEquals(1, commands().get("create-home"));
+        assertEquals(2, aliases().get("sethome"));
     }
 
     @Test
     void theNamespacedFormCountsOnceWithoutTheNamespace() {
         playerTypes("/sethomestwo:home base");
 
-        assertEquals(1, commands().get("go-home"));
         assertEquals(1, aliases().get("home"));
-        assertEquals(1, commands().size());
+        assertEquals(1, aliases().size());
+        assertTrue(commands().isEmpty());
     }
 
     @Test

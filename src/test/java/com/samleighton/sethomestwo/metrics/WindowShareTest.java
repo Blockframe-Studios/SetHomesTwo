@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.samleighton.sethomestwo.metrics.UsageCounters.Family.ALIAS;
 import static com.samleighton.sethomestwo.metrics.UsageCounters.Family.COMMAND;
 import static com.samleighton.sethomestwo.metrics.UsageCounters.Family.GUI_ACTION;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -74,6 +75,19 @@ class WindowShareTest {
 
         later(120);
         assertEquals(1, share.total(COMMAND));
+    }
+
+    @Test
+    void aTotalOverSeveralFamiliesAddsUpOneWindowOfEach() {
+        UsageCounters counters = new UsageCounters();
+        counters.increment(COMMAND, "create-home");
+        counters.increment(ALIAS, "sethome");
+        counters.increment(ALIAS, "sethome");
+        WindowShare share = share(counters);
+
+        assertEquals(3, share.total(COMMAND, ALIAS));
+        assertEquals(1, share.count(COMMAND, "create-home"), "each family is drained once, not twice");
+        assertEquals(2, share.count(ALIAS, "sethome"));
     }
 
     @Test
