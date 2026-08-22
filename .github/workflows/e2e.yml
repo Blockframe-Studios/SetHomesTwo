@@ -1,0 +1,52 @@
+name: E2E
+
+# Nightly rather than on every push. The suite pays server boot before its
+# first assertion and is inherently flakier than the in-process tests, so a red
+# nightly is cheaper to absorb than a blocked pull request.
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # The unit suite already ran in Tests on this commit; no reason to pay twice.
+      - name: Build the plugin jar
+        run: mvn -B clean package -DskipTests
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run the end-to-end suite
+        run: ./gradlew plugwrightTest --no-daemon
+
+      # A nightly red with no server log is not actionable.
+      - name: Upload the server logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-server-logs
+          path: run/logs/
+          if-no-files-found: warn
