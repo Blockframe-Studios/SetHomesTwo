@@ -60,7 +60,7 @@ aborts into real failures. Do not remove it.
     ./gradlew plugwrightTest
 
 Boots Paper 1.21.11, installs the jar you just built, and joins bot players
-that run commands and click through the GUI. Seven tests, under two seconds
+that run commands and click through the GUI. 39 tests, about twenty seconds
 once the server is up.
 
 Maven has to run first. Gradle stages the newest jar out of `target/` and never
@@ -76,6 +76,13 @@ by hand. Specs live in `src/test/e2e` and are TypeScript. The server config
 they assume is written by `build.gradle.kts`, so change a value there rather
 than in a spec. Logs from the last run are in `run/logs/`, and the next run
 wipes them.
+
+That config grants `sh2.player` to everyone and leaves the bypass nodes on
+`sh2.admin`, which gives the specs two tiers to test against. A bot that calls
+`makeOp()` skips the teleport delay and the max-homes cap; one that does not
+takes both. Tests that need to stand still through the countdown disable the
+bot's physics first, because the move check compares locations exactly and an
+idle bot still sends position packets.
 
 CI runs the unit suite on every push and pull request, and the end-to-end
 suite on every pull request.
