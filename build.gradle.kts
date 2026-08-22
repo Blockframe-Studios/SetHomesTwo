@@ -34,7 +34,7 @@ plugwright {
         file(
             "plugins/SetHomesTwo/config.yml",
             """
-            inventoryTitle: "Your homes"
+            inventoryTitle: "E2E homes"
             maxHomeEnabled: false
             delay: 0
             cancelOnMove: false

@@ -34,8 +34,8 @@ test('the homes menu lists the home', async ({ player }) => {
   await expect(player).toHaveReceivedMessage('base has been created successfully');
 
   player.chat('/homes');
-  const gui = await player.gui({ title: 'Your homes' });
-  expect(gui.title).toContain('Your homes');
+  const gui = await player.gui({ title: 'E2E homes' });
+  expect(gui.title).toContain('E2E homes');
 
   const home = gui.locator(i => i.getDisplayName().includes('base'));
   await expect.poll(() => home.displayName()).toContain('base');
@@ -53,7 +53,7 @@ test('clicking a home in the menu teleports the player', async ({ player }) => {
   await waitUntil(() => player.bot.entity.position.distanceTo(origin) > 20);
 
   player.chat('/homes');
-  const gui = await player.gui({ title: 'Your homes' });
+  const gui = await player.gui({ title: 'E2E homes' });
   await gui.locator(i => i.getDisplayName().includes('base')).click();
 
   await expect(player).toHaveReceivedMessage('Teleported to base');
