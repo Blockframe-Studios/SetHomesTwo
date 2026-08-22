@@ -12,12 +12,14 @@ CHANGESET_DIR=".changeset"
 # Label that marks a master to dev down-merge.
 DOWNMERGE_LABEL="downmerge"
 
-# Nothing under these prefixes ships to a user's server.
+# Nothing under these prefixes ships to a user's server. gradle/ is the wrapper
+# for the end-to-end suite; Maven builds the jar.
 EXEMPT_PREFIXES=(
   "$CHANGESET_DIR/"
   ".github/"
   ".idea/"
   "docs/"
+  "gradle/"
   "scripts/"
   "src/test/"
 )
@@ -27,6 +29,10 @@ EXEMPT_FILES=(
   ".gitattributes"
   ".gitconfig"
   ".gitignore"
+  "build.gradle.kts"
+  "settings.gradle.kts"
+  "gradlew"
+  "gradlew.bat"
 )
 
 # Returns 0 when changing this path should force a version bump. Fails closed:
