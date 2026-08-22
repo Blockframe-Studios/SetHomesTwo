@@ -1,15 +1,17 @@
 name: E2E
 
-# Nightly rather than on every push. The suite pays server boot before its
-# first assertion and is inherently flakier than the in-process tests, so a red
-# nightly is cheaper to absorb than a blocked pull request.
+# On pull requests rather than on a schedule. Releases pool on dev for weeks at
+# a time, so a nightly mostly re-ran an unchanged commit; the drift it existed
+# to catch (the Paper download, the pinned anvilgui snapshot, the npm
+# toolchain) surfaces on the next pull request anyway, which is when it matters.
+# Still not on every push: the suite pays server boot before its first
+# assertion, which is wasted on a branch with no pull request open yet.
 on:
-  schedule:
-    - cron: '0 3 * * *'
+  pull_request:
   workflow_dispatch:
 
-# Supersede an in-flight run when the same ref is triggered again, so a manual
-# dispatch does not queue alongside the nightly schedule.
+# Supersede an in-flight run when the same pull request is pushed to again, so
+# a burst of commits does not queue duplicate server boots.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -45,7 +47,7 @@ jobs:
       - name: Run the end-to-end suite
         run: ./gradlew plugwrightTest --no-daemon
 
-      # A nightly red with no server log is not actionable.
+      # A red run with no server log is not actionable.
       - name: Upload the server logs
         if: failure()
         uses: actions/upload-artifact@v4

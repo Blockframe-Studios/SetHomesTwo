@@ -76,8 +76,8 @@ they assume is written by `build.gradle.kts`, so change a value there rather
 than in a spec. Logs from the last run are in `run/logs/`, and the next run
 wipes them.
 
-CI runs the unit suite on every push and pull request, and the end-to-end suite
-nightly.
+CI runs the unit suite on every push and pull request, and the end-to-end
+suite on every pull request.
 
 ## Branching
 
