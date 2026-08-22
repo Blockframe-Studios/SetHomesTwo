@@ -29,19 +29,25 @@ plugwright {
     // CI installs Node itself; a workstation may have none.
     downloadNode.set(System.getenv("CI") != "true")
 
+    // sh2.player is granted to everyone and the bypass nodes stay op-only, so the
+    // delay, cancel-on-move and the max-homes cap bind ordinary players while an op
+    // keeps the instant, uncapped path.
     writeFiles {
         file(
             "plugins/SetHomesTwo/config.yml",
             """
             inventoryTitle: "E2E homes"
-            maxHomeEnabled: false
-            delay: 0
-            cancelOnMove: false
-            teleportSafety: false
+            maxHomeEnabled: true
+            maxHomesType: "singular"
+            maxHomes: 3
+            delay: 2
+            cancelOnMove: true
+            teleportSafety: true
             checkForUpdates: false
             debugLevel: "info"
             permissions:
-              sh2.player: op
+              sh2.player: true
+              sh2.move-home: op
             """.trimIndent()
         )
     }
