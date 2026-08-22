@@ -5,10 +5,8 @@ documentation (commands, permissions, example config, changelog) and is what
 server owners read. Keep the two in step, but do not merge them: they have
 different readers.
 
-`CLAUDE.md` at the repo root is the third doc. It carries the invariants and
-the traps, the things that look safe to change and are not. This file is the
-procedure: what to install, what to run, and how a change gets from a branch
-into a release.
+This file is the procedure: what to install, what to run, and how a change gets
+from a branch into a release.
 
 ## Prerequisites
 
@@ -49,9 +47,12 @@ Two suites, and both have to pass before a pull request merges.
 `-Dtest=HomesDaoTest`, several with commas rather than plus signs:
 `-Dtest=A,B`.
 
-Read the `Skipped: 0` line, not just `BUILD SUCCESS`. A skipped test here means
-a test that quietly stopped testing anything; `CLAUDE.md` explains the
-mechanism.
+Read the `Skipped: 0` line, not just `BUILD SUCCESS`. MockBukkit's
+`UnimplementedOperationException` extends JUnit's `TestAbortedException`, so
+reaching an unimplemented mock method is reported as a skip rather than a
+failure and the build still passes. A test can quietly stop testing anything.
+`support/FailOnUnimplemented`, registered on `ServerTestBase`, turns those
+aborts into real failures. Do not remove it.
 
 ### End-to-end suite (a real Paper server and real bots)
 
