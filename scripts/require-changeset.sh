@@ -12,8 +12,7 @@ CHANGESET_DIR=".changeset"
 # Label that marks a master to dev down-merge.
 DOWNMERGE_LABEL="downmerge"
 
-# Nothing under these prefixes ships to a user's server. gradle/ is the wrapper
-# for the end-to-end suite; Maven builds the jar.
+# Nothing under these prefixes ships to a user's server.
 EXEMPT_PREFIXES=(
   "$CHANGESET_DIR/"
   ".github/"

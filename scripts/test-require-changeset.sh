@@ -108,8 +108,6 @@ test_repo_metadata_is_exempt() {
   assert_exempt ".idea/misc.xml"
 }
 
-# The E2E harness runs the plugin, it does not ship inside the jar. Gradle is a
-# test runner here and Maven still builds the artifact.
 test_e2e_build_files_are_exempt() {
   assert_exempt "build.gradle.kts"
   assert_exempt "settings.gradle.kts"

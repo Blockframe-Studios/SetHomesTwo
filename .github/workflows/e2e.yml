@@ -1,11 +1,5 @@
 name: E2E
 
-# On pull requests rather than on a schedule. Releases pool on dev for weeks at
-# a time, so a nightly mostly re-ran an unchanged commit; the drift it existed
-# to catch (the Paper download, the pinned anvilgui snapshot, the npm
-# toolchain) surfaces on the next pull request anyway, which is when it matters.
-# Still not on every push: the suite pays server boot before its first
-# assertion, which is wasted on a branch with no pull request open yet.
 on:
   pull_request:
   workflow_dispatch:
@@ -32,7 +26,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # The unit suite already ran in Tests on this commit; no reason to pay twice.
+      # The unit suite already ran in Tests on this commit.
       - name: Build the plugin jar
         run: mvn -B clean package -DskipTests
 
@@ -47,7 +41,6 @@ jobs:
       - name: Run the end-to-end suite
         run: ./gradlew plugwrightTest --no-daemon
 
-      # A red run with no server log is not actionable.
       - name: Upload the server logs
         if: failure()
         uses: actions/upload-artifact@v4

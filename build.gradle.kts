@@ -4,9 +4,8 @@ plugins {
     id("io.github.drownek.plugwright") version "2.0.3"
 }
 
-// Newest first, matching the rule Spigot/start.bat already uses. The shade
-// plugin also leaves original-SetHomesTwo-*.jar in target/, which this skips,
-// and stale jars from earlier versions can linger until mvn clean.
+// The shade plugin also leaves original-SetHomesTwo-*.jar in target/, and jars
+// from earlier versions linger until mvn clean, so take the newest match.
 fun newestPluginJar(): File {
     val jars = file("target")
         .listFiles { f -> f.isFile && f.name.startsWith("SetHomesTwo-") && f.name.endsWith(".jar") }
@@ -48,8 +47,8 @@ plugwright {
     }
 }
 
-// Set lazily so an unbuilt target/ fails when the suite runs, with a message
-// naming the fix, rather than at configuration time on every Gradle command.
+// Lazy, so an unbuilt target/ fails when the suite runs rather than on every
+// Gradle command.
 tasks.named<me.drownek.plugwright.PlugwrightTestTask>("plugwrightTest") {
     pluginJar.set(providers.provider { newestPluginJar() })
     dependsOn("plugwrightClean")

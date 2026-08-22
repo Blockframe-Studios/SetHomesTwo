@@ -112,7 +112,7 @@ buildNumber.properties
 # Common working directory
 run/
 
-# Gradle runs the end-to-end suite only; Maven still builds the plugin.
+# End-to-end suite build output.
 .gradle/
 src/test/e2e/node_modules/
 src/test/e2e/dist/

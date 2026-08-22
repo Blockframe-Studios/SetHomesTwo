@@ -19,8 +19,9 @@ test('the plugin starts without logging an error', async ({ player }) => {
     // Paper renders levels as "[Thread/ERROR]", not the plain "SEVERE" token
     // java.util.logging uses.
     .filter(line => /\/(ERROR|SEVERE)\]|Could not load|Error occurred while enabling/.test(line))
-    // Bukkit.getLogger() is the root logger, so a plugin-logged error carries
-    // the "SH2" prefix set in plugin.yml, not the plugin's class/jar name.
+    // The plugin logs through Bukkit.getLogger(), whose lines carry neither
+    // token, so this sees Paper's load and enable failures but not the
+    // plugin's own errors.
     .filter(line => line.includes('SetHomesTwo') || line.includes('[SH2]'));
 
   expect(bad).toEqual([]);
