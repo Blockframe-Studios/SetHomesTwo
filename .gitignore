@@ -111,3 +111,11 @@ buildNumber.properties
 
 # Common working directory
 run/
+
+# End-to-end suite build output.
+.gradle/
+src/test/e2e/node_modules/
+src/test/e2e/dist/
+
+# The blanket *.jar rule above would otherwise swallow the wrapper.
+!gradle/wrapper/gradle-wrapper.jar

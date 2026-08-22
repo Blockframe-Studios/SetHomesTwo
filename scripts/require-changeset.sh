@@ -18,6 +18,7 @@ EXEMPT_PREFIXES=(
   ".github/"
   ".idea/"
   "docs/"
+  "gradle/"
   "scripts/"
   "src/test/"
 )
@@ -27,6 +28,10 @@ EXEMPT_FILES=(
   ".gitattributes"
   ".gitconfig"
   ".gitignore"
+  "build.gradle.kts"
+  "settings.gradle.kts"
+  "gradlew"
+  "gradlew.bat"
 )
 
 # Returns 0 when changing this path should force a version bump. Fails closed:

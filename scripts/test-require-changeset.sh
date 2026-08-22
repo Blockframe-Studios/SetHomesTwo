@@ -108,6 +108,15 @@ test_repo_metadata_is_exempt() {
   assert_exempt ".idea/misc.xml"
 }
 
+test_e2e_build_files_are_exempt() {
+  assert_exempt "build.gradle.kts"
+  assert_exempt "settings.gradle.kts"
+  assert_exempt "gradlew"
+  assert_exempt "gradlew.bat"
+  assert_exempt "gradle/wrapper/gradle-wrapper.properties"
+  assert_exempt "gradle/wrapper/gradle-wrapper.jar"
+}
+
 test_changesets_themselves_are_exempt() {
   assert_exempt ".changeset/brave-otters-sing.md"
 }
@@ -224,6 +233,7 @@ test_tests_are_exempt
 test_automation_is_exempt
 test_docs_are_exempt
 test_repo_metadata_is_exempt
+test_e2e_build_files_are_exempt
 test_changesets_themselves_are_exempt
 
 test_a_changeset_file_is_recognised
