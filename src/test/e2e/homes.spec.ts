@@ -6,8 +6,9 @@ test('a created home survives and is listed', async ({ player }) => {
   player.chat('/create-home base');
   await expect(player).toHaveReceivedMessage('base has been created successfully');
 
+  const since = player.getMessageBufferIndex();
   player.chat('/list-homes');
-  await expect(player).toHaveReceivedMessage('base');
+  await expect(player).toHaveReceivedMessage('base', { since });
 });
 
 test('the go-home command teleports the player back', async ({ player }) => {
