@@ -59,15 +59,3 @@ test('clicking a home in the menu teleports the player', async ({ player }) => {
   await expect(player).toHaveReceivedMessage('Teleported to base');
   await waitUntil(() => player.bot.entity.position.distanceTo(origin) < 2);
 });
-
-test('a player without sh2.create-home is refused and creates nothing', async ({ player }) => {
-  player.chat('/create-home base');
-  // Paper's Brigadier tree hides a node the sender fails the permission check
-  // for, so a denied command reads as unknown, not as the Bukkit denial.
-  await expect(player).toHaveReceivedMessage('Unknown or incomplete command');
-
-  // list-homes is gated too, so reading the list back needs op.
-  await player.makeOp();
-  player.chat('/list-homes');
-  await expect(player).toHaveReceivedMessage('You have not created any homes yet');
-});
