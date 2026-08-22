@@ -26,3 +26,36 @@ test('the go-home command teleports the player back', async ({ player }) => {
   await expect(player).toHaveReceivedMessage('Teleported to base');
   await waitUntil(() => player.bot.entity.position.distanceTo(origin) < 2);
 });
+
+test('the homes menu lists the home', async ({ player }) => {
+  await player.makeOp();
+
+  player.chat('/create-home base');
+  await expect(player).toHaveReceivedMessage('base has been created successfully');
+
+  player.chat('/homes');
+  const gui = await player.gui({ title: 'Your homes' });
+  expect(gui.title).toContain('Your homes');
+
+  const home = gui.locator(i => i.getDisplayName().includes('base'));
+  await expect.poll(() => home.displayName()).toContain('base');
+});
+
+test('clicking a home in the menu teleports the player', async ({ player }) => {
+  await player.makeOp();
+  await player.setGameMode('spectator');
+
+  const origin = player.bot.entity.position.clone();
+  player.chat('/create-home base');
+  await expect(player).toHaveReceivedMessage('base has been created successfully');
+
+  await player.teleport(origin.x + 60, origin.y, origin.z + 60);
+  await waitUntil(() => player.bot.entity.position.distanceTo(origin) > 20);
+
+  player.chat('/homes');
+  const gui = await player.gui({ title: 'Your homes' });
+  await gui.locator(i => i.getDisplayName().includes('base')).click();
+
+  await expect(player).toHaveReceivedMessage('Teleported to base');
+  await waitUntil(() => player.bot.entity.position.distanceTo(origin) < 2);
+});
