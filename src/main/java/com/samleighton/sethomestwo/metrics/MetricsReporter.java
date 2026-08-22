@@ -172,7 +172,8 @@ public class MetricsReporter {
                 metrics.addCustomChart(new SingleLineChart(commandChartId(command),
                         () -> share.count(UsageCounters.Family.COMMAND, command)));
             }
-            metrics.addCustomChart(new SingleLineChart("commands_total", () -> share.total(UsageCounters.Family.COMMAND)));
+            metrics.addCustomChart(new SingleLineChart("commands_total",
+                    () -> share.total(UsageCounters.Family.COMMAND, UsageCounters.Family.ALIAS)));
 
             for (String alias : declaredAliases(plugin)) {
                 metrics.addCustomChart(new SingleLineChart(aliasChartId(alias),

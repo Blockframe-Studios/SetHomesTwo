@@ -45,10 +45,12 @@ final class WindowShare {
         return window(family).getOrDefault(key, 0);
     }
 
-    /** Sum of every key in the window. */
-    int total(UsageCounters.Family family) {
+    /** Sum of every key in the window, across one family or several. */
+    int total(UsageCounters.Family... families) {
         int sum = 0;
-        for (int value : window(family).values()) sum += value;
+        for (UsageCounters.Family family : families) {
+            for (int value : window(family).values()) sum += value;
+        }
         return sum;
     }
 
